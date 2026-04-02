@@ -85,7 +85,7 @@ export default function Nouveau() {
 
       {/* Hero */}
       <div style={{background:'linear-gradient(135deg,#C8102E,#8b0000)',padding:'80px 24px 48px',textAlign:'center',color:'white'}}>
-        <img src="/logo.png" alt="Logo" style={{width:'70px',height:'70px',objectFit:'contain',borderRadius:'12px',marginBottom:'16px',filter:'drop-shadow(0 4px 20px rgba(0,0,0,0.4))'}} />
+        <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'70px',height:'70px',objectFit:'contain',borderRadius:'12px',marginBottom:'16px',filter:'drop-shadow(0 4px 20px rgba(0,0,0,0.4))'}} />
         <h1 style={{fontFamily:'Outfit,sans-serif',fontSize:'28px',fontWeight:'700',margin:'0 0 8px'}}>
           Bienvenue parmi nous
         </h1>
@@ -160,6 +160,7 @@ export default function Nouveau() {
                     key={p.id}
                     src={p.url}
                     alt=""
+                    loading="lazy"
                     onClick={() => setLightbox(p.url)}
                     style={{
                       width:'100%',
@@ -199,7 +200,7 @@ export default function Nouveau() {
       {/* Lightbox */}
       {lightbox && (
         <div onClick={() => setLightbox(null)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.92)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
-          <img src={lightbox} alt="" style={{maxWidth:'95%',maxHeight:'90vh',borderRadius:'10px'}} />
+          <img src={lightbox} alt="" loading="lazy" style={{maxWidth:'95%',maxHeight:'90vh',borderRadius:'10px'}} />
         </div>
       )}
 

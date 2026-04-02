@@ -60,7 +60,7 @@ export default function Visiteur() {
 
       {/* Header */}
       <div style={{background:dark?'#1a1a1a':'#111',padding:'60px 24px 32px',textAlign:'center'}}>
-        <img src="/logo.png" alt="Logo" style={{width:'48px',height:'48px',objectFit:'contain',borderRadius:'10px',marginBottom:'12px',filter:'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'}} />
+        <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'48px',height:'48px',objectFit:'contain',borderRadius:'10px',marginBottom:'12px',filter:'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'}} />
         <h1 style={{color:'white',fontFamily:'Outfit,sans-serif',fontSize:'22px',fontWeight:'700',margin:'0 0 6px'}}>
           Annuaire des talents
         </h1>

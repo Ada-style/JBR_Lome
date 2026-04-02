@@ -78,7 +78,7 @@ export default function Login() {
 
         {/* Logo */}
         <div style={{textAlign:'center',marginBottom:'32px',cursor:'pointer'}} onClick={handleLogoClick}>
-          <img src="/logo.png" alt="Logo" style={{width:'80px',height:'80px',objectFit:'contain',marginBottom:'12px',borderRadius:'16px',filter:'drop-shadow(0 4px 20px rgba(0,0,0,0.4))'}} />
+          <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'80px',height:'80px',objectFit:'contain',marginBottom:'12px',borderRadius:'16px',filter:'drop-shadow(0 4px 20px rgba(0,0,0,0.4))'}} />
           <h1 style={{color:'white',fontSize:'22px',fontFamily:'Outfit,sans-serif',fontWeight:'700',margin:'0'}}>
             Jeunesse EB Le Rocher
           </h1>

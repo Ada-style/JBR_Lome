@@ -34,7 +34,7 @@ export default function Membre() {
 
       {/* Topbar */}
       <div style={{background:dark?'#1a1a1a':'#ffffff',borderBottom:'2px solid #C8102E',padding:'12px 16px',display:'flex',alignItems:'center',gap:'10px',position:'sticky',top:0,zIndex:50}}>
-        <img src="/logo.png" alt="Logo" style={{width:'28px',height:'28px',objectFit:'contain',borderRadius:'6px'}} />
+        <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'28px',height:'28px',objectFit:'contain',borderRadius:'6px'}} />
         <div style={{flex:1}}>
           <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>EB Le Rocher</div>
           <div style={{color:theme.muted,fontSize:'10px'}}>Espace membre</div>
@@ -181,7 +181,7 @@ function Accueil({ theme, supabase }) {
           {evActif && (
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px'}}>
               {evActif.photos_galerie?.map((p, i) => (
-                <img key={p.id} src={p.url} alt="" onClick={() => setLightbox(p.url)} style={{width:'100%',height:i===0?'200px':'130px',objectFit:'cover',borderRadius:'10px',cursor:'pointer',gridColumn:i===0?'span 2':'span 1'}} />
+                <img key={p.id} src={p.url} alt="" loading="lazy" onClick={() => setLightbox(p.url)} style={{width:'100%',height:i===0?'200px':'130px',objectFit:'cover',borderRadius:'10px',cursor:'pointer',gridColumn:i===0?'span 2':'span 1'}} />
               ))}
             </div>
           )}
@@ -191,7 +191,7 @@ function Accueil({ theme, supabase }) {
       {/* Lightbox */}
       {lightbox && (
         <div onClick={() => setLightbox(null)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.92)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
-          <img src={lightbox} alt="" style={{maxWidth:'95%',maxHeight:'90vh',borderRadius:'10px'}} />
+          <img src={lightbox} alt="" loading="lazy" style={{maxWidth:'95%',maxHeight:'90vh',borderRadius:'10px'}} />
         </div>
       )}
     </div>

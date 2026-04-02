@@ -42,7 +42,7 @@ export default function Admin() {
     <div style={{minHeight:'100vh',background:theme.bg,display:'flex',transition:'background 0.3s'}}>
       <div style={{width:'220px',background:theme.sidebar,borderRight:`1px solid ${theme.border}`,display:'flex',flexDirection:'column',position:'fixed',height:'100vh',zIndex:50,overflowY:'auto'}}>
         <div style={{padding:'20px 16px',borderBottom:`1px solid ${theme.border}`}}>
-          <img src="/logo.png" alt="Logo" style={{width:'36px',height:'36px',objectFit:'contain',borderRadius:'8px',marginBottom:'8px'}} />
+          <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'36px',height:'36px',objectFit:'contain',borderRadius:'8px',marginBottom:'8px'}} />
           <div style={{color:theme.text,fontSize:'13px',fontWeight:'700'}}>Bureau · Admin</div>
           <div style={{color:theme.muted,fontSize:'11px',marginTop:'2px'}}>Accès restreint</div>
         </div>
@@ -552,6 +552,7 @@ function Galerie({ theme, supabase }) {
                   key={i} 
                   src={url} 
                   alt="" 
+                  loading="lazy"
                   onClick={() => setLightbox(url)}
                   style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'8px',cursor:'pointer',border:`1px solid ${theme.border}`}} 
                 />
@@ -577,7 +578,7 @@ function Galerie({ theme, supabase }) {
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'6px',cursor:'pointer'}}>
               {ev.photos_galerie?.map(p => (
-                <img key={p.id} src={p.url} alt="" onClick={() => setLightbox(p.url)} style={{width:'100%',height:'80px',objectFit:'cover',borderRadius:'8px',transition:'transform 0.2s'}} />
+                <img key={p.id} src={p.url} alt="" loading="lazy" onClick={() => setLightbox(p.url)} style={{width:'100%',height:'80px',objectFit:'cover',borderRadius:'8px',transition:'transform 0.2s'}} />
               ))}
             </div>
           </div>
@@ -587,7 +588,7 @@ function Galerie({ theme, supabase }) {
       {/* Lightbox */}
       {lightbox && (
         <div onClick={() => setLightbox(null)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.92)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
-          <img src={lightbox} alt="" style={{maxWidth:'95%',maxHeight:'90vh',borderRadius:'10px'}} />
+          <img src={lightbox} alt="" loading="lazy" style={{maxWidth:'95%',maxHeight:'90vh',borderRadius:'10px'}} />
         </div>
       )}
     </div>
