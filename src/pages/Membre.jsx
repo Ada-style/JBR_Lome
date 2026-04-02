@@ -523,6 +523,10 @@ function Profil({ theme, supabase, profile }) {
   }
 
   async function uploadAvatar(e) {
+    if (!profile || !profile.id) {
+      setMsg('Erreur : profil non chargé, réessayez')
+      return
+    }
     const file = e.target.files[0]
     if (!file) return
     setUploading(true)
