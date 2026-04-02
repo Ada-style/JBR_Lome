@@ -8,7 +8,7 @@ const supabaseAdmin = createClient('https://qzqphzfbkdtglghloplo.supabase.co', '
 export default function Admin() {
   const navigate = useNavigate()
   const { supabase, signOut } = useAuth() 
-  const [tab, setTab] = useState('dashboard')
+  const [tab, setTab] = useState('dashboard') 
   const [dark, setDark] = useState(true)
 
   const theme = {
@@ -414,6 +414,7 @@ function Cotisations({ theme, supabase }) {
 
 function Fichiers({ theme, supabase }) {
   const [fichiers, setFichiers] = useState([])
+  const [preview, setPreview] = useState(null)
 
   useEffect(() => { loadFichiers() }, [])
 
@@ -424,11 +425,13 @@ function Fichiers({ theme, supabase }) {
 
   async function approuver(id) {
     await supabase.from('fichiers').update({statut:'approuve'}).eq('id',id)
+    setPreview(null)
     loadFichiers()
   }
 
   async function supprimer(id) {
     await supabase.from('fichiers').update({statut:'supprime'}).eq('id',id)
+    setPreview(null)
     loadFichiers()
   }
 
@@ -448,12 +451,34 @@ function Fichiers({ theme, supabase }) {
             <div style={{color:theme.muted,fontSize:'11px'}}>{f.utilisateurs?.prenom} {f.utilisateurs?.nom} · {f.type_fichier}</div>
           </div>
           <div style={{display:'flex',gap:'8px'}}>
-            <a href={f.url} target="_blank" rel="noreferrer" style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#25d366',fontSize:'12px',textDecoration:'none',fontWeight:'600'}}>Voir</a>
+            <button onClick={() => setPreview(f)} style={{background:'rgba(255,193,7,0.1)',border:'1px solid rgba(255,193,7,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#ffc107',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Aperçu</button>
             <button onClick={() => approuver(f.id)} style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#25d366',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Approuver</button>
             <button onClick={() => supprimer(f.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>Supprimer</button>
           </div>
         </div>
       ))}
+
+      {/* Modal aperçu */}
+      {preview && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:'16px'}} onClick={() => setPreview(null)}>
+          <div style={{background:theme.bg,borderRadius:'14px',padding:'20px',maxWidth:'90vw',maxHeight:'90vh',overflowY:'auto',display:'flex',flexDirection:'column'}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
+              <h3 style={{color:theme.text,fontSize:'16px',fontWeight:'700'}}>{preview.nom_fichier}</h3>
+              <button onClick={() => setPreview(null)} style={{background:'none',border:'none',fontSize:'24px',color:theme.muted,cursor:'pointer'}}>✕</button>
+            </div>
+            <iframe 
+              src={`${preview.url}#toolbar=0`}
+              style={{width:'100%',height:'400px',border:`1px solid ${theme.border}`,borderRadius:'10px',marginBottom:'16px'}}
+              title="Aperçu"
+            />
+            <div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}>
+              <button onClick={() => setPreview(null)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 16px',color:theme.text,fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>Fermer</button>
+              <button onClick={() => approuver(preview.id)} style={{background:'#25d366',border:'none',borderRadius:'8px',padding:'8px 16px',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>Approuver</button>
+              <button onClick={() => supprimer(preview.id)} style={{background:'#C8102E',border:'none',borderRadius:'8px',padding:'8px 16px',color:'white',fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>Supprimer</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -462,9 +487,11 @@ function Galerie({ theme, supabase }) {
   const [nom, setNom] = useState('')
   const [date, setDate] = useState('')
   const [photos, setPhotos] = useState([])
+  const [previews, setPreviews] = useState([])
   const [uploading, setUploading] = useState(false)
   const [msg, setMsg] = useState('')
   const [evenements, setEvenements] = useState([])
+  const [lightbox, setLightbox] = useState(null)
 
   useEffect(() => { loadEvenements() }, [])
 
@@ -476,6 +503,8 @@ function Galerie({ theme, supabase }) {
   function handlePhotos(e) {
     const files = Array.from(e.target.files).slice(0,5)
     setPhotos(files)
+    const urls = files.map(f => URL.createObjectURL(f))
+    setPreviews(urls)
   }
 
   async function publier() {
@@ -491,7 +520,8 @@ function Galerie({ theme, supabase }) {
       await supabase.from('photos_galerie').insert({evenement_id:ev.id, url:publicUrl})
     }
     setMsg('Événement publié !')
-    setNom(''); setDate(''); setPhotos([])
+    setNom(''); setDate(''); setPhotos([]); setPreviews([])
+    previews.forEach(url => URL.revokeObjectURL(url))
     loadEvenements()
     setUploading(false)
   }
@@ -513,6 +543,22 @@ function Galerie({ theme, supabase }) {
           <div style={{color:theme.muted,fontSize:'13px'}}>{photos.length>0?`${photos.length} photo(s) sélectionnée(s)`:"Choisir jusqu'à 5 photos"}</div>
           <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{display:'none'}} />
         </label>
+        {previews.length > 0 && (
+          <div style={{marginBottom:'12px'}}>
+            <div style={{color:theme.muted,fontSize:'11px',marginBottom:'8px'}}>Aperçu :</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'6px'}}>
+              {previews.map((url, i) => (
+                <img 
+                  key={i} 
+                  src={url} 
+                  alt="" 
+                  onClick={() => setLightbox(url)}
+                  style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'8px',cursor:'pointer',border:`1px solid ${theme.border}`}} 
+                />
+              ))}
+            </div>
+          </div>
+        )}
         <button onClick={publier} disabled={uploading} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',opacity:uploading?0.6:1}}>
           {uploading?'Publication...':'Publier'}
         </button>
@@ -529,14 +575,21 @@ function Galerie({ theme, supabase }) {
                 Supprimer
               </button>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'6px'}}>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'6px',cursor:'pointer'}}>
               {ev.photos_galerie?.map(p => (
-                <img key={p.id} src={p.url} alt="" style={{width:'100%',height:'80px',objectFit:'cover',borderRadius:'8px'}} />
+                <img key={p.id} src={p.url} alt="" onClick={() => setLightbox(p.url)} style={{width:'100%',height:'80px',objectFit:'cover',borderRadius:'8px',transition:'transform 0.2s'}} />
               ))}
             </div>
           </div>
         ))}
       </div>
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div onClick={() => setLightbox(null)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.92)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
+          <img src={lightbox} alt="" style={{maxWidth:'95%',maxHeight:'90vh',borderRadius:'10px'}} />
+        </div>
+      )}
     </div>
   )
 }

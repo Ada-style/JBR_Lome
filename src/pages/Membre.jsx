@@ -296,27 +296,43 @@ function Annuaire({ theme, supabase }) {
   })
 
   return (
-    <div style={{padding:'16px',maxWidth:'600px',margin:'0 auto'}}>
-      <input placeholder="Chercher par nom, domaine..." value={search} onChange={e=>setSearch(e.target.value)} style={{width:'100%',background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'10px',padding:'11px 14px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-      <div style={{display:'flex',gap:'6px',overflowX:'auto',marginBottom:'14px',paddingBottom:'4px',scrollbarWidth:'none'}}>
+    <div style={{padding:'16px',maxWidth:'700px',margin:'0 auto'}}>
+      <h2 style={{color:theme.text,fontSize:'20px',fontWeight:'700',marginBottom:'14px'}}>Annuaire</h2>
+      <input placeholder="Chercher par nom, domaine..." value={search} onChange={e=>setSearch(e.target.value)} style={{width:'100%',background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'10px',padding:'11px 14px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'12px',fontFamily:'inherit'}} />
+      <div style={{display:'flex',gap:'6px',overflowX:'auto',marginBottom:'16px',paddingBottom:'4px',scrollbarWidth:'none'}}>
         {domaines.map(d => (
           <button key={d} onClick={() => setFiltre(d)} style={{background:filtre===d?'#C8102E':theme.card,border:`1px solid ${filtre===d?'#C8102E':theme.border}`,borderRadius:'18px',padding:'6px 14px',color:filtre===d?'white':theme.muted,fontSize:'11px',cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit',fontWeight:filtre===d?'600':'400',flexShrink:0}}>
             {d}
           </button>
         ))}
       </div>
-      {filtered.map(m => (
-        <div key={m.id} onClick={() => openProfil(m)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'12px 14px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'12px',cursor:'pointer'}}>
-          <div style={{width:'42px',height:'42px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'13px',fontWeight:'700',flexShrink:0}}>
-            {m.prenom?.[0]}{m.nom?.[0]}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+        {filtered.map(m => (
+          <div key={m.id} onClick={() => openProfil(m)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',cursor:'pointer',transition:'all 0.2s',position:'relative',overflow:'hidden'}}>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',gap:'10px'}}>
+              <div style={{width:'56px',height:'56px',borderRadius:'50%',background:m.avatar_url?`url('${m.avatar_url}')`:'#C8102E',backgroundSize:'cover',backgroundPosition:'center',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700',flexShrink:0,border:'2px solid #C8102E'}}>
+                {!m.avatar_url && `${m.prenom?.[0]}${m.nom?.[0]}`}
+              </div>
+              <div style={{flex:1}}>
+                <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'2px'}}>{m.prenom} {m.nom}</div>
+                <div style={{color:'#C8102E',fontSize:'11px',fontWeight:'600',marginBottom:'6px'}}>{m.domaine || 'Domaine'}</div>
+                <p style={{color:theme.muted,fontSize:'11px',lineHeight:'1.5',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+                  {m.bio || 'Pas de bio renseignée'}
+                </p>
+              </div>
+            </div>
+            <div style={{marginTop:'10px',paddingTop:'10px',borderTop:`1px solid ${theme.border}`,display:'flex',justifyContent:'center'}}>
+              <div style={{fontSize:'12px',color:'#C8102E',fontWeight:'600'}}>Voir le profil →</div>
+            </div>
           </div>
-          <div style={{flex:1}}>
-            <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{m.prenom} {m.nom}</div>
-            <div style={{color:theme.muted,fontSize:'11px',marginTop:'2px'}}>{m.domaine}</div>
-          </div>
-          <div style={{color:theme.muted,fontSize:'18px'}}>›</div>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
+          Aucun membre trouvé
         </div>
-      ))}
+      )}
 
       {/* Fiche membre */}
       {selected && (
@@ -465,6 +481,9 @@ function Profil({ theme, supabase, profile }) {
   const [tab, setTab] = useState('info')
   const [msg, setMsg] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [passwordNew, setPasswordNew] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     if (profile?.id) {
@@ -487,6 +506,36 @@ function Profil({ theme, supabase, profile }) {
     await supabase.from('utilisateurs').update({ bio }).eq('id', profile.id)
     setEditing(false)
     setMsg('Profil mis à jour !')
+  }
+
+  async function changePassword() {
+    if (!passwordNew || !passwordConfirm) { setMsg('Remplissez les deux champs'); return }
+    if (passwordNew !== passwordConfirm) { setMsg('Les mots de passe ne correspondent pas'); return }
+    if (passwordNew.length < 6) { setMsg('Minimum 6 caractères'); return }
+    try {
+      await supabase.auth.updateUser({ password: passwordNew })
+      setMsg('Mot de passe mis à jour !')
+      setPasswordNew('')
+      setPasswordConfirm('')
+    } catch (error) {
+      setMsg('Erreur : ' + error.message)
+    }
+  }
+
+  async function uploadAvatar(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const fileName = `${profile.id}-avatar`
+      await supabase.storage.from('fichiers-membres').upload(`avatars/${fileName}`, file, { upsert: true })
+      const { data: { publicUrl } } = supabase.storage.from('fichiers-membres').getPublicUrl(`avatars/${fileName}`)
+      await supabase.from('utilisateurs').update({ avatar_url: publicUrl }).eq('id', profile.id)
+      setMsg('Photo de profil mise à jour !')
+    } catch (error) {
+      setMsg('Erreur upload : ' + error.message)
+    }
+    setUploading(false)
   }
 
   async function uploadFichier(e, type) {
@@ -522,10 +571,10 @@ function Profil({ theme, supabase, profile }) {
         <div style={{fontSize:'12px',opacity:0.75,marginTop:'4px'}}>{profile?.role} · {profile?.domaine}</div>
       </div>
 
-      <div style={{display:'flex',background:theme.card,borderBottom:`1px solid ${theme.border}`}}>
-        {['info','fichiers','cotisations'].map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{flex:1,padding:'12px 4px',background:'none',border:'none',borderBottom:`2px solid ${tab===t?'#C8102E':'transparent'}`,color:tab===t?'#C8102E':theme.muted,fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:tab===t?'600':'400',textTransform:'capitalize'}}>
-            {t==='info'?'Infos':t==='fichiers'?'Fichiers':'Cotisations'}
+      <div style={{display:'flex',background:theme.card,borderBottom:`1px solid ${theme.border}`,overflowX:'auto'}}>
+        {['info','fichiers','cotisations','parametres'].map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{flex:1,padding:'12px 4px',background:'none',border:'none',borderBottom:`2px solid ${tab===t?'#C8102E':'transparent'}`,color:tab===t?'#C8102E':theme.muted,fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:tab===t?'600':'400',textTransform:'capitalize',whiteSpace:'nowrap'}}>
+            {t==='info'?'Infos':t==='fichiers'?'Fichiers':t==='cotisations'?'Cotisations':'Paramètres'}
           </button>
         ))}
       </div>
@@ -599,6 +648,45 @@ function Profil({ theme, supabase, profile }) {
                 <span style={{color:statutColor[c.statut],fontSize:'12px',fontWeight:'600'}}>{statutLabel[c.statut]} — {c.montant?.toLocaleString()} F</span>
               </div>
             ))}
+          </div>
+        )}
+
+        {tab==='parametres' && (
+          <div>
+            <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'16px',marginBottom:'12px'}}>
+              <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Photo de profil</div>
+              <label style={{display:'block',background:theme.bg,border:`2px dashed ${theme.border}`,borderRadius:'12px',padding:'20px',textAlign:'center',cursor:'pointer',marginBottom:'10px'}}>
+                <div style={{fontSize:'32px',marginBottom:'8px'}}>📸</div>
+                <div style={{color:theme.muted,fontSize:'12px',fontWeight:'600',marginBottom:'4px'}}>{uploading?'Upload en cours...':'Cliquer pour changer'}</div>
+                <div style={{color:theme.muted,fontSize:'11px'}}>JPG ou PNG</div>
+                <input type="file" accept="image/jpeg,image/png" onChange={uploadAvatar} disabled={uploading} style={{display:'none'}} />
+              </label>
+            </div>
+
+            <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'16px'}}>
+              <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Changer mot de passe</div>
+              <input 
+                type={showPassword?'text':'password'}
+                placeholder="Nouveau mot de passe" 
+                value={passwordNew} 
+                onChange={e=>setPasswordNew(e.target.value)} 
+                style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} 
+              />
+              <input 
+                type={showPassword?'text':'password'}
+                placeholder="Confirmer mot de passe" 
+                value={passwordConfirm} 
+                onChange={e=>setPasswordConfirm(e.target.value)} 
+                style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} 
+              />
+              <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',marginBottom:'12px'}}>
+                <input type="checkbox" checked={showPassword} onChange={e=>setShowPassword(e.target.checked)} style={{accentColor:'#C8102E'}} />
+                <span style={{color:theme.muted,fontSize:'12px'}}>Afficher le mot de passe</span>
+              </label>
+              <button onClick={changePassword} style={{width:'100%',background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
+                Mettre à jour
+              </button>
+            </div>
           </div>
         )}
       </div>
