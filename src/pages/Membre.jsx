@@ -395,7 +395,6 @@ function Evenements({ theme, supabase, profile }) {
   async function envoyerFeedback() {
     if (!contenu) { setMsg('Rédigez votre feedback'); return }
     await supabase.from('feedbacks').insert({
-      evenement_id: feedbackEv.id,
       utilisateur_id: profile?.id,
       contenu,
       note
@@ -640,4 +639,4 @@ function AdminAccess({ navigate, theme }) {
       )}
     </>
   )
-}
+} 

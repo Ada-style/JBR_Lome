@@ -7,7 +7,7 @@ const supabaseAdmin = createClient('https://qzqphzfbkdtglghloplo.supabase.co', '
 
 export default function Admin() {
   const navigate = useNavigate()
-  const { supabase, signOut } = useAuth()
+  const { supabase, signOut } = useAuth() 
   const [tab, setTab] = useState('dashboard')
   const [dark, setDark] = useState(true)
 
@@ -623,7 +623,7 @@ function Feedbacks({ theme, supabase }) {
   useEffect(() => { loadFeedbacks() }, [])
 
   async function loadFeedbacks() {
-    const {data} = await supabase.from('feedbacks').select('*, utilisateurs(prenom, nom), evenements(titre)').order('created_at',{ascending:false})
+    const {data} = await supabase.from('feedbacks').select('*, utilisateurs(prenom, nom)').order('created_at',{ascending:false})
     if (data) setFeedbacks(data)
   }
 
