@@ -7,6 +7,8 @@ export default function Membre() {
   const { supabase, profile, signOut, fetchProfile } = useAuth()
   const [tab, setTab] = useState('accueil')
   const [dark, setDark] = useState(true)
+  const [notifs, setNotifs] = useState([])
+  const [showNotifPanel, setShowNotifPanel] = useState(false)
 
   const theme = {
     bg: dark ? '#0f0f0f' : '#f4f4f5',
@@ -15,6 +17,14 @@ export default function Membre() {
     text: dark ? '#ffffff' : '#111111',
     muted: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
   }
+
+  useEffect(() => {
+    async function loadNotifs() {
+      const { data } = await supabase.from('annonces').select('*').eq('urgent', true).limit(5)
+      setNotifs(data || [])
+    }
+    loadNotifs()
+  }, [])
 
   const tabs = [
     { id: 'accueil', label: 'Accueil' },
@@ -42,10 +52,47 @@ export default function Membre() {
         <button onClick={() => setDark(!dark)} style={{background:'none',border:`1px solid ${theme.border}`,borderRadius:'16px',padding:'5px 12px',color:theme.muted,fontSize:'11px',cursor:'pointer',fontFamily:'inherit'}}>
           {dark ? 'Clair' : 'Sombre'}
         </button>
-        <div style={{width:'32px',height:'32px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'11px',fontWeight:'700',cursor:'pointer'}} onClick={handleSignOut}>
-          {profile?.prenom?.[0]}{profile?.nom?.[0]}
+        <div style={{position:'relative',cursor:'pointer'}} onClick={() => setShowNotifPanel(!showNotifPanel)}>
+          <button style={{background:'none',border:'none',fontSize:'18px',cursor:'pointer',padding:'4px',position:'relative'}}>
+            🔔
+          </button>
+          {notifs.length > 0 && (
+            <div style={{position:'absolute',top:'0px',right:'0px',background:'#C8102E',color:'white',width:'20px',height:'20px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:'700'}}>
+              {notifs.length}
+            </div>
+          )}
+        </div>
+        <div style={{width:'32px',height:'32px',borderRadius:'50%',background:profile?.avatar_url?'transparent':'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'11px',fontWeight:'700',cursor:'pointer',overflow:'hidden'}} onClick={() => setTab('profil')}>
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} loading="lazy" style={{width:'100%',height:'100%',objectFit:'cover'}} alt="Avatar" />
+          ) : (
+            <>{profile?.prenom?.[0]}{profile?.nom?.[0]}</>
+          )}
         </div>
       </div>
+
+      {/* Panel notifications - avec backdrop pour click-outside */}
+      {showNotifPanel && (
+        <div style={{position:'fixed',inset:0,zIndex:35}} onClick={() => setShowNotifPanel(false)} />
+      )}
+      {showNotifPanel && (
+        <div style={{position:'absolute',top:'55px',left:0,right:0,background:dark?'#1a1a1a':'#ffffff',borderBottom:`1px solid ${theme.border}`,zIndex:40,animation:'slideDown 0.3s ease-in-out'}}>
+          <style>{`@keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`}</style>
+          <div style={{padding:'12px 16px',maxWidth:'600px',margin:'0 auto'}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',color:theme.muted,marginBottom:'10px'}}>Notifications urgentes</div>
+            {notifs.length === 0 ? (
+              <div style={{color:theme.muted,fontSize:'13px',padding:'10px 0'}}>Aucune notification</div>
+            ) : (
+              notifs.map(n => (
+                <div key={n.id} style={{background:theme.card,border:`1px solid #C8102E`,borderRadius:'8px',padding:'10px 12px',marginBottom:'8px',borderLeft:'3px solid #C8102E'}}>
+                  <div style={{color:theme.text,fontSize:'12px',fontWeight:'600'}}>{n.titre}</div>
+                  {n.contenu && <div style={{color:theme.muted,fontSize:'11px',marginTop:'4px'}}>{n.contenu}</div>}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       <AdminAccess navigate={navigate} theme={theme} />
 
@@ -67,7 +114,7 @@ export default function Membre() {
         {tab==='devotion' && <Devotion theme={theme} supabase={supabase} />}
         {tab==='annuaire' && <Annuaire theme={theme} supabase={supabase} />}
         {tab==='evenements' && <Evenements theme={theme} supabase={supabase} profile={profile} />}
-        {tab==='profil' && <Profil theme={theme} supabase={supabase} profile={profile} />}
+        {tab==='profil' && <Profil theme={theme} supabase={supabase} profile={profile} handleSignOut={handleSignOut} navigate={navigate} />}
       </div>
     </div>
   )
@@ -80,6 +127,7 @@ function Accueil({ theme, supabase }) {
   const [evenements, setEvenements] = useState([])
   const [activeEv, setActiveEv] = useState(null)
   const [lightbox, setLightbox] = useState(null)
+  const [expandPrayer, setExpandPrayer] = useState(false)
 
   const EVENEMENTS_LOCAUX = [
     {
@@ -134,7 +182,7 @@ function Accueil({ theme, supabase }) {
     <div style={{padding:'16px',maxWidth:'600px',margin:'0 auto'}}>
 
       {/* Verset */}
-      <div style={{background:'linear-gradient(135deg,#C8102E,#8b0000)',borderRadius:'18px',padding:'28px 24px',color:'white',marginBottom:'16px',position:'relative',overflow:'hidden'}}>
+      <div style={{background:'linear-gradient(135deg,#C8102E,#8b0000)',borderRadius:'18px',padding:'28px 24px',color:'white',marginBottom:'16px',position:'relative',overflow:'hidden',boxShadow:!dark?'0 4px 12px rgba(200,16,46,0.2)':'none'}}>
         <div style={{position:'absolute',top:'-20px',left:'10px',fontFamily:'Georgia,serif',fontSize:'100px',color:'rgba(255,255,255,0.06)',lineHeight:1}}>"</div>
         <div style={{fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',opacity:0.7,marginBottom:'12px'}}>Dévotion du jour</div>
         {devotion ? (
@@ -150,12 +198,25 @@ function Accueil({ theme, supabase }) {
         )}
       </div>
 
+      {/* Prière du matin */}
+      {devotion?.priere && (
+        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'16px',marginBottom:'16px',boxShadow:!dark?'0 2px 8px rgba(0,0,0,0.07)':'none'}}>
+          <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'10px'}}>Prière du matin</div>
+          <p style={{color:theme.muted,fontSize:'13px',lineHeight:'1.8',fontStyle:'italic',display:'-webkit-box',WebkitLineClamp:expandPrayer?'unset':'2',WebkitBoxOrient:'vertical',overflow:expandPrayer?'unset':'hidden',maxHeight:expandPrayer?'unset':'80px',transition:'all 0.3s ease-in-out'}}>{devotion.priere}</p>
+          {devotion.priere.length > 100 && (
+            <button onClick={() => setExpandPrayer(!expandPrayer)} style={{background:'none',border:'none',color:'#C8102E',fontSize:'11px',fontWeight:'600',cursor:'pointer',marginTop:'8px',fontFamily:'inherit',padding:0}}>
+              {expandPrayer ? '← Réduire' : 'Lire plus →'}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Annonces */}
       {annonces.length > 0 && (
         <>
           <div style={{fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',color:theme.muted,marginBottom:'10px'}}>Annonces</div>
           {annonces.map(a => (
-            <div key={a.id} style={{background:theme.card,border:`1px solid ${a.urgent?'#C8102E':theme.border}`,borderRadius:'10px',padding:'12px 14px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'12px'}}>
+            <div key={a.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderLeft:`3px solid ${a.urgent?'#C8102E':'#999'}`,borderRadius:'10px',padding:'12px 14px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'12px',boxShadow:!dark?'0 2px 8px rgba(0,0,0,0.07)':'none'}}>
               <div style={{width:'8px',height:'8px',borderRadius:'50%',background:a.urgent?'#C8102E':'#555',flexShrink:0}} />
               <div style={{flex:1}}>
                 <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{a.titre}</div>
@@ -169,7 +230,7 @@ function Accueil({ theme, supabase }) {
 
       {/* Galerie */}
       {evenements.length > 0 && (
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'16px',padding:'16px',marginBottom:'16px',marginTop:'16px'}}>
+        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'16px',padding:'16px',marginBottom:'16px',marginTop:'16px',boxShadow:!dark?'0 2px 8px rgba(0,0,0,0.07)':'none'}}>
           <div style={{fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',color:theme.muted,marginBottom:'12px'}}>Nos moments</div>
           <div style={{display:'flex',gap:'8px',overflowX:'auto',marginBottom:'14px',paddingBottom:'4px',scrollbarWidth:'none'}}>
             {evenements.map(ev => (
@@ -181,7 +242,7 @@ function Accueil({ theme, supabase }) {
           {evActif && (
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px'}}>
               {evActif.photos_galerie?.map((p, i) => (
-                <img key={p.id} src={p.url} alt="" loading="lazy" onClick={() => setLightbox(p.url)} style={{width:'100%',height:i===0?'200px':'130px',objectFit:'cover',borderRadius:'10px',cursor:'pointer',gridColumn:i===0?'span 2':'span 1'}} />
+                <img key={p.id} src={p.url} alt="" loading="lazy" onClick={() => setLightbox(p.url)} style={{width:'100%',height:i===0?'200px':'130px',objectFit:'cover',borderRadius:'10px',cursor:'pointer',gridColumn:i===0?'span 2':'span 1',boxShadow:!dark?'0 2px 8px rgba(0,0,0,0.1)':'none'}} />
               ))}
             </div>
           )}
@@ -202,6 +263,7 @@ function Devotion({ theme, supabase }) {
   const [devotion, setDevotion] = useState(null)
   const [defi, setDefi] = useState(null)
   const [checked, setChecked] = useState([])
+  const [expandPrayer, setExpandPrayer] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -217,7 +279,7 @@ function Devotion({ theme, supabase }) {
 
   return (
     <div style={{padding:'16px',maxWidth:'600px',margin:'0 auto'}}>
-      <div style={{background:'linear-gradient(135deg,#C8102E,#8b0000)',borderRadius:'18px',padding:'28px 24px',color:'white',marginBottom:'16px',textAlign:'center'}}>
+      <div style={{background:'linear-gradient(135deg,#C8102E,#8b0000)',borderRadius:'18px',padding:'28px 24px',color:'white',marginBottom:'16px',textAlign:'center',boxShadow:!dark?'0 4px 12px rgba(200,16,46,0.2)':'none'}}>
         <div style={{fontSize:'32px',marginBottom:'8px'}}>🙏</div>
         <div style={{fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',opacity:0.7,marginBottom:'12px'}}>{new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
         {devotion ? (
@@ -234,14 +296,17 @@ function Devotion({ theme, supabase }) {
       </div>
 
       {devotion?.priere && (
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'16px'}}>
+        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'16px',boxShadow:!dark?'0 2px 8px rgba(0,0,0,0.07)':'none'}}>
           <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'10px'}}>Prière du matin</div>
-          <p style={{color:theme.muted,fontSize:'14px',lineHeight:'1.9',fontStyle:'italic'}}>{devotion.priere}</p>
+          <p style={{color:theme.muted,fontSize:'14px',lineHeight:'1.9',fontStyle:'italic',display:'-webkit-box',WebkitLineClamp:expandPrayer?'unset':'3',WebkitBoxOrient:'vertical',overflow:expandPrayer?'unset':'hidden',maxHeight:expandPrayer?'unset':'120px',transition:'all 0.3s ease-in-out'}}>{devotion.priere}</p>
+          <button onClick={() => setExpandPrayer(!expandPrayer)} style={{background:'none',border:'none',color:'#C8102E',fontSize:'12px',fontWeight:'600',cursor:'pointer',marginTop:'10px',fontFamily:'inherit',padding:0}}>
+            {expandPrayer ? '← Réduire' : 'Lire plus →'}
+          </button>
         </div>
       )}
 
       {defi && (
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px'}}>
+        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',boxShadow:!dark?'0 2px 8px rgba(0,0,0,0.07)':'none'}}>
           <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Défi lecture cette semaine</div>
           {defi.lectures?.map((l, i) => (
             <div key={i} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
@@ -473,7 +538,7 @@ function Evenements({ theme, supabase, profile }) {
   )
 }
 
-function Profil({ theme, supabase, profile }) {
+function Profil({ theme, supabase, profile, handleSignOut, navigate }) {
   const [bio, setBio] = useState(profile?.bio || '')
   const [editing, setEditing] = useState(false)
   const [fichiers, setFichiers] = useState([])
@@ -691,6 +756,12 @@ function Profil({ theme, supabase, profile }) {
               </label>
               <button onClick={changePassword} style={{width:'100%',background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
                 Mettre à jour
+              </button>
+            </div>
+
+            <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'16px',marginTop:'16px'}}>
+              <button onClick={handleSignOut} style={{width:'100%',background:'rgba(200,16,46,0.1)',color:'#C8102E',border:`1px solid rgba(200,16,46,0.3)`,borderRadius:'8px',padding:'10px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
+                Déconnexion
               </button>
             </div>
           </div>
