@@ -285,10 +285,12 @@ function Devotion({ theme, supabase, dark }) {
     async function load() {
       const { data: dev } = await supabase.from('devotions').select('*').order('date_devotion', { ascending: false }).limit(1).single()
       setDevotion(dev)
-      const now = new Date()
-      const start = new Date(now.getFullYear(), 0, 1)
-      const weekNum = Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7)
-      const { data: d } = await supabase.from('defis_lecture').select('*').eq('semaine', weekNum).eq('annee', 2026).single()
+      const { data: d } = await supabase
+        .from('defis_lecture')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
       setDefi(d)
     }
     load()
