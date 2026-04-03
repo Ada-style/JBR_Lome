@@ -110,18 +110,18 @@ export default function Membre() {
 
       {/* Contenu */}
       <div style={{paddingBottom:'70px'}}>
-        {tab==='accueil' && <Accueil theme={theme} supabase={supabase} />}
-        {tab==='devotion' && <Devotion theme={theme} supabase={supabase} />}
+        {tab==='accueil' && <Accueil theme={theme} supabase={supabase} dark={dark} />}
+        {tab==='devotion' && <Devotion theme={theme} supabase={supabase} dark={dark} />}
         {tab==='annuaire' && <Annuaire theme={theme} supabase={supabase} />}
         {tab==='evenements' && <Evenements theme={theme} supabase={supabase} profile={profile} />}
-        {tab==='profil' && <Profil theme={theme} supabase={supabase} profile={profile} handleSignOut={handleSignOut} navigate={navigate} />}
+        {tab==='profil' && <Profil theme={theme} supabase={supabase} profile={profile} handleSignOut={handleSignOut} navigate={navigate} fetchProfile={fetchProfile} />}
       </div>
     </div>
   )
 }
 
 
-function Accueil({ theme, supabase }) {
+function Accueil({ theme, supabase, dark }) {
   const [devotion, setDevotion] = useState(null)
   const [annonces, setAnnonces] = useState([])
   const [evenements, setEvenements] = useState([])
@@ -259,7 +259,7 @@ function Accueil({ theme, supabase }) {
   )
 }
 
-function Devotion({ theme, supabase }) {
+function Devotion({ theme, supabase, dark }) {
   const [devotion, setDevotion] = useState(null)
   const [defi, setDefi] = useState(null)
   const [checked, setChecked] = useState([])
@@ -538,7 +538,7 @@ function Evenements({ theme, supabase, profile }) {
   )
 }
 
-function Profil({ theme, supabase, profile, handleSignOut, navigate }) {
+function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfile }) {
   const [bio, setBio] = useState(profile?.bio || '')
   const [editing, setEditing] = useState(false)
   const [fichiers, setFichiers] = useState([])
