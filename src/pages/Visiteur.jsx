@@ -11,6 +11,7 @@ export default function Visiteur() {
   const [domaines, setDomaines] = useState(['Tous'])
   const [selected, setSelected] = useState(null)
   const [fichiers, setFichiers] = useState([])
+  const [preview, setPreview] = useState(null)
 
   const theme = {
     bg: dark ? '#0f0f0f' : '#f7f5f2',
@@ -92,28 +93,36 @@ export default function Visiteur() {
           ))}
         </div>
 
-        {/* Liste membres */}
+        {/* Grille membres style LinkedIn */}
         {filtered.length === 0 && (
           <div style={{textAlign:'center',color:theme.muted,fontSize:'13px',padding:'32px 0'}}>
             Aucun résultat
           </div>
         )}
-        {filtered.map(m => (
-          <div
-            key={m.id}
-            onClick={() => openProfil(m)}
-            style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'12px 14px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'12px',cursor:'pointer',transition:'border-color 0.2s'}}
-          >
-            <div style={{width:'44px',height:'44px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'14px',fontWeight:'700',flexShrink:0}}>
-              {m.prenom?.[0]}{m.nom?.[0]}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+          {filtered.map(m => (
+            <div
+              key={m.id}
+              onClick={() => openProfil(m)}
+              style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',cursor:'pointer',transition:'border-color 0.2s',display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center'}}
+            >
+              {m.avatar_url ? (
+                <img src={m.avatar_url} loading="lazy" style={{width:'56px',height:'56px',borderRadius:'50%',objectFit:'cover',marginBottom:'10px'}} alt="Avatar" />
+              ) : (
+                <div style={{width:'56px',height:'56px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'16px',fontWeight:'700',marginBottom:'10px',flexShrink:0}}>
+                  {m.prenom?.[0]}{m.nom?.[0]}
+                </div>
+              )}
+              <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'2px'}}>{m.prenom} {m.nom}</div>
+              <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'1px',textTransform:'uppercase',marginBottom:'8px'}}>{m.domaine || 'Domaine'}</div>
+              {m.bio && (
+                <div style={{color:theme.muted,fontSize:'11px',lineHeight:'1.5',display:'-webkit-box',WebkitLineClamp:'2',WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+                  {m.bio}
+                </div>
+              )}
             </div>
-            <div style={{flex:1}}>
-              <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{m.prenom} {m.nom}</div>
-              <div style={{color:theme.muted,fontSize:'11px',marginTop:'2px'}}>{m.domaine}</div>
-            </div>
-            <div style={{color:theme.muted,fontSize:'18px'}}>›</div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Fiche membre */}
@@ -153,7 +162,7 @@ export default function Visiteur() {
                         <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{f.nom_fichier}</div>
                         <div style={{color:theme.muted,fontSize:'11px'}}>{f.type_fichier}</div>
                       </div>
-                      <a href={f.url} target="_blank" rel="noreferrer" style={{color:'#C8102E',fontSize:'12px',textDecoration:'none',fontWeight:'600'}}>Voir</a>
+                      <button onClick={() => setPreview(f)} style={{background:'rgba(255,193,7,0.1)',border:'1px solid rgba(255,193,7,0.3)',borderRadius:'6px',padding:'4px 10px',color:'#ffc107',fontSize:'11px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Aperçu</button>
                     </div>
                   ))}
                 </div>
@@ -177,6 +186,27 @@ export default function Visiteur() {
                 Fermer
               </button>
             </div> 
+          </div>
+        </div>
+      )}
+
+      {/* Modal aperçu fichier */}
+      {preview && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:'16px'}} onClick={() => setPreview(null)}>
+          <div style={{background:theme.bg,borderRadius:'14px',padding:'20px',maxWidth:'90vw',maxHeight:'90vh',overflowY:'auto',display:'flex',flexDirection:'column'}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
+              <h3 style={{color:theme.text,fontSize:'16px',fontWeight:'700'}}>{preview.nom_fichier}</h3>
+              <button onClick={() => setPreview(null)} style={{background:'none',border:'none',fontSize:'24px',color:theme.muted,cursor:'pointer'}}>✕</button>
+            </div>
+            <iframe 
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(preview.url)}&embedded=true`}
+              style={{width:'100%',height:'500px',border:`1px solid ${theme.border}`,borderRadius:'10px',marginBottom:'16px'}}
+              title="Aperçu"
+            />
+            <div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}>
+              <button onClick={() => setPreview(null)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 16px',color:theme.text,fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>Fermer</button>
+              <a href={preview.url} target="_blank" rel="noreferrer" style={{background:'#C8102E',border:'none',borderRadius:'8px',padding:'8px 16px',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',textDecoration:'none',display:'flex',alignItems:'center'}}>Ouvrir</a>
+            </div>
           </div>
         </div>
       )}

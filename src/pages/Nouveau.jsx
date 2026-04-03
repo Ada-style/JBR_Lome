@@ -41,6 +41,7 @@ export default function Nouveau() {
   const [domaine, setDomaine] = useState('')
   const [msg, setMsg] = useState('')
   const [email, setEmail] = useState('')
+  const [bureau, setBureau] = useState([])
 
   const theme = {
     bg: dark ? '#0f0f0f' : '#f7f5f2',
@@ -50,7 +51,12 @@ export default function Nouveau() {
     muted: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
   }
 
-  useEffect(() => { loadEvenements() }, [])
+  useEffect(() => { loadEvenements(); loadBureau() }, [])
+
+  async function loadBureau() {
+    const { data } = await supabase.from('utilisateurs').select('*').eq('role', 'bureau').order('nom')
+    if (data) setBureau(data)
+  }
 
   async function loadEvenements() {
     const { data } = await supabase
@@ -175,6 +181,27 @@ export default function Nouveau() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* L'équipe */}
+        {bureau.length > 0 && (
+          <div style={{marginBottom:'32px'}}>
+            <h2 style={{color:theme.text,fontSize:'18px',fontWeight:'700',marginBottom:'16px'}}>L'équipe derrière la plateforme</h2>
+            <div style={{display:'flex',gap:'12px',overflowX:'auto',paddingBottom:'8px',scrollbarWidth:'none'}}>
+              {bureau.map(m => (
+                <div key={m.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',minWidth:'160px',textAlign:'center',flexShrink:0}}>
+                  <div style={{width:'64px',height:'64px',borderRadius:'50%',background:m.avatar_url?`url('${m.avatar_url}')`:'#C8102E',backgroundSize:'cover',backgroundPosition:'center',margin:'0 auto 10px',border:'2px solid #C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'16px',fontWeight:'700'}}>
+                    {!m.avatar_url && `${m.prenom?.[0]}${m.nom?.[0]}`}
+                  </div>
+                  <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'2px'}}>{m.prenom} {m.nom}</div>
+                  <div style={{color:'#C8102E',fontSize:'11px',fontWeight:'600',marginBottom:'6px'}}>{m.domaine}</div>
+                  <p style={{color:theme.muted,fontSize:'11px',lineHeight:'1.5',margin:'0',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+                    {m.bio || 'Membre du bureau'}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

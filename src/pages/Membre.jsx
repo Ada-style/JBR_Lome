@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Membre() {
   const navigate = useNavigate()
-  const { supabase, profile, signOut } = useAuth()
+  const { supabase, profile, signOut, fetchProfile } = useAuth()
   const [tab, setTab] = useState('accueil')
   const [dark, setDark] = useState(true)
 
@@ -112,7 +112,7 @@ function Accueil({ theme, supabase }) {
   useEffect(() => {
     async function load() {
       const today = new Date().toISOString().split('T')[0]
-      const { data: dev } = await supabase.from('devotions').select('*').eq('date_devotion', today).single()
+      const { data: dev } = await supabase.from('devotions').select('*').order('date_devotion', {ascending: false}).limit(1).single()
       setDevotion(dev)
       const { data: ann } = await supabase.from('annonces').select('*').order('created_at', { ascending: false }).limit(5)
       if (ann) setAnnonces(ann)
@@ -206,7 +206,7 @@ function Devotion({ theme, supabase }) {
   useEffect(() => {
     async function load() {
       const today = new Date().toISOString().split('T')[0]
-      const { data: dev } = await supabase.from('devotions').select('*').eq('date_devotion', today).single()
+      const { data: dev } = await supabase.from('devotions').select('*').order('date_devotion', {ascending: false}).limit(1).single()
       setDevotion(dev)
       const weekNum = Math.ceil(new Date().getDate() / 7)
       const { data: d } = await supabase.from('defis_lecture').select('*').eq('semaine', weekNum).eq('annee', 2026).single()
@@ -484,6 +484,7 @@ function Profil({ theme, supabase, profile }) {
   const [passwordNew, setPasswordNew] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [preview, setPreview] = useState(null)
 
   useEffect(() => {
     if (profile?.id) {
@@ -535,6 +536,7 @@ function Profil({ theme, supabase, profile }) {
       await supabase.storage.from('fichiers-membres').upload(`avatars/${fileName}`, file, { upsert: true })
       const { data: { publicUrl } } = supabase.storage.from('fichiers-membres').getPublicUrl(`avatars/${fileName}`)
       await supabase.from('utilisateurs').update({ avatar_url: publicUrl }).eq('id', profile.id)
+      await fetchProfile(profile.id)
       setMsg('Photo de profil mise à jour !')
     } catch (error) {
       setMsg('Erreur upload : ' + error.message)
@@ -622,13 +624,13 @@ function Profil({ theme, supabase, profile }) {
               </label>
             </div>
             {fichiers.map(f => (
-              <div key={f.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'10px',padding:'12px',marginBottom:'6px',display:'flex',alignItems:'center',gap:'10px'}}>
+              <div key={f.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'10px',padding:'12px',marginBottom:'6px',display:'flex',alignItems:'center',gap:'8px'}}>
                 <div style={{fontSize:'20px'}}>📄</div>
                 <div style={{flex:1}}>
                   <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{f.nom_fichier}</div>
                   <div style={{color:statutColor[f.statut],fontSize:'11px',marginTop:'2px'}}>{statutLabel[f.statut]}</div>
                 </div>
-                <a href={f.url} target="_blank" rel="noreferrer" style={{color:'#C8102E',fontSize:'12px',textDecoration:'none',fontWeight:'600'}}>Voir</a>
+                <button onClick={() => setPreview(f)} style={{background:'rgba(255,193,7,0.1)',border:'1px solid rgba(255,193,7,0.3)',borderRadius:'8px',padding:'4px 10px',color:'#ffc107',fontSize:'11px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Aperçu</button>
               </div>
             ))}
           </div>
@@ -694,6 +696,27 @@ function Profil({ theme, supabase, profile }) {
           </div>
         )}
       </div>
+
+      {/* Modal aperçu fichier */}
+      {preview && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:'16px'}} onClick={() => setPreview(null)}>
+          <div style={{background:theme.bg,borderRadius:'14px',padding:'20px',maxWidth:'90vw',maxHeight:'90vh',overflowY:'auto',display:'flex',flexDirection:'column'}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
+              <h3 style={{color:theme.text,fontSize:'16px',fontWeight:'700'}}>{preview.nom_fichier}</h3>
+              <button onClick={() => setPreview(null)} style={{background:'none',border:'none',fontSize:'24px',color:theme.muted,cursor:'pointer'}}>✕</button>
+            </div>
+            <iframe 
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(preview.url)}&embedded=true`}
+              style={{width:'100%',height:'500px',border:`1px solid ${theme.border}`,borderRadius:'10px',marginBottom:'16px'}}
+              title="Aperçu"
+            />
+            <div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}>
+              <button onClick={() => setPreview(null)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 16px',color:theme.text,fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>Fermer</button>
+              <a href={preview.url} target="_blank" rel="noreferrer" style={{background:'#C8102E',border:'none',borderRadius:'8px',padding:'8px 16px',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',textDecoration:'none',display:'flex',alignItems:'center'}}>Ouvrir</a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -49,7 +49,7 @@ export default function Admin() {
         <div style={{padding:'12px 8px',flex:1}}>
           {tabs.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{width:'100%',background:tab===t.id?'rgba(200,16,46,0.15)':'none',border:'none',borderRadius:'10px',padding:'10px 12px',color:tab===t.id?'#C8102E':theme.muted,fontSize:'13px',fontWeight:tab===t.id?'600':'400',cursor:'pointer',textAlign:'left',marginBottom:'2px',fontFamily:'inherit',transition:'all 0.2s'}}>
-              {t.label}
+              {t.label} 
             </button>
           ))}
         </div>
@@ -154,9 +154,13 @@ function Demandes({ theme, supabase }) {
       {demandes.map(d => (
         <div key={d.id} style={{background:theme.card,border:`1px solid ${d.statut==='en_attente'?'#C8102E':theme.border}`,borderRadius:'12px',padding:'16px',marginBottom:'8px'}}>
           <div style={{display:'flex',alignItems:'flex-start',gap:'12px'}}>
-            <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'14px',fontWeight:'700',flexShrink:0}}>
-              {d.nom[0]}
-            </div>
+            {d.avatar_url ? (
+              <img src={d.avatar_url} loading="lazy" style={{width:'40px',height:'40px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt="Avatar" />
+            ) : (
+              <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'14px',fontWeight:'700',flexShrink:0}}>
+                {d.nom[0]}
+              </div>
+            )}
             <div style={{flex:1}}>
               <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{d.nom}</div>
               <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.domaine || 'Domaine non renseigné'}</div>
@@ -288,9 +292,13 @@ function Membres({ theme, supabase }) {
       <div>
         {membres.map(m => (
           <div key={m.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'12px'}}>
-            <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'12px',fontWeight:'600',flexShrink:0}}>
-              {m.prenom?.[0]}{m.nom?.[0]}
-            </div>
+            {m.avatar_url ? (
+              <img src={m.avatar_url} loading="lazy" style={{width:'40px',height:'40px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt="Avatar" />
+            ) : (
+              <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'12px',fontWeight:'600',flexShrink:0}}>
+                {m.prenom?.[0]}{m.nom?.[0]}
+              </div>
+            )}
             <div style={{flex:1}}>
               <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{m.prenom} {m.nom}</div>
               <div style={{color:theme.muted,fontSize:'11px'}}>{m.domaine} · {m.role}</div>
@@ -349,9 +357,13 @@ function Cotisations({ theme, supabase }) {
           <div style={{color:theme.muted,fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'10px'}}>Sélectionner un membre</div>
           {membres.map(m => (
             <div key={m.id} onClick={() => setSelected(m)} style={{background:selected?.id===m.id?'rgba(200,16,46,0.15)':theme.card,border:`1px solid ${selected?.id===m.id?'#C8102E':theme.border}`,borderRadius:'10px',padding:'12px',marginBottom:'6px',cursor:'pointer',display:'flex',alignItems:'center',gap:'10px'}}>
-              <div style={{width:'34px',height:'34px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'11px',fontWeight:'600',flexShrink:0}}>
-                {m.prenom?.[0]}{m.nom?.[0]}
-              </div>
+              {m.avatar_url ? (
+                <img src={m.avatar_url} loading="lazy" style={{width:'34px',height:'34px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt="Avatar" />
+              ) : (
+                <div style={{width:'34px',height:'34px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'11px',fontWeight:'600',flexShrink:0}}>
+                  {m.prenom?.[0]}{m.nom?.[0]}
+                </div>
+              )}
               <div>
                 <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{m.prenom} {m.nom}</div>
                 <div style={{color:theme.muted,fontSize:'11px'}}>{m.cotisations?.length||0} cotisation(s)</div>
@@ -467,8 +479,8 @@ function Fichiers({ theme, supabase }) {
               <button onClick={() => setPreview(null)} style={{background:'none',border:'none',fontSize:'24px',color:theme.muted,cursor:'pointer'}}>✕</button>
             </div>
             <iframe 
-              src={`${preview.url}#toolbar=0`}
-              style={{width:'100%',height:'400px',border:`1px solid ${theme.border}`,borderRadius:'10px',marginBottom:'16px'}}
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(preview.url)}&embedded=true`}
+              style={{width:'100%',height:'500px',border:`1px solid ${theme.border}`,borderRadius:'10px',marginBottom:'16px'}}
               title="Aperçu"
             />
             <div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}>
