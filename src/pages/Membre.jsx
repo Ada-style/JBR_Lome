@@ -633,11 +633,11 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfil
     setUploading(true)
     const fileName = `${profile.id}-${Date.now()}.${file.name.split('.').pop()}`
     const { error: uploadError } = await supabase.storage
-      .from('fichiers-membres')
+      .from('fichiers_membres')
       .upload(`avatars/${fileName}`, file, { upsert: true })
     if (uploadError) { setMsg('Erreur upload : ' + uploadError.message); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage
-      .from('fichiers-membres')
+      .from('fichiers_membres')
       .getPublicUrl(`avatars/${fileName}`)
     await supabase.from('utilisateurs').update({ avatar_url: publicUrl }).eq('id', profile.id)
     setMsg('Photo mise à jour !')
@@ -650,8 +650,8 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfil
     if (!file) return
     setUploading(true)
     const fileName = `${profile.id}-${Date.now()}-${file.name}`
-    await supabase.storage.from('fichiers-membres').upload(`membres/${fileName}`, file)
-    const { data: { publicUrl } } = supabase.storage.from('fichiers-membres').getPublicUrl(`membres/${fileName}`)
+    await supabase.storage.from('fichiers_membres').upload(`membres/${fileName}`, file)
+    const { data: { publicUrl } } = supabase.storage.from('fichiers_membres').getPublicUrl(`membres/${fileName}`)
     await supabase.from('fichiers').insert({
       utilisateur_id: profile.id,
       nom_fichier: file.name,

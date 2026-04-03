@@ -527,8 +527,8 @@ function Galerie({ theme, supabase }) {
     if (error) { setMsg('Erreur création événement'); setUploading(false); return }
     for (const photo of photos) {
       const fileName = `${Date.now()}-${photo.name}`
-      await supabase.storage.from('fichiers-membres').upload(`galerie/${fileName}`, photo)
-      const {data:{publicUrl}} = supabase.storage.from('fichiers-membres').getPublicUrl(`galerie/${fileName}`)
+      await supabase.storage.from('fichiers_membres').upload(`galerie/${fileName}`, photo)
+      const {data:{publicUrl}} = supabase.storage.from('fichiers_membres').getPublicUrl(`galerie/${fileName}`)
       await supabase.from('photos_galerie').insert({evenement_id:ev.id, url:publicUrl})
     }
     setMsg('Événement publié !')
