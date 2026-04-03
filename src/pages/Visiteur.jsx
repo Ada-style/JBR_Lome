@@ -168,7 +168,7 @@ export default function Visiteur() {
                         <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{f.nom_fichier}</div>
                         <div style={{color:theme.muted,fontSize:'11px'}}>{f.type_fichier}</div>
                       </div>
-                      <button onClick={() => setPreview(f)} style={{background:'rgba(255,193,7,0.1)',border:'1px solid rgba(255,193,7,0.3)',borderRadius:'6px',padding:'4px 10px',color:'#ffc107',fontSize:'11px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Aperçu</button>
+                      <button onClick={() => window.open(f.url, '_blank')} style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'6px',padding:'4px 10px',color:'#25d366',fontSize:'11px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Voir</button>
                     </div>
                   ))}
                 </div>

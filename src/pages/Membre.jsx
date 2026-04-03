@@ -283,10 +283,11 @@ function Devotion({ theme, supabase, dark }) {
 
   useEffect(() => {
     async function load() {
-      const today = new Date().toISOString().split('T')[0]
-      const { data: dev } = await supabase.from('devotions').select('*').order('date_devotion', {ascending: false}).limit(1).single()
+      const { data: dev } = await supabase.from('devotions').select('*').order('date_devotion', { ascending: false }).limit(1).single()
       setDevotion(dev)
-      const weekNum = Math.ceil(new Date().getDate() / 7)
+      const now = new Date()
+      const start = new Date(now.getFullYear(), 0, 1)
+      const weekNum = Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7)
       const { data: d } = await supabase.from('defis_lecture').select('*').eq('semaine', weekNum).eq('annee', 2026).single()
       setDefi(d)
     }
@@ -625,24 +626,21 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfil
   }
 
   async function uploadAvatar(e) {
-    if (!profile?.id) {
-      setMsg('Erreur : reconnectez-vous et réessayez')
-      return
-    }
     const file = e.target.files[0]
-    if (!file) return
+    if (!file || !profile?.id) return
     setUploading(true)
-    try {
-      const fileName = `${profile.id}-avatar`
-      await supabase.storage.from('fichiers-membres').upload(`avatars/${fileName}`, file, { upsert: true })
-      const { data: { publicUrl } } = supabase.storage.from('fichiers-membres').getPublicUrl(`avatars/${fileName}`)
-      await supabase.from('utilisateurs').update({ avatar_url: publicUrl }).eq('id', profile.id)
-      await fetchProfile(profile.id)
-      setMsg('Photo de profil mise à jour !')
-    } catch (error) {
-      setMsg('Erreur upload : ' + error.message)
-    }
+    const fileName = `${profile.id}-${Date.now()}.${file.name.split('.').pop()}`
+    const { error: uploadError } = await supabase.storage
+      .from('fichiers-membres')
+      .upload(`avatars/${fileName}`, file, { upsert: true })
+    if (uploadError) { setMsg('Erreur upload : ' + uploadError.message); setUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage
+      .from('fichiers-membres')
+      .getPublicUrl(`avatars/${fileName}`)
+    await supabase.from('utilisateurs').update({ avatar_url: publicUrl }).eq('id', profile.id)
+    setMsg('Photo mise à jour !')
     setUploading(false)
+    window.location.reload()
   }
 
   async function uploadFichier(e, type) {

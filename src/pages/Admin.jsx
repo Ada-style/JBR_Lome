@@ -632,6 +632,11 @@ function Devotions({ theme, supabase }) {
     loadDevotions()
   }
 
+  async function deleteDevotion(id) {
+    await supabase.from('devotions').delete().eq('id', id)
+    loadDevotions()
+  }
+
   async function saveDefi() {
     if (!semaine) { setMsg('Renseignez le numéro de semaine'); return }
     const lecturesFilled = lectures.filter(l => l.ref.trim())
@@ -676,6 +681,9 @@ function Devotions({ theme, supabase }) {
               <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{d.verset.substring(0,50)}...</div>
               <div style={{color:theme.muted,fontSize:'11px',marginTop:'2px'}}>{d.reference} · {new Date(d.date_devotion).toLocaleDateString('fr-FR')}</div>
             </div>
+            <button onClick={() => deleteDevotion(d.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
+              Supprimer
+            </button>
           </div>
         ))}
       </div>

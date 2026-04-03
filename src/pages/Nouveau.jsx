@@ -41,7 +41,20 @@ export default function Nouveau() {
   const [domaine, setDomaine] = useState('')
   const [msg, setMsg] = useState('')
   const [email, setEmail] = useState('')
-  const [bureau, setBureau] = useState([])
+
+  const BUREAU = [
+    { prenom: 'Benjamin', nom: 'EZIAN', role: 'Président' },
+    { prenom: 'Elom', nom: 'ATTIOGBE', role: 'Vice-Président' },
+    { prenom: 'Prunelle', nom: 'ADOSSI', role: 'Secrétaire' },
+    { prenom: 'Levi', nom: 'AGBETOWOKA', role: 'Vice-Secrétaire & Communication' },
+    { prenom: 'Dorcas', nom: 'ADJINARE', role: 'Trésorière' },
+    { prenom: 'Messan', nom: 'KOUMAYI', role: 'Vice-Trésorier' },
+    { prenom: 'Esther', nom: 'KPEMOUA', role: 'Présidente JCF' },
+    { prenom: 'Gloria', nom: 'HOUNGLONOU', role: 'Évangélisation' },
+    { prenom: 'John', nom: 'AFATSAWO', role: 'Prière' },
+    { prenom: 'Louise', nom: 'ADJINARE', role: 'Communion Fraternelle' },
+    { prenom: 'Michel', nom: 'DADZI', role: 'Entretien' },
+  ]
 
   const theme = {
     bg: dark ? '#0f0f0f' : '#f7f5f2',
@@ -51,12 +64,7 @@ export default function Nouveau() {
     muted: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
   }
 
-  useEffect(() => { loadEvenements(); loadBureau() }, [])
-
-  async function loadBureau() {
-    const { data } = await supabase.from('utilisateurs').select('*').eq('role', 'bureau').order('nom')
-    if (data) setBureau(data)
-  }
+  useEffect(() => { loadEvenements() }, [])
 
   async function loadEvenements() {
     const { data } = await supabase
@@ -185,31 +193,20 @@ export default function Nouveau() {
         )}
 
         {/* L'équipe - Bureau 2026-2028 */}
-        {bureau.length > 0 && (
+        {BUREAU.length > 0 && (
           <div style={{marginBottom:'32px'}}>
             <h2 style={{color:theme.text,fontSize:'18px',fontWeight:'700',marginBottom:'6px'}}>Notre Bureau 2026-2028</h2>
             <p style={{color:theme.muted,fontSize:'12px',marginBottom:'20px'}}>Rencontrez les leaders de la jeunesse</p>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px'}}>
-              {bureau.map(m => (
-                <div key={m.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'16px',textAlign:'center',transition:'all 0.3s ease',cursor:'pointer',':hover':{transform:'translateY(-4px)',borderColor:'#C8102E'}}}>
-                  {m.avatar_url ? (
-                    <img src={m.avatar_url} loading="lazy" alt="Avatar" style={{width:'72px',height:'72px',borderRadius:'50%',objectFit:'cover',margin:'0 auto 12px',border:'3px solid #C8102E',display:'block'}} />
-                  ) : (
-                    <div style={{width:'72px',height:'72px',borderRadius:'50%',background:'#C8102E',margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'22px',fontWeight:'700',border:'3px solid #C8102E'}}>
-                      {`${m.prenom?.[0]}${m.nom?.[0]}`}
-                    </div>
-                  )}
+              {BUREAU.map((m, i) => (
+                <div key={i} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'16px',textAlign:'center',transition:'all 0.3s ease',cursor:'pointer',':hover':{transform:'translateY(-4px)',borderColor:'#C8102E'}}}>
+                  <div style={{width:'72px',height:'72px',borderRadius:'50%',background:'#C8102E',margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'22px',fontWeight:'700',border:'3px solid #C8102E'}}>
+                    {`${m.prenom?.[0]}${m.nom?.[0]}`}
+                  </div>
                   <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'4px'}}>{m.prenom} {m.nom}</div>
-                  {m.domaine && (
-                    <div style={{background:'rgba(200,16,46,0.15)',color:'#C8102E',fontSize:'10px',fontWeight:'700',padding:'2px 8px',borderRadius:'10px',marginBottom:'8px',display:'inline-block',textTransform:'uppercase',letterSpacing:'0.5px'}}>
-                      {m.domaine}
-                    </div>
-                  )}
-                  {m.bio && (
-                    <p style={{color:theme.muted,fontSize:'11px',lineHeight:'1.4',margin:'0'}}>
-                      {m.bio}
-                    </p>
-                  )}
+                  <div style={{background:'rgba(200,16,46,0.15)',color:'#C8102E',fontSize:'10px',fontWeight:'700',padding:'2px 8px',borderRadius:'10px',marginBottom:'8px',display:'inline-block',textTransform:'uppercase',letterSpacing:'0.5px'}}>
+                    {m.role}
+                  </div>
                 </div>
               ))}
             </div>
