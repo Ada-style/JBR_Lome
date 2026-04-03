@@ -184,21 +184,32 @@ export default function Nouveau() {
           </div>
         )}
 
-        {/* L'équipe */}
+        {/* L'équipe - Bureau 2026-2028 */}
         {bureau.length > 0 && (
           <div style={{marginBottom:'32px'}}>
-            <h2 style={{color:theme.text,fontSize:'18px',fontWeight:'700',marginBottom:'16px'}}>L'équipe derrière la plateforme</h2>
-            <div style={{display:'flex',gap:'12px',overflowX:'auto',paddingBottom:'8px',scrollbarWidth:'none'}}>
+            <h2 style={{color:theme.text,fontSize:'18px',fontWeight:'700',marginBottom:'6px'}}>Notre Bureau 2026-2028</h2>
+            <p style={{color:theme.muted,fontSize:'12px',marginBottom:'20px'}}>Rencontrez les leaders de la jeunesse</p>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px'}}>
               {bureau.map(m => (
-                <div key={m.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',minWidth:'160px',textAlign:'center',flexShrink:0}}>
-                  <div style={{width:'64px',height:'64px',borderRadius:'50%',background:m.avatar_url?`url('${m.avatar_url}')`:'#C8102E',backgroundSize:'cover',backgroundPosition:'center',margin:'0 auto 10px',border:'2px solid #C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'16px',fontWeight:'700'}}>
-                    {!m.avatar_url && `${m.prenom?.[0]}${m.nom?.[0]}`}
-                  </div>
-                  <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'2px'}}>{m.prenom} {m.nom}</div>
-                  <div style={{color:'#C8102E',fontSize:'11px',fontWeight:'600',marginBottom:'6px'}}>{m.domaine}</div>
-                  <p style={{color:theme.muted,fontSize:'11px',lineHeight:'1.5',margin:'0',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
-                    {m.bio || 'Membre du bureau'}
-                  </p>
+                <div key={m.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'16px',textAlign:'center',transition:'all 0.3s ease',cursor:'pointer',':hover':{transform:'translateY(-4px)',borderColor:'#C8102E'}}}>
+                  {m.avatar_url ? (
+                    <img src={m.avatar_url} loading="lazy" alt="Avatar" style={{width:'72px',height:'72px',borderRadius:'50%',objectFit:'cover',margin:'0 auto 12px',border:'3px solid #C8102E',display:'block'}} />
+                  ) : (
+                    <div style={{width:'72px',height:'72px',borderRadius:'50%',background:'#C8102E',margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'22px',fontWeight:'700',border:'3px solid #C8102E'}}>
+                      {`${m.prenom?.[0]}${m.nom?.[0]}`}
+                    </div>
+                  )}
+                  <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'4px'}}>{m.prenom} {m.nom}</div>
+                  {m.domaine && (
+                    <div style={{background:'rgba(200,16,46,0.15)',color:'#C8102E',fontSize:'10px',fontWeight:'700',padding:'2px 8px',borderRadius:'10px',marginBottom:'8px',display:'inline-block',textTransform:'uppercase',letterSpacing:'0.5px'}}>
+                      {m.domaine}
+                    </div>
+                  )}
+                  {m.bio && (
+                    <p style={{color:theme.muted,fontSize:'11px',lineHeight:'1.4',margin:'0'}}>
+                      {m.bio}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

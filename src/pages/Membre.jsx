@@ -9,6 +9,7 @@ export default function Membre() {
   const [dark, setDark] = useState(true)
   const [notifs, setNotifs] = useState([])
   const [showNotifPanel, setShowNotifPanel] = useState(false)
+  const [showProfil, setShowProfil] = useState(false)
 
   const theme = {
     bg: dark ? '#0f0f0f' : '#f4f4f5',
@@ -31,7 +32,6 @@ export default function Membre() {
     { id: 'devotion', label: 'Dévotion' },
     { id: 'annuaire', label: 'Annuaire' },
     { id: 'evenements', label: 'Événements' },
-    { id: 'profil', label: 'Profil' },
   ]
 
   async function handleSignOut() {
@@ -62,7 +62,7 @@ export default function Membre() {
             </div>
           )}
         </div>
-        <div style={{width:'32px',height:'32px',borderRadius:'50%',background:profile?.avatar_url?'transparent':'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'11px',fontWeight:'700',cursor:'pointer',overflow:'hidden'}} onClick={() => setTab('profil')}>
+        <div style={{width:'32px',height:'32px',borderRadius:'50%',background:profile?.avatar_url?'transparent':'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'11px',fontWeight:'700',cursor:'pointer',overflow:'hidden',transition:'transform 0.2s'}} onClick={() => setShowProfil(true)} title="Profil">
           {profile?.avatar_url ? (
             <img src={profile.avatar_url} loading="lazy" style={{width:'100%',height:'100%',objectFit:'cover'}} alt="Avatar" />
           ) : (
@@ -114,8 +114,24 @@ export default function Membre() {
         {tab==='devotion' && <Devotion theme={theme} supabase={supabase} dark={dark} />}
         {tab==='annuaire' && <Annuaire theme={theme} supabase={supabase} />}
         {tab==='evenements' && <Evenements theme={theme} supabase={supabase} profile={profile} />}
-        {tab==='profil' && <Profil theme={theme} supabase={supabase} profile={profile} handleSignOut={handleSignOut} navigate={navigate} fetchProfile={fetchProfile} />}
       </div>
+
+      {/* Panel Profil - side modal */}
+      {showProfil && (
+        <>
+          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:100}} onClick={() => setShowProfil(false)} />
+          <div style={{position:'fixed',top:0,right:0,bottom:0,width:'100%',maxWidth:'600px',background:theme.bg,zIndex:101,display:'flex',flexDirection:'column',boxShadow:'-4px 0 16px rgba(0,0,0,0.2)',animation:'slideInRight 0.3s ease-in-out'}} onClick={e=>e.stopPropagation()}>
+            <style>{`@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 20px',borderBottom:`1px solid ${theme.border}`}}>
+              <h2 style={{color:theme.text,fontSize:'16px',fontWeight:'700',margin:0}}>Mon Profil</h2>
+              <button onClick={() => setShowProfil(false)} style={{background:'none',border:'none',fontSize:'24px',color:theme.muted,cursor:'pointer',padding:0}}>✕</button>
+            </div>
+            <div style={{flex:1,overflowY:'auto'}}>
+              <Profil theme={theme} supabase={supabase} profile={profile} handleSignOut={handleSignOut} navigate={navigate} fetchProfile={fetchProfile} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -373,17 +389,33 @@ function Annuaire({ theme, supabase }) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
         {filtered.map(m => (
-          <div key={m.id} onClick={() => openProfil(m)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',cursor:'pointer',transition:'all 0.2s',position:'relative',overflow:'hidden'}}>
-            <div style={{display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',gap:'10px'}}>
-              <div style={{width:'56px',height:'56px',borderRadius:'50%',background:m.avatar_url?`url('${m.avatar_url}')`:'#C8102E',backgroundSize:'cover',backgroundPosition:'center',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700',flexShrink:0,border:'2px solid #C8102E'}}>
-                {!m.avatar_url && `${m.prenom?.[0]}${m.nom?.[0]}`}
-              </div>
+          <div key={m.id} onClick={() => openProfil(m)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',cursor:'pointer',transition:'all 0.3s ease-in-out',position:'relative',overflow:'hidden',transform:'translateX(0)',':hover':{transform:'translateX(3px)'}}}>
+            <style>{`
+              [data-member-id="${m.id}"]:hover {
+                transform: translateX(3px);
+                border-color: #C8102E;
+              }
+            `}</style>
+            <div data-member-id={m.id} style={{display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',gap:'10px'}}>
+              {m.avatar_url ? (
+                <img src={m.avatar_url} loading="lazy" alt="Avatar" style={{width:'56px',height:'56px',borderRadius:'50%',objectFit:'cover',border:'3px solid #C8102E'}} />
+              ) : (
+                <div style={{width:'56px',height:'56px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700',border:'3px solid #C8102E'}}>
+                  {`${m.prenom?.[0]}${m.nom?.[0]}`}
+                </div>
+              )}
               <div style={{flex:1}}>
-                <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'2px'}}>{m.prenom} {m.nom}</div>
-                <div style={{color:'#C8102E',fontSize:'11px',fontWeight:'600',marginBottom:'6px'}}>{m.domaine || 'Domaine'}</div>
-                <p style={{color:theme.muted,fontSize:'11px',lineHeight:'1.5',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
-                  {m.bio || 'Pas de bio renseignée'}
-                </p>
+                <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'4px'}}>{m.prenom} {m.nom}</div>
+                <div style={{display:'flex',justifyContent:'center',marginBottom:'8px'}}>
+                  <span style={{background:'rgba(200,16,46,0.15)',color:'#C8102E',fontSize:'10px',fontWeight:'700',padding:'2px 10px',borderRadius:'12px',textTransform:'uppercase',letterSpacing:'0.5px'}}>
+                    {m.domaine || 'Domaine'}
+                  </span>
+                </div>
+                {m.bio && (
+                  <p style={{color:theme.muted,fontSize:'11px',lineHeight:'1.5',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+                    {m.bio}
+                  </p>
+                )}
               </div>
             </div>
             <div style={{marginTop:'10px',paddingTop:'10px',borderTop:`1px solid ${theme.border}`,display:'flex',justifyContent:'center'}}>
@@ -406,11 +438,15 @@ function Annuaire({ theme, supabase }) {
 
             {/* Header */}
             <div style={{background:'linear-gradient(135deg,#C8102E,#8b0000)',padding:'28px 20px',textAlign:'center',color:'white',borderRadius:'20px 20px 0 0'}}>
-              <div style={{width:'64px',height:'64px',borderRadius:'50%',background:'rgba(255,255,255,0.2)',border:'3px solid rgba(255,255,255,0.4)',margin:'0 auto 10px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'20px',fontWeight:'700'}}>
-                {selected.prenom?.[0]}{selected.nom?.[0]}
-              </div>
-              <div style={{fontSize:'17px',fontWeight:'700',fontFamily:'Outfit,sans-serif'}}>{selected.prenom} {selected.nom}</div>
-              <div style={{fontSize:'12px',opacity:0.75,marginTop:'4px'}}>{selected.domaine}</div>
+              {selected.avatar_url ? (
+                <img src={selected.avatar_url} loading="lazy" alt="Avatar" style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',border:'4px solid rgba(255,255,255,0.6)',margin:'0 auto 12px',display:'block'}} />
+              ) : (
+                <div style={{width:'80px',height:'80px',borderRadius:'50%',background:'rgba(255,255,255,0.2)',border:'4px solid rgba(255,255,255,0.6)',margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'28px',fontWeight:'700'}}>
+                  {selected.prenom?.[0]}{selected.nom?.[0]}
+                </div>
+              )}
+              <div style={{fontSize:'18px',fontWeight:'700',fontFamily:'Outfit,sans-serif'}}>{selected.prenom} {selected.nom}</div>
+              <div style={{fontSize:'12px',opacity:0.85,marginTop:'6px',background:'rgba(255,255,255,0.15)',padding:'4px 12px',borderRadius:'20px',display:'inline-block',marginTop:'6px'}}>{selected.domaine}</div>
             </div>
 
             <div style={{padding:'20px'}}>
