@@ -607,90 +607,6 @@ function Galerie({ theme, supabase }) {
   )
 }
 
-function Devotions({ theme, supabase }) {
-  const [verset, setVerset] = useState('')
-  const [reference, setReference] = useState('')
-  const [priere, setPriere] = useState('')
-  const [date, setDate] = useState('')
-  const [lectures, setLectures] = useState([{jour:'Lundi',ref:''},{jour:'Mardi',ref:''},{jour:'Mercredi',ref:''},{jour:'Jeudi',ref:''},{jour:'Vendredi',ref:''}])
-  const [semaine, setSemaine] = useState('')
-  const [msg, setMsg] = useState('')
-  const [devotions, setDevotions] = useState([])
-
-  useEffect(() => { loadDevotions() }, [])
-
-  async function loadDevotions() {
-    const {data} = await supabase.from('devotions').select('*').order('date_devotion',{ascending:false}).limit(7)
-    if (data) setDevotions(data)
-  }
-
-  async function saveDevotion() {
-    if (!verset||!reference||!date) { setMsg('Renseignez le verset, la référence et la date'); return }
-    await supabase.from('devotions').upsert({verset, reference, priere, date_devotion:date})
-    setMsg('Dévotion enregistrée !')
-    setVerset(''); setReference(''); setPriere(''); setDate('')
-    loadDevotions()
-  }
-
-  async function deleteDevotion(id) {
-    await supabase.from('devotions').delete().eq('id', id)
-    loadDevotions()
-  }
-
-  async function saveDefi() {
-    if (!semaine) { setMsg('Renseignez le numéro de semaine'); return }
-    const lecturesFilled = lectures.filter(l => l.ref.trim())
-    await supabase.from('defis_lecture').upsert({semaine:parseInt(semaine), annee:2026, lectures:lecturesFilled})
-    setMsg('Défi lecture enregistré !')
-  }
-
-  return (
-    <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Dévotions</h2>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px',marginBottom:'20px'}}>
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px'}}>
-          <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Dévotion du jour</div>
-          {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
-          <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-          <input placeholder="Verset *" value={verset} onChange={e=>setVerset(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-          <input placeholder="Référence (ex: Jean 3:16)" value={reference} onChange={e=>setReference(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-          <textarea placeholder="Prière du matin (optionnel)" value={priere} onChange={e=>setPriere(e.target.value)} rows={4} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',resize:'none'}} />
-          <button onClick={saveDevotion} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
-            Enregistrer
-          </button>
-        </div>
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px'}}>
-          <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Défi lecture</div>
-          <input placeholder="Numéro de semaine" value={semaine} onChange={e=>setSemaine(e.target.value)} type="number" style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-          {lectures.map((l,i) => (
-            <div key={i} style={{display:'flex',gap:'8px',marginBottom:'8px',alignItems:'center'}}>
-              <span style={{color:theme.muted,fontSize:'12px',width:'70px',flexShrink:0}}>{l.jour}</span>
-              <input placeholder="Référence biblique" value={l.ref} onChange={e=>{const n=[...lectures];n[i].ref=e.target.value;setLectures(n)}} style={{flex:1,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'7px 10px',color:theme.text,fontSize:'12px',outline:'none',fontFamily:'inherit'}} />
-            </div>
-          ))}
-          <button onClick={saveDefi} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',marginTop:'8px'}}>
-            Enregistrer le défi
-          </button>
-        </div>
-      </div>
-      <div>
-        <div style={{color:theme.muted,fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'10px'}}>Dernières dévotions</div>
-        {devotions.map(d => (
-          <div key={d.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'10px',padding:'12px',marginBottom:'6px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            <div>
-              <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{d.verset.substring(0,50)}...</div>
-              <div style={{color:theme.muted,fontSize:'11px',marginTop:'2px'}}>{d.reference} · {new Date(d.date_devotion).toLocaleDateString('fr-FR')}</div>
-            </div>
-            <button onClick={() => deleteDevotion(d.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
-              Supprimer
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 function Feedbacks({ theme, supabase }) {
   const [feedbacks, setFeedbacks] = useState([])
 
@@ -822,6 +738,13 @@ function Annonces({ theme, supabase }) {
     loadAnnonces()
   }
 
+  function copierMessage(a) {
+    navigator.clipboard.writeText(
+      `📢 *${a.titre}*\n\n${a.contenu || ''}\n\n${a.urgent ? '⚠️ URGENT' : ''}\n\n— Jeunesse EB Le Rocher`
+    )
+    alert('Message copié !')
+  }
+
   return (
     <div>
       <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Annonces</h2>
@@ -848,25 +771,42 @@ function Annonces({ theme, supabase }) {
               </div>
               {a.contenu && <div style={{color:theme.muted,fontSize:'12px',lineHeight:'1.6'}}>{a.contenu}</div>}
               <div style={{color:theme.muted,fontSize:'11px',marginTop:'6px'}}>{new Date(a.created_at).toLocaleDateString('fr-FR')}</div>
-              <a 
-                href={`https://wa.me/?text=${encodeURIComponent(`📢 *${a.titre}*\n\n${a.contenu || ''}\n\n${a.urgent ? '⚠️ URGENT' : ''}\n\n— Jeunesse EB Le Rocher`)}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  background:'rgba(37,211,102,0.1)',
-                  border:'1px solid rgba(37,211,102,0.3)',
-                  borderRadius:'8px',
-                  padding:'8px 14px',
-                  color:'#25d366',
-                  fontSize:'12px',
-                  fontWeight:'600',
-                  textDecoration:'none',
-                  display:'inline-block',
-                  marginTop:'8px'
-                }}
-              >
-                Partager dans le groupe WhatsApp
-              </a>
+              <div style={{display:'flex',gap:'8px',marginTop:'8px'}}>
+                <button 
+                  onClick={() => copierMessage(a)}
+                  style={{
+                    background:'rgba(37,211,102,0.1)',
+                    border:'1px solid rgba(37,211,102,0.3)',
+                    borderRadius:'8px',
+                    padding:'8px 14px',
+                    color:'#25d366',
+                    fontSize:'12px',
+                    fontWeight:'600',
+                    cursor:'pointer',
+                    fontFamily:'inherit'
+                  }}
+                >
+                  Copier le message
+                </button>
+                <a 
+                  href="https://chat.whatsapp.com/FLeruqQMOJ7AuqPsOWVwiD"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    background:'rgba(37,211,102,0.1)',
+                    border:'1px solid rgba(37,211,102,0.3)',
+                    borderRadius:'8px',
+                    padding:'8px 14px',
+                    color:'#25d366',
+                    fontSize:'12px',
+                    fontWeight:'600',
+                    textDecoration:'none',
+                    display:'inline-block'
+                  }}
+                >
+                  Ouvrir le groupe
+                </a>
+              </div>
             </div>
             <button onClick={() => supprimer(a.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
               Supprimer
@@ -874,6 +814,191 @@ function Annonces({ theme, supabase }) {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function Devotions({ theme, supabase }) {
+  const [titre, setTitre] = useState('')
+  const [verset, setVerset] = useState('')
+  const [reference, setReference] = useState('')
+  const [priere, setPriere] = useState('')
+  const [dateDevotion, setDateDevotion] = useState('')
+  const [devotions, setDevotions] = useState([])
+  const [defis, setDefis] = useState([])
+  const [lectures, setLectures] = useState([{ jour: '', ref: '' }])
+  const [msg, setMsg] = useState('')
+  const [tab, setTab] = useState('devotions')
+
+  useEffect(() => {
+    loadDevotions()
+    loadDefis()
+  }, [])
+
+  async function loadDevotions() {
+    const { data } = await supabase.from('devotions').select('*').order('date_devotion', { ascending: false })
+    if (data) setDevotions(data)
+  }
+
+  async function loadDefis() {
+    const { data } = await supabase.from('defis_lecture').select('*').order('created_at', { ascending: false })
+    if (data) setDefis(data)
+  }
+
+  async function publierDevotion() {
+    if (!titre || !verset || !reference || !dateDevotion) { setMsg('Renseignez tous les champs obligatoires'); return }
+    await supabase.from('devotions').insert({
+      titre,
+      verset,
+      reference,
+      priere,
+      date_devotion: dateDevotion
+    })
+    setMsg('Dévotion publiée !')
+    setTitre(''); setVerset(''); setReference(''); setPriere(''); setDateDevotion('')
+    loadDevotions()
+  }
+
+  async function publierDefi() {
+    if (!lectures.some(l => l.jour && l.ref)) { setMsg('Ajoutez au moins une lecture'); return }
+    await supabase.from('defis_lecture').insert({
+      lectures: lectures.filter(l => l.jour && l.ref)
+    })
+    setMsg('Défi publié !')
+    setLectures([{ jour: '', ref: '' }])
+    loadDefis()
+  }
+
+  async function supprimerDevotion(id) {
+    await supabase.from('devotions').delete().eq('id', id)
+    loadDevotions()
+  }
+
+  async function supprimerDefi(id) {
+    await supabase.from('defis_lecture').delete().eq('id', id)
+    loadDefis()
+  }
+
+  function ajouterLecture() {
+    setLectures([...lectures, { jour: '', ref: '' }])
+  }
+
+  function modifierLecture(index, field, value) {
+    const nouvelles = [...lectures]
+    nouvelles[index][field] = value
+    setLectures(nouvelles)
+  }
+
+  function supprimerLecture(index) {
+    setLectures(lectures.filter((_, i) => i !== index))
+  }
+
+  return (
+    <div>
+      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Dévotions</h2>
+
+      <div style={{display:'flex',background:theme.card,borderBottom:`1px solid ${theme.border}`,overflowX:'auto'}}>
+        {[
+          { id: 'devotions', label: 'Dévotions' },
+          { id: 'defis', label: 'Défis lecture' }
+        ].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{flex:1,padding:'12px 4px',background:'none',border:'none',borderBottom:`2px solid ${tab===t.id?'#C8102E':'transparent'}`,color:tab===t.id?'#C8102E':theme.muted,fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:tab===t.id?'600':'400',textTransform:'capitalize',whiteSpace:'nowrap'}}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'devotions' && (
+        <>
+          <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'24px',marginTop:'20px'}}>
+            <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Nouvelle dévotion</div>
+            {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
+            <input placeholder="Titre *" value={titre} onChange={e=>setTitre(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
+            <input placeholder="Verset *" value={verset} onChange={e=>setVerset(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
+            <input placeholder="Référence *" value={reference} onChange={e=>setReference(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
+            <input type="date" value={dateDevotion} onChange={e=>setDateDevotion(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',cursor:'pointer'}} />
+            <textarea placeholder="Prière du matin (optionnel)" value={priere} onChange={e=>setPriere(e.target.value)} rows={3} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',resize:'none'}} />
+            <button onClick={publierDevotion} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
+              Publier
+            </button>
+          </div>
+
+          <div>
+            <div style={{color:theme.text,fontSize:'16px',fontWeight:'700',marginBottom:'14px'}}>Dévotions publiées</div>
+            {devotions.map(d => (
+              <div key={d.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
+                <div style={{flex:1}}>
+                  <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{d.titre}</div>
+                  <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{new Date(d.date_devotion).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>
+                  <div style={{color:theme.muted,fontSize:'12px',marginTop:'4px',fontStyle:'italic'}}>« {d.verset} » — {d.reference}</div>
+                  {d.priere && <div style={{color:theme.muted,fontSize:'12px',marginTop:'6px'}}>{d.priere}</div>}
+                </div>
+                <button onClick={() => supprimerDevotion(d.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
+                  Supprimer
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {tab === 'defis' && (
+        <>
+          <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'24px',marginTop:'20px'}}>
+            <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Nouveau défi lecture</div>
+            {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
+            
+            {lectures.map((lecture, index) => (
+              <div key={index} style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'8px'}}>
+                <input 
+                  placeholder="Jour (ex: Lundi)" 
+                  value={lecture.jour} 
+                  onChange={e=>modifierLecture(index, 'jour', e.target.value)} 
+                  style={{flex:1,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit'}} 
+                />
+                <input 
+                  placeholder="Référence (ex: Genèse 1:1-5)" 
+                  value={lecture.ref} 
+                  onChange={e=>modifierLecture(index, 'ref', e.target.value)} 
+                  style={{flex:2,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit'}} 
+                />
+                {lectures.length > 1 && (
+                  <button onClick={() => supprimerLecture(index)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+            
+            <button onClick={ajouterLecture} style={{background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 12px',color:theme.muted,fontSize:'12px',cursor:'pointer',fontFamily:'inherit',marginBottom:'12px'}}>
+              + Ajouter une lecture
+            </button>
+            
+            <button onClick={publierDefi} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
+              Publier le défi
+            </button>
+          </div>
+
+          <div>
+            <div style={{color:theme.text,fontSize:'16px',fontWeight:'700',marginBottom:'14px'}}>Défis publiés</div>
+            {defis.map(d => (
+              <div key={d.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
+                <div style={{flex:1}}>
+                  <div style={{color:theme.text,fontSize:'14px',fontWeight:'700',marginBottom:'8px'}}>Défi du {new Date(d.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>
+                  {d.lectures?.map((l, i) => (
+                    <div key={i} style={{color:theme.muted,fontSize:'12px',marginBottom:'4px'}}>
+                      {l.jour}: {l.ref}
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => supprimerDefi(d.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
+                  Supprimer
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }
