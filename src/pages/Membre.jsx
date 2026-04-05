@@ -180,6 +180,7 @@ function Accueil({ theme, supabase, dark }) {
   const [activeEv, setActiveEv] = useState(null)
   const [lightbox, setLightbox] = useState(null)
   const [expandPrayer, setExpandPrayer] = useState(false)
+  const [derniereCotisation, setDerniereCotisation] = useState(null)
 
   const EVENEMENTS_LOCAUX = [
     {
@@ -224,6 +225,12 @@ function Accueil({ theme, supabase, dark }) {
         setEvenements(EVENEMENTS_LOCAUX)
         setActiveEv('local-detente')
       }
+      const { data: cotisations } = await supabase
+        .from('cotisations')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+      if (cotisations && cotisations.length > 0) setDerniereCotisation(cotisations[0])
     }
     load()
   }, [])
@@ -278,6 +285,74 @@ function Accueil({ theme, supabase, dark }) {
             </div>
           ))}
         </>
+      )}
+
+      {/* Statut Cotisation */}
+      {derniereCotisation && (
+        <div style={{
+          background: derniereCotisation.statut === 'paye' ? 'rgba(37,211,102,0.05)' : derniereCotisation.statut === 'en_retard' ? 'rgba(200,16,46,0.05)' : 'rgba(245,158,11,0.05)',
+          border: `1px solid ${derniereCotisation.statut === 'paye' ? 'rgba(37,211,102,0.2)' : derniereCotisation.statut === 'en_retard' ? 'rgba(200,16,46,0.2)' : 'rgba(245,158,11,0.2)'}`,
+          borderRadius: '12px',
+          padding: '12px 14px',
+          marginBottom: '16px',
+          marginTop: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: derniereCotisation.statut === 'paye' ? '#25d366' : derniereCotisation.statut === 'en_retard' ? '#C8102E' : '#f59e0b',
+            flexShrink: 0
+          }} />
+          <div style={{flex: 1}}>
+            <div style={{
+              color: derniereCotisation.statut === 'paye' ? '#25d366' : derniereCotisation.statut === 'en_retard' ? '#C8102E' : '#f59e0b',
+              fontSize: '13px',
+              fontWeight: '600'
+            }}>
+              {derniereCotisation.statut === 'paye' && 'Cotisation du mois en ordre'}
+              {derniereCotisation.statut === 'en_retard' && 'Cotisation en retard - pense à régulariser'}
+              {derniereCotisation.statut === 'en_attente' && 'Cotisation en attente de confirmation'}
+            </div>
+            <div style={{color: theme.muted, fontSize: '11px', marginTop: '2px'}}>
+              {new Date(derniereCotisation.created_at).toLocaleDateString('fr-FR')}
+            </div>
+          </div>
+        </div>
+      )}
+      {!derniereCotisation && (
+        <div style={{
+          background: 'rgba(155,155,155,0.05)',
+          border: '1px solid rgba(155,155,155,0.2)',
+          borderRadius: '12px',
+          padding: '12px 14px',
+          marginBottom: '16px',
+          marginTop: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: '#999',
+            flexShrink: 0
+          }} />
+          <div style={{flex: 1}}>
+            <div style={{
+              color: '#999',
+              fontSize: '13px',
+              fontWeight: '600'
+            }}
+            >
+              Aucune cotisation enregistrée ce mois
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Galerie */}

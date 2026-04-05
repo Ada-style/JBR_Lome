@@ -208,13 +208,6 @@ function Demandes({ theme, supabase }) {
 
 function Membres({ theme, supabase }) {
   const [membres, setMembres] = useState([])
-  const [prenom, setPrenom] = useState('')
-  const [nom, setNom] = useState('')
-  const [email, setEmail] = useState('')
-  const [domaine, setDomaine] = useState('')
-  const [whatsapp, setWhatsapp] = useState('')
-  const [msg, setMsg] = useState('')
-  const [lastMembre, setLastMembre] = useState(null)
 
   useEffect(() => { loadMembres() }, [])
 
@@ -223,93 +216,66 @@ function Membres({ theme, supabase }) {
     if (data) setMembres(data)
   }
 
-  async function addMembre() {
-    if (!nom||!prenom||!email) { setMsg('Remplissez tous les champs obligatoires'); return }
-    const { data, error } = await supabase.rpc('creer_membre', {
-      p_email: email,
-      p_password: 'rocher2026',
-      p_nom: nom,
-      p_prenom: prenom,
-      p_domaine: domaine,
-      p_whatsapp: whatsapp
-    })
-    if (error) { setMsg('Erreur : ' + error.message); return }
-    setLastMembre({prenom, nom, email, whatsapp})
-    setMsg('Compte créé !')
-    setNom(''); setPrenom(''); setEmail(''); setDomaine(''); setWhatsapp('')
-    loadMembres()
-  }
-
   async function retirerMembre(id) {
     await supabase.from('utilisateurs').delete().eq('id',id)
     loadMembres()
   }
 
+  function envoyerAcces(m) {
+    const message = encodeURIComponent(
+`Bonjour ${m.prenom},
+
+La Jeunesse EB Le Rocher dispose désormais d'une plateforme numérique dédiée à ses membres.
+
+Sur cet espace tu trouveras les dévotions et défis de lecture biblique, les annonces et événements du bureau, l'annuaire des membres avec leurs talents et compétences, le suivi de tes cotisations, et un espace personnel pour partager ton profil et tes documents.
+
+Nous t'encourageons à la consulter régulièrement pour rester connecté à la vie de la jeunesse.
+
+Tes accès :
+Email : ${m.email}
+Mot de passe : rocher2026
+Lien : https://jbr-l.netlify.app/
+
+Pense à changer ton mot de passe dès ta première connexion dans Profil > Paramètres.
+
+A bientôt.
+- Le Bureau de la Jeunesse EB Le Rocher`
+    )
+    const lien = `https://wa.me/${m.whatsapp?.replace(/\+/g,'').replace(/\s/g,'')}?text=${message}`
+    window.open(lien, '_blank')
+  }
+
   return (
     <div>
       <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Membres</h2>
-      <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'20px'}}>
-        <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Ajouter un membre</div>
-        {msg && (
-          <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>
-            {msg}
-          </div>
-        )}
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'10px'}}>
-          <input placeholder="Prénom *" value={prenom} onChange={e=>setPrenom(e.target.value)} style={{background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit'}} />
-          <input placeholder="Nom *" value={nom} onChange={e=>setNom(e.target.value)} style={{background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit'}} />
-        </div>
-        <input placeholder="Email *" value={email} onChange={e=>setEmail(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'10px'}}>
-          <input placeholder="Domaine" value={domaine} onChange={e=>setDomaine(e.target.value)} style={{background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit'}} />
-          <input placeholder="WhatsApp (+228...)" value={whatsapp} onChange={e=>setWhatsapp(e.target.value)} style={{background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit'}} />
-        </div>
-        <button onClick={addMembre} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
-          Créer le compte
-        </button>
-        {lastMembre && (
-          <div style={{marginTop:'14px',background:'rgba(37,211,102,0.05)',border:'1px solid rgba(37,211,102,0.2)',borderRadius:'12px',padding:'14px'}}>
-            <div style={{color:'#25d366',fontSize:'11px',fontWeight:'600',marginBottom:'8px'}}>
-              Compte créé pour {lastMembre.prenom} {lastMembre.nom}
-            </div>
-            {lastMembre.whatsapp ? (
-              <a
-                href={`https://wa.me/${lastMembre.whatsapp.replace(/\+/g,'').replace(/\s/g,'')}?text=${encodeURIComponent(`Bonjour ${lastMembre.prenom} ! 👋\n\nVoici tes accès pour la plateforme Jeunesse EB Le Rocher :\n\nEmail : ${lastMembre.email}\nMot de passe : rocher2026\n\nConnecte-toi et change ton mot de passe depuis ton profil.\nBienvenue dans la famille ! 🙏`)}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{display:'block',background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'10px',color:'#25d366',fontSize:'13px',fontWeight:'600',textDecoration:'none',textAlign:'center'}}
-              >
-                Envoyer les identifiants par WhatsApp
-              </a>
-            ) : (
-              <div style={{color:'rgba(255,255,255,0.4)',fontSize:'12px'}}>
-                Aucun numéro WhatsApp renseigné — partagez les identifiants manuellement.
-              </div>
-            )}
-          </div>
-        )}
-      </div>
       <div>
+        {membres.length === 0 && (
+          <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
+            Aucun membre pour le moment
+          </div>
+        )}
         {membres.map(m => (
-          <div key={m.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'12px'}}>
+          <div key={m.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
             {m.avatar_url ? (
-              <img src={m.avatar_url} loading="lazy" style={{width:'40px',height:'40px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt="Avatar" />
+              <img src={m.avatar_url} loading="lazy" style={{width:'48px',height:'48px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt="Avatar" />
             ) : (
-              <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'12px',fontWeight:'600',flexShrink:0}}>
+              <div style={{width:'48px',height:'48px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'14px',fontWeight:'700',flexShrink:0}}>
                 {m.prenom?.[0]}{m.nom?.[0]}
               </div>
             )}
             <div style={{flex:1}}>
-              <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{m.prenom} {m.nom}</div>
-              <div style={{color:theme.muted,fontSize:'11px'}}>{m.domaine} · {m.role}</div>
+              <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{m.prenom} {m.nom}</div>
+              <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{m.email}</div>
+              {m.whatsapp && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{m.whatsapp}</div>}
+              <div style={{color:theme.muted,fontSize:'11px',marginTop:'4px'}}>{m.domaine} · {m.role}</div>
             </div>
-            <div style={{display:'flex',gap:'8px'}}>
+            <div style={{display:'flex',gap:'6px',flexDirection:'column',flexShrink:0}}>
               {m.whatsapp && (
-                <a href={`https://wa.me/${m.whatsapp.replace(/\+/g,'').replace(/\s/g,'')}`} target="_blank" rel="noreferrer" style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#25d366',fontSize:'12px',fontWeight:'600',textDecoration:'none'}}>
-                  WA
-                </a>
+                <button onClick={() => envoyerAcces(m)} style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#25d366',fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>
+                  Envoyer les accès
+                </button>
               )}
-              <button onClick={() => retirerMembre(m.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
+              <button onClick={() => retirerMembre(m.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
                 Retirer
               </button>
             </div>

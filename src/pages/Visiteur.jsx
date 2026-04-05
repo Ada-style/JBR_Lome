@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 import md5 from 'md5'
 
 export default function Visiteur() {
   const navigate = useNavigate()
+  const { session } = useAuth()
   const [dark, setDark] = useState(false)
   const [membres, setMembres] = useState([])
   const [search, setSearch] = useState('')
@@ -24,6 +26,12 @@ export default function Visiteur() {
 
   const gravatarUrl = (email) => 
     `https://www.gravatar.com/avatar/${md5(email?.toLowerCase().trim() || '')}?d=identicon&s=200`
+
+  useEffect(() => {
+    if (session) {
+      navigate('/membre')
+    }
+  }, [session, navigate])
 
   useEffect(() => {
     async function load() {
