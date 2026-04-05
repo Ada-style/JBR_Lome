@@ -126,11 +126,11 @@ function Demandes({ theme, supabase }) {
   }
 
   async function updateStatut(id, statut) {
-    await supabase.from('demandes').update({statut}).eq('id', id)
+    await supabaseAdmin.from('demandes').update({statut}).eq('id', id)
     if (statut === 'accepte') {
       const demande = demandes.find(d => d.id === id)
       if (demande) {
-        await supabase.from('utilisateurs').insert({
+        await supabaseAdmin.from('utilisateurs').insert({
           nom: demande.nom.split(' ').slice(1).join(' ') || demande.nom,
           prenom: demande.nom.split(' ')[0],
           email: demande.email || null,
@@ -217,7 +217,7 @@ function Membres({ theme, supabase }) {
   }
 
   async function retirerMembre(id) {
-    await supabase.from('utilisateurs').delete().eq('id',id)
+    await supabaseAdmin.from('utilisateurs').delete().eq('id',id)
     loadMembres()
   }
 
@@ -305,9 +305,9 @@ function Cotisations({ theme, supabase }) {
     if (!selected||!mois) { setMsg('Sélectionnez un membre et un mois'); return }
     const {data:existing} = await supabase.from('cotisations').select('id').eq('utilisateur_id',selected.id).eq('mois',mois).single()
     if (existing) {
-      await supabase.from('cotisations').update({statut,montant:parseInt(montant)}).eq('id',existing.id)
+      await supabaseAdmin.from('cotisations').update({statut,montant:parseInt(montant)}).eq('id',existing.id)
     } else {
-      await supabase.from('cotisations').insert({utilisateur_id:selected.id,mois,montant:parseInt(montant),statut})
+      await supabaseAdmin.from('cotisations').insert({utilisateur_id:selected.id,mois,montant:parseInt(montant),statut})
     }
     setMsg('Cotisation enregistrée !')
     loadMembres()
@@ -402,13 +402,13 @@ function Fichiers({ theme, supabase }) {
   }
 
   async function approuver(id) {
-    await supabase.from('fichiers').update({statut:'approuve'}).eq('id',id)
+    await supabaseAdmin.from('fichiers').update({statut:'approuve'}).eq('id',id)
     setPreview(null)
     loadFichiers()
   }
 
   async function supprimer(id) {
-    await supabase.from('fichiers').update({statut:'supprime'}).eq('id',id)
+    await supabaseAdmin.from('fichiers').update({statut:'supprime'}).eq('id',id)
     setPreview(null)
     loadFichiers()
   }
@@ -489,13 +489,13 @@ function Galerie({ theme, supabase }) {
     if (!nom||!date) { setMsg('Renseignez le nom et la date'); return }
     if (photos.length===0) { setMsg('Ajoutez au moins une photo'); return }
     setUploading(true)
-    const {data:ev, error} = await supabase.from('evenements_galerie').insert({nom, date_evenement:date}).select().single()
+    const {data:ev, error} = await supabaseAdmin.from('evenements_galerie').insert({nom, date_evenement:date}).select().single()
     if (error) { setMsg('Erreur création événement'); setUploading(false); return }
     for (const photo of photos) {
       const fileName = `${Date.now()}-${photo.name}`
       await supabase.storage.from('fichiers_membres').upload(`galerie/${fileName}`, photo)
       const {data:{publicUrl}} = supabase.storage.from('fichiers_membres').getPublicUrl(`galerie/${fileName}`)
-      await supabase.from('photos_galerie').insert({evenement_id:ev.id, url:publicUrl})
+      await supabaseAdmin.from('photos_galerie').insert({evenement_id:ev.id, url:publicUrl})
     }
     setMsg('Événement publié !')
     setNom(''); setDate(''); setPhotos([]); setPreviews([])
@@ -505,7 +505,7 @@ function Galerie({ theme, supabase }) {
   }
 
   async function supprimerEv(id) {
-    await supabase.from('evenements_galerie').delete().eq('id',id)
+    await supabaseAdmin.from('evenements_galerie').delete().eq('id',id)
     loadEvenements()
   }
 
@@ -629,14 +629,14 @@ function Evenements({ theme, supabase }) {
 
   async function publier() {
     if (!titre || !date) { setMsg('Renseignez le titre et la date'); return }
-    await supabase.from('evenements').insert({ titre, date_evenement: date, lieu, description })
+    await supabaseAdmin.from('evenements').insert({ titre, date_evenement: date, lieu, description })
     setMsg('Événement publié !')
     setTitre(''); setDate(''); setLieu(''); setDescription('')
     loadEvenements()
   }
 
   async function supprimer(id) {
-    await supabase.from('evenements').delete().eq('id', id)
+    await supabaseAdmin.from('evenements').delete().eq('id', id)
     loadEvenements()
   }
 
@@ -693,14 +693,14 @@ function Annonces({ theme, supabase }) {
 
   async function publier() {
     if (!titre) { setMsg('Renseignez un titre'); return }
-    await supabase.from('annonces').insert({titre, contenu, urgent})
+    await supabaseAdmin.from('annonces').insert({titre, contenu, urgent})
     setMsg('Annonce publiée !')
     setTitre(''); setContenu(''); setUrgent(false)
     loadAnnonces()
   }
 
   async function supprimer(id) {
-    await supabase.from('annonces').delete().eq('id',id)
+    await supabaseAdmin.from('annonces').delete().eq('id',id)
     loadAnnonces()
   }
 
@@ -813,7 +813,7 @@ function Devotions({ theme, supabase }) {
 
   async function publierDevotion() {
     if (!titre || !verset || !reference || !dateDevotion) { setMsg('Renseignez tous les champs obligatoires'); return }
-    await supabase.from('devotions').insert({
+    await supabaseAdmin.from('devotions').insert({
       titre,
       verset,
       reference,
@@ -827,7 +827,7 @@ function Devotions({ theme, supabase }) {
 
   async function publierDefi() {
     if (!lectures.some(l => l.jour && l.ref)) { setMsg('Ajoutez au moins une lecture'); return }
-    await supabase.from('defis_lecture').insert({
+    await supabaseAdmin.from('defis_lecture').insert({
       lectures: lectures.filter(l => l.jour && l.ref)
     })
     setMsg('Défi publié !')
@@ -836,12 +836,12 @@ function Devotions({ theme, supabase }) {
   }
 
   async function supprimerDevotion(id) {
-    await supabase.from('devotions').delete().eq('id', id)
+    await supabaseAdmin.from('devotions').delete().eq('id', id)
     loadDevotions()
   }
 
   async function supprimerDefi(id) {
-    await supabase.from('defis_lecture').delete().eq('id', id)
+    await supabaseAdmin.from('defis_lecture').delete().eq('id', id)
     loadDefis()
   }
 

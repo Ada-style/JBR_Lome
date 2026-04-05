@@ -37,8 +37,11 @@ export function AuthProvider({ children }) {
   }
 
   async function signIn(email, password) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error }
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+    return { data, error }
   }
 
   async function signOut() {
