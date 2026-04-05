@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import md5 from 'md5'
 
 export default function Visiteur() {
   const navigate = useNavigate()
@@ -20,6 +21,9 @@ export default function Visiteur() {
     text: dark ? '#ffffff' : '#111111',
     muted: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
   }
+
+  const gravatarUrl = (email) => 
+    `https://www.gravatar.com/avatar/${md5(email?.toLowerCase().trim() || '')}?d=identicon&s=200`
 
   useEffect(() => {
     async function load() {
@@ -106,13 +110,12 @@ export default function Visiteur() {
               onClick={() => openProfil(m)}
               style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',cursor:'pointer',transition:'all 0.3s ease-in-out',display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',transform:'translateX(0)'}}
             >
-              {m.avatar_url ? (
-                <img src={m.avatar_url} loading="lazy" style={{width:'60px',height:'60px',borderRadius:'50%',objectFit:'cover',marginBottom:'10px',border:'3px solid #C8102E'}} alt="Avatar" />
-              ) : (
-                <div style={{width:'60px',height:'60px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700',marginBottom:'10px',border:'3px solid #C8102E'}}>
-                  {m.prenom?.[0]}{m.nom?.[0]}
-                </div>
-              )}
+              <img 
+                src={m.avatar_url || gravatarUrl(m.email)} 
+                alt="Avatar"
+                loading="lazy"
+                style={{width:'60px',height:'60px',borderRadius:'50%',objectFit:'cover',marginBottom:'10px',border:'3px solid #C8102E'}}
+              />
               <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'4px'}}>{m.prenom} {m.nom}</div>
               <div style={{background:'rgba(200,16,46,0.15)',color:'#C8102E',fontSize:'10px',fontWeight:'700',padding:'2px 10px',borderRadius:'12px',marginBottom:'8px',textTransform:'uppercase',letterSpacing:'0.5px'}}>
                 {m.domaine || 'Domaine'}
@@ -138,13 +141,12 @@ export default function Visiteur() {
             onClick={e => e.stopPropagation()}
           >
             <div style={{background:'linear-gradient(135deg,#C8102E,#8b0000)',padding:'28px 20px',textAlign:'center',color:'white',borderRadius:'20px 20px 0 0'}}>
-              {selected.avatar_url ? (
-                <img src={selected.avatar_url} loading="lazy" alt="Avatar" style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',border:'4px solid rgba(255,255,255,0.6)',margin:'0 auto 12px',display:'block'}} />
-              ) : (
-                <div style={{width:'80px',height:'80px',borderRadius:'50%',background:'rgba(255,255,255,0.2)',border:'4px solid rgba(255,255,255,0.6)',margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'28px',fontWeight:'700'}}>
-                  {selected.prenom?.[0]}{selected.nom?.[0]}
-                </div>
-              )}
+              <img 
+                src={selected.avatar_url || gravatarUrl(selected.email)} 
+                alt="Avatar"
+                loading="lazy"
+                style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',border:'4px solid rgba(255,255,255,0.6)',margin:'0 auto 12px',display:'block'}}
+              />
               <div style={{fontSize:'18px',fontWeight:'700',fontFamily:'Outfit,sans-serif'}}>{selected.prenom} {selected.nom}</div>
               <div style={{fontSize:'12px',opacity:0.85,marginTop:'6px',background:'rgba(255,255,255,0.15)',padding:'4px 12px',borderRadius:'20px',display:'inline-block'}}>{selected.domaine}</div>
             </div>

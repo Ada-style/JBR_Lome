@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import md5 from 'md5'
 
 export default function Membre() {
   const navigate = useNavigate()
@@ -10,6 +11,7 @@ export default function Membre() {
   const [notifs, setNotifs] = useState([])
   const [showNotifPanel, setShowNotifPanel] = useState(false)
   const [showProfil, setShowProfil] = useState(false)
+  const [luesAnnonces, setLuesAnnonces] = useState([])
 
   const theme = {
     bg: dark ? '#0f0f0f' : '#f4f4f5',
@@ -19,12 +21,23 @@ export default function Membre() {
     muted: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
   }
 
+  const gravatarUrl = (email) => 
+    `https://www.gravatar.com/avatar/${md5(email?.toLowerCase().trim() || '')}?d=identicon&s=200`
+
   useEffect(() => {
     async function loadNotifs() {
-      const { data } = await supabase.from('annonces').select('*').eq('urgent', true).limit(5)
+      const { data } = await supabase
+        .from('annonces')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10)
       setNotifs(data || [])
     }
     loadNotifs()
+
+    // Charger les annonces lues depuis localStorage
+    const lues = JSON.parse(localStorage.getItem('lues_annonces') || '[]')
+    setLuesAnnonces(lues)
   }, [])
 
   const tabs = [
@@ -37,6 +50,18 @@ export default function Membre() {
   async function handleSignOut() {
     await signOut()
     navigate('/')
+  }
+
+  function marquerLu(id) {
+    const nouvellesLues = [...luesAnnonces, id]
+    setLuesAnnonces(nouvellesLues)
+    localStorage.setItem('lues_annonces', JSON.stringify(nouvellesLues))
+  }
+
+  function marquerToutLu() {
+    const toutesIds = notifs.map(n => n.id)
+    setLuesAnnonces(toutesIds)
+    localStorage.setItem('lues_annonces', JSON.stringify(toutesIds))
   }
 
   return (
@@ -56,9 +81,9 @@ export default function Membre() {
           <button style={{background:'none',border:'none',fontSize:'18px',cursor:'pointer',padding:'4px',position:'relative'}}>
             🔔
           </button>
-          {notifs.length > 0 && (
+          {notifs.filter(n => !luesAnnonces.includes(n.id)).length > 0 && (
             <div style={{position:'absolute',top:'0px',right:'0px',background:'#C8102E',color:'white',width:'20px',height:'20px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:'700'}}>
-              {notifs.length}
+              {notifs.filter(n => !luesAnnonces.includes(n.id)).length}
             </div>
           )}
         </div>
@@ -66,7 +91,7 @@ export default function Membre() {
           {profile?.avatar_url ? (
             <img src={profile.avatar_url} loading="lazy" style={{width:'100%',height:'100%',objectFit:'cover'}} alt="Avatar" />
           ) : (
-            <>{profile?.prenom?.[0]}{profile?.nom?.[0]}</>
+            <img src={gravatarUrl(profile?.email)} loading="lazy" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%'}} alt="Avatar" />
           )}
         </div>
       </div>
@@ -79,13 +104,24 @@ export default function Membre() {
         <div style={{position:'absolute',top:'55px',left:0,right:0,background:dark?'#1a1a1a':'#ffffff',borderBottom:`1px solid ${theme.border}`,zIndex:40,animation:'slideDown 0.3s ease-in-out'}}>
           <style>{`@keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`}</style>
           <div style={{padding:'12px 16px',maxWidth:'600px',margin:'0 auto'}} onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',color:theme.muted,marginBottom:'10px'}}>Notifications urgentes</div>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
+              <div style={{fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',color:theme.muted}}>Notifications récentes</div>
+              {notifs.filter(n => !luesAnnonces.includes(n.id)).length > 0 && (
+                <button onClick={marquerToutLu} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'6px',padding:'4px 8px',color:'#C8102E',fontSize:'10px',cursor:'pointer',fontFamily:'inherit'}}>
+                  Tout marquer comme lu
+                </button>
+              )}
+            </div>
             {notifs.length === 0 ? (
               <div style={{color:theme.muted,fontSize:'13px',padding:'10px 0'}}>Aucune notification</div>
             ) : (
               notifs.map(n => (
-                <div key={n.id} style={{background:theme.card,border:`1px solid #C8102E`,borderRadius:'8px',padding:'10px 12px',marginBottom:'8px',borderLeft:'3px solid #C8102E'}}>
-                  <div style={{color:theme.text,fontSize:'12px',fontWeight:'600'}}>{n.titre}</div>
+                <div key={n.id} onClick={() => marquerLu(n.id)} style={{background:theme.card,border:`1px solid ${n.urgent ? '#C8102E' : theme.border}`,borderRadius:'8px',padding:'10px 12px',marginBottom:'8px',cursor:'pointer',opacity: luesAnnonces.includes(n.id) ? 0.6 : 1, borderLeft: n.urgent ? '3px solid #C8102E' : '3px solid transparent'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}}>
+                    <div style={{color:theme.text,fontSize:'12px',fontWeight:'600'}}>{n.titre}</div>
+                    {n.urgent && <span style={{background:'rgba(200,16,46,0.15)',color:'#C8102E',fontSize:'9px',fontWeight:'700',padding:'2px 6px',borderRadius:'8px'}}>URGENT</span>}
+                    {luesAnnonces.includes(n.id) && <span style={{color:theme.muted,fontSize:'9px'}}>✓ Lu</span>}
+                  </div>
                   {n.contenu && <div style={{color:theme.muted,fontSize:'11px',marginTop:'4px'}}>{n.contenu}</div>}
                 </div>
               ))
@@ -400,13 +436,12 @@ function Annuaire({ theme, supabase }) {
               }
             `}</style>
             <div data-member-id={m.id} style={{display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',gap:'10px'}}>
-              {m.avatar_url ? (
-                <img src={m.avatar_url} loading="lazy" alt="Avatar" style={{width:'56px',height:'56px',borderRadius:'50%',objectFit:'cover',border:'3px solid #C8102E'}} />
-              ) : (
-                <div style={{width:'56px',height:'56px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700',border:'3px solid #C8102E'}}>
-                  {`${m.prenom?.[0]}${m.nom?.[0]}`}
-                </div>
-              )}
+              <img 
+                src={m.avatar_url || gravatarUrl(m.email)} 
+                alt="Avatar"
+                loading="lazy"
+                style={{width:'56px',height:'56px',objectFit:'cover',borderRadius:'50%',border:'3px solid #C8102E'}}
+              />
               <div style={{flex:1}}>
                 <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'4px'}}>{m.prenom} {m.nom}</div>
                 <div style={{display:'flex',justifyContent:'center',marginBottom:'8px'}}>
@@ -534,8 +569,8 @@ function Evenements({ theme, supabase, profile }) {
       )}
       {evenements.map(ev => (
         <div key={ev.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',overflow:'hidden',marginBottom:'12px'}}>
-          <div style={{background:ev.type==='spirituel'?'#C8102E':ev.type==='formation'?'#2563eb':'#16a34a',padding:'6px 14px'}}>
-            <span style={{color:'white',fontSize:'10px',fontWeight:'700',letterSpacing:'1.5px',textTransform:'uppercase'}}>{ev.type}</span>
+          <div style={{background:ev.urgent?'#C8102E':'#16a34a',padding:'6px 14px'}}>
+            <span style={{color:'white',fontSize:'10px',fontWeight:'700',letterSpacing:'1.5px',textTransform:'uppercase'}}>{ev.urgent ? 'URGENT' : 'ÉVÉNEMENT'}</span>
           </div>
           <div style={{padding:'14px'}}>
             <div style={{color:theme.text,fontSize:'15px',fontWeight:'700',marginBottom:'4px'}}>{ev.titre}</div>
@@ -731,7 +766,14 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfil
                   <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{f.nom_fichier}</div>
                   <div style={{color:statutColor[f.statut],fontSize:'11px',marginTop:'2px'}}>{statutLabel[f.statut]}</div>
                 </div>
-                <button onClick={() => setPreview(f)} style={{background:'rgba(255,193,7,0.1)',border:'1px solid rgba(255,193,7,0.3)',borderRadius:'8px',padding:'4px 10px',color:'#ffc107',fontSize:'11px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Aperçu</button>
+                <a 
+                  href={f.url} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  style={{color:'#C8102E',fontSize:'12px',fontWeight:'600',textDecoration:'none'}}
+                >
+                  Voir
+                </a>
               </div>
             ))}
           </div>

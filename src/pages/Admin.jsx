@@ -848,6 +848,25 @@ function Annonces({ theme, supabase }) {
               </div>
               {a.contenu && <div style={{color:theme.muted,fontSize:'12px',lineHeight:'1.6'}}>{a.contenu}</div>}
               <div style={{color:theme.muted,fontSize:'11px',marginTop:'6px'}}>{new Date(a.created_at).toLocaleDateString('fr-FR')}</div>
+              <a 
+                href={`https://wa.me/?text=${encodeURIComponent(`📢 *${a.titre}*\n\n${a.contenu || ''}\n\n${a.urgent ? '⚠️ URGENT' : ''}\n\n— Jeunesse EB Le Rocher`)}`}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  background:'rgba(37,211,102,0.1)',
+                  border:'1px solid rgba(37,211,102,0.3)',
+                  borderRadius:'8px',
+                  padding:'8px 14px',
+                  color:'#25d366',
+                  fontSize:'12px',
+                  fontWeight:'600',
+                  textDecoration:'none',
+                  display:'inline-block',
+                  marginTop:'8px'
+                }}
+              >
+                Partager dans le groupe WhatsApp
+              </a>
             </div>
             <button onClick={() => supprimer(a.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
               Supprimer
