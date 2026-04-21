@@ -184,6 +184,11 @@ export default function Nouveau() {
       return;
     }
 
+    if (!email || !email.trim()) {
+      showMsg('Veuillez renseigner votre adresse email (nécessaire pour créer ton compte)');
+      return;
+    }
+
     if (!statutActivite) {
       showMsg('Veuillez sélectionner votre statut');
       return;
@@ -283,7 +288,13 @@ export default function Nouveau() {
   const selectStyle = {
     ...inputStyle,
     cursor:'pointer',
-    appearance:'auto'
+    appearance:'auto',
+    colorScheme: dark ? 'dark' : 'light',
+  }
+
+  const optionStyle = {
+    background: '#ffffff',
+    color: '#111111',
   }
 
   const labelStyle = {
@@ -483,8 +494,8 @@ export default function Nouveau() {
               </div>
             </div>
 
-            <label style={labelStyle}>Adresse email</label>
-            <input placeholder="jean.kokou@email.com" type="email" value={email} onChange={e=>setEmail(e.target.value)} style={inputStyle} />
+            <label style={labelStyle}>Adresse email *</label>
+            <input placeholder="jean.kokou@email.com" type="email" value={email} onChange={e=>setEmail(e.target.value)} style={inputStyle} required />
 
             <label style={labelStyle}>Numéro WhatsApp *</label>
             <input placeholder="+228 90 12 34 56" value={tel} onChange={e=>setTel(e.target.value)} style={inputStyle} />
@@ -534,8 +545,8 @@ export default function Nouveau() {
             <div style={{marginBottom:'12px', animation:'fadeIn 0.3s ease'}}>
               <label style={labelStyle}>Classe *</label>
               <select value={classeEleve} onChange={e=>setClasseEleve(e.target.value)} style={selectStyle}>
-                <option value="">Sélectionner ta classe</option>
-                {CLASSES_ELEVE.map(c => <option key={c} value={c}>{c}</option>)}
+                <option value="" style={optionStyle}>Sélectionner ta classe</option>
+                {CLASSES_ELEVE.map(c => <option key={c} value={c} style={optionStyle}>{c}</option>)}
               </select>
             </div>
           )}

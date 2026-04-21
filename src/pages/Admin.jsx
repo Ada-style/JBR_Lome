@@ -28,6 +28,7 @@ export default function Admin() {
   const [tab, setTab] = useState('dashboard')
   const [refreshCount, setRefreshCount] = useState(0)
   const [dark, setDark] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const theme = {
     bg: dark ? '#0f0f0f' : '#f4f4f5',
@@ -38,17 +39,34 @@ export default function Admin() {
     sidebar: dark ? '#1a1a1a' : '#ffffff',
   }
 
+  // SVG Icon components
+  const I = (p) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>{p.children}</svg>
+  const IconDashboard = () => <I><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></I>
+  const IconUsers = () => <I><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></I>
+  const IconInbox = () => <I><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></I>
+  const IconWallet = () => <I><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></I>
+  const IconFolder = () => <I><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></I>
+  const IconImage = () => <I><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></I>
+  const IconCalendar = () => <I><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></I>
+  const IconBook = () => <I><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></I>
+  const IconMessage = () => <I><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></I>
+  const IconMegaphone = () => <I><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></I>
+  const IconMenu = () => <I width="22" height="22"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></I>
+  const IconX = () => <I width="22" height="22"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></I>
+  const IconSun = () => <I width="14" height="14"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></I>
+  const IconMoon = () => <I width="14" height="14"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></I>
+
   const tabs = [
-    { id: 'dashboard', label: 'Tableau de bord' },
-    { id: 'membres', label: 'Membres' },
-    { id: 'demandes', label: 'Demandes' },
-    { id: 'cotisations', label: 'Cotisations' },
-    { id: 'fichiers', label: 'Fichiers' },
-    { id: 'galerie', label: 'Galerie' },
-    { id: 'evenements', label: 'Événements' },
-    { id: 'devotions', label: 'Dévotions' },
-    { id: 'feedbacks', label: 'Feedbacks' },
-    { id: 'annonces', label: 'Annonces' },
+    { id: 'dashboard', label: 'Tableau de bord', icon: <IconDashboard /> },
+    { id: 'membres', label: 'Membres', icon: <IconUsers /> },
+    { id: 'demandes', label: 'Demandes', icon: <IconInbox /> },
+    { id: 'cotisations', label: 'Cotisations', icon: <IconWallet /> },
+    { id: 'fichiers', label: 'Fichiers', icon: <IconFolder /> },
+    { id: 'galerie', label: 'Galerie', icon: <IconImage /> },
+    { id: 'evenements', label: 'Événements', icon: <IconCalendar /> },
+    { id: 'devotions', label: 'Dévotions', icon: <IconBook /> },
+    { id: 'feedbacks', label: 'Feedbacks', icon: <IconMessage /> },
+    { id: 'annonces', label: 'Annonces', icon: <IconMegaphone /> },
   ]
 
   async function handleSignOut() {
@@ -56,9 +74,65 @@ export default function Admin() {
     navigate('/')
   }
 
+  function selectTab(id) {
+    setTab(id)
+    setMenuOpen(false)
+  }
+
+  const currentTab = tabs.find(t => t.id === tab)
+
   return (
-    <div style={{minHeight:'100vh',background:theme.bg,display:'flex',transition:'background 0.3s'}}>
-      <div style={{width:'220px',background:theme.sidebar,borderRight:`1px solid ${theme.border}`,display:'flex',flexDirection:'column',position:'fixed',height:'100vh',zIndex:50,overflowY:'auto'}}>
+    <div style={{minHeight:'100vh',background:theme.bg,transition:'background 0.3s'}}>
+      <style>{`
+        @media (min-width: 769px) {
+          .admin-sidebar { display: flex !important; }
+          .admin-mobile-header { display: none !important; }
+          .admin-backdrop { display: none !important; }
+          .admin-content { margin-left: 220px !important; }
+        }
+        @media (max-width: 768px) {
+          .admin-sidebar { 
+            transform: ${menuOpen ? 'translateX(0)' : 'translateX(-100%)'};
+            transition: transform 0.3s ease;
+            width: 260px !important;
+          }
+          .admin-content { margin-left: 0 !important; padding: 16px !important; padding-top: 70px !important; }
+        }
+      `}</style>
+
+      {/* Mobile header */}
+      <div className="admin-mobile-header" style={{
+        display: 'flex', alignItems: 'center', gap: '12px',
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 45,
+        background: theme.sidebar, borderBottom: `1px solid ${theme.border}`,
+        padding: '12px 16px',
+      }}>
+        <button onClick={() => setMenuOpen(!menuOpen)} style={{
+          background: 'none', border: 'none', color: theme.text, fontSize: '22px', cursor: 'pointer', padding: '4px'
+        }}>
+          {menuOpen ? <IconX /> : <IconMenu />}
+        </button>
+        <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'24px',height:'24px',objectFit:'contain',borderRadius:'4px'}} />
+        <div style={{flex:1}}>
+          <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',display:'flex',alignItems:'center',gap:'6px'}}><span style={{display:'inline-flex'}}>{currentTab?.icon}</span> {currentTab?.label}</div>
+        </div>
+        <button onClick={() => setDark(!dark)} style={{background:'none',border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'4px 10px',color:theme.muted,fontSize:'10px',cursor:'pointer',fontFamily:'inherit'}}>
+          {dark ? <IconSun /> : <IconMoon />}
+        </button>
+      </div>
+
+      {/* Backdrop mobile */}
+      {menuOpen && (
+        <div className="admin-backdrop" onClick={() => setMenuOpen(false)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 48
+        }} />
+      )}
+
+      {/* Sidebar */}
+      <div className="admin-sidebar" style={{
+        width:'220px',background:theme.sidebar,borderRight:`1px solid ${theme.border}`,
+        display:'flex',flexDirection:'column',position:'fixed',height:'100vh',zIndex:50,overflowY:'auto'
+      }}>
         <div style={{padding:'20px 16px',borderBottom:`1px solid ${theme.border}`}}>
           <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'36px',height:'36px',objectFit:'contain',borderRadius:'8px',marginBottom:'8px'}} />
           <div style={{color:theme.text,fontSize:'13px',fontWeight:'700'}}>Bureau · Admin</div>
@@ -66,8 +140,8 @@ export default function Admin() {
         </div>
         <div style={{padding:'12px 8px',flex:1}}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{width:'100%',background:tab===t.id?'rgba(200,16,46,0.15)':'none',border:'none',borderRadius:'10px',padding:'10px 12px',color:tab===t.id?'#C8102E':theme.muted,fontSize:'13px',fontWeight:tab===t.id?'600':'400',cursor:'pointer',textAlign:'left',marginBottom:'2px',fontFamily:'inherit',transition:'all 0.2s'}}>
-              {t.label} 
+            <button key={t.id} onClick={() => selectTab(t.id)} style={{width:'100%',background:tab===t.id?'rgba(200,16,46,0.15)':'none',border:'none',borderRadius:'10px',padding:'10px 12px',color:tab===t.id?'#C8102E':theme.muted,fontSize:'13px',fontWeight:tab===t.id?'600':'400',cursor:'pointer',textAlign:'left',marginBottom:'2px',fontFamily:'inherit',transition:'all 0.2s',display:'flex',alignItems:'center',gap:'8px'}}>
+              <span style={{display:'inline-flex',flexShrink:0}}>{t.icon}</span> {t.label} 
             </button>
           ))}
         </div>
@@ -83,7 +157,9 @@ export default function Admin() {
           </button>
         </div>
       </div>
-      <div style={{marginLeft:'220px',flex:1,padding:'24px',maxWidth:'1000px'}}>
+
+      {/* Content */}
+      <div className="admin-content" style={{marginLeft:'220px',flex:1,padding:'24px',maxWidth:'1000px'}}>
         {tab==='dashboard' && <Dashboard theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} refreshCount={refreshCount} />}
         {tab==='membres' && <Membres key={tab} theme={theme} supabase={supabase} refreshCount={refreshCount} />}
         {tab==='demandes' && <Demandes key={tab} theme={theme} supabase={supabase} onRefresh={() => setRefreshCount(r => r+1)} />}
@@ -116,7 +192,12 @@ function Dashboard({ theme, supabase, supabaseAdmin, refreshCount }) {
   return (
     <div>
       <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Tableau de bord</h2>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px'}}>
+      <style>{`
+        @media (max-width: 768px) {
+          .dashboard-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+      `}</style>
+      <div className="dashboard-grid" style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px'}}>
         {[
           {label:'Membres',val:stats.membres},
           {label:'Cotisations payées',val:stats.cotisOk},
@@ -135,19 +216,22 @@ function Dashboard({ theme, supabase, supabaseAdmin, refreshCount }) {
 
 function Demandes({ theme, supabase, onRefresh }) {
   const [demandes, setDemandes] = useState([])
+  const [msg, setMsg] = useState('')
+  const [msgType, setMsgType] = useState('error')
 
   useEffect(() => { loadDemandes() }, [])
 
+  function showMsg(text, type = 'error') {
+    setMsg(text)
+    setMsgType(type)
+    setTimeout(() => setMsg(''), 8000)
+  }
+
   async function loadDemandes() {
-    console.log('🔄 Chargement des demandes...');
-    
     const { data, error } = await supabaseAdmin
       .from('demandes')
       .select('*')
       .order('created_at', { ascending: false });
-
-    console.log('📋 Données reçues :', data);
-    console.log('❌ Erreur :', error);
 
     if (error) {
       console.error('Erreur chargement demandes:', error);
@@ -159,60 +243,102 @@ function Demandes({ theme, supabase, onRefresh }) {
 
   async function updateStatut(id, statut) {
     try {
-      // Mettre à jour le statut de la demande
-      const { error: updateError } = await supabaseAdmin.from('demandes').update({ statut }).eq('id', id)
-      if (updateError) {
-        console.log('❌ Erreur mise à jour demande:', updateError)
+      const demande = demandes.find(d => d.id === id)
+      if (!demande) {
+        showMsg('Demande non trouvée')
         return
       }
 
       if (statut === 'accepte') {
-        const demande = demandes.find(d => d.id === id)
-        if (!demande) {
-          console.log('❌ Demande non trouvée')
+        // Vérifier que l'email est renseigné
+        if (!demande.email || !demande.email.trim()) {
+          showMsg('Impossible d\'accepter : pas d\'email. Un email est nécessaire pour créer le compte.')
+          return
+        }
+
+        // Mettre à jour le statut de la demande
+        const { error: updateError } = await supabaseAdmin.from('demandes').update({ statut }).eq('id', id)
+        if (updateError) {
+          showMsg('Erreur mise à jour : ' + updateError.message)
           return
         }
 
         // Créer le compte utilisateur
+        let userId = null
         const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-          email: demande.email,
+          email: demande.email.trim(),
           password: 'rocher2026',
           email_confirm: true
         })
 
-        if (authError || !authData.user) {
-          console.log('❌ Erreur création compte:', authError)
-          // Remettre le statut en attente en cas d'erreur
-          await supabaseAdmin.from('demandes').update({ statut: 'en_attente' }).eq('id', id)
-          return
+        if (authError) {
+          console.log('⚠️ createUser error:', authError.message)
+          // Si l'utilisateur existe déjà, on le cherche
+          const { data: usersData } = await supabaseAdmin.auth.admin.listUsers()
+          const existingUser = usersData?.users?.find(u => u.email === demande.email.trim())
+          if (existingUser) {
+            userId = existingUser.id
+            console.log('✅ Utilisateur auth existant trouvé:', userId)
+          } else {
+            showMsg('Erreur création compte : ' + authError.message)
+            await supabaseAdmin.from('demandes').update({ statut: 'en_attente' }).eq('id', id)
+            return
+          }
+        } else {
+          userId = authData.user.id
         }
 
-        // Ajouter dans la table utilisateurs
-        const { error: insertError } = await supabaseAdmin.from('utilisateurs').insert({
-          id: authData.user.id,
-          email: demande.email,
-          nom: demande.nom,
-          prenom: demande.prenom,
-          whatsapp: demande.whatsapp,
-          domaine: demande.domaine || '',
-          date_anniversaire: demande.date_anniversaire || null,
-          role: 'membre'
-        })
+        // Vérifier si l'utilisateur existe déjà dans la table utilisateurs
+        const { data: existingProfile } = await supabaseAdmin.from('utilisateurs').select('id').eq('id', userId).single()
+        
+        if (existingProfile) {
+          // Mettre à jour le profil existant avec les données de la demande
+          const { error: updateErr } = await supabaseAdmin.from('utilisateurs').update({
+            nom: demande.nom,
+            prenom: demande.prenom,
+            whatsapp: demande.whatsapp,
+            domaine: demande.domaine || '',
+            date_anniversaire: demande.date_anniversaire || null,
+            statut_activite: demande.statut_activite || null,
+          }).eq('id', userId)
+          if (updateErr) {
+            showMsg('Erreur mise à jour profil : ' + updateErr.message)
+            await supabaseAdmin.from('demandes').update({ statut: 'en_attente' }).eq('id', id)
+            return
+          }
+        } else {
+          // Créer le profil
+          const { error: insertError } = await supabaseAdmin.from('utilisateurs').insert({
+            id: userId,
+            email: demande.email.trim(),
+            nom: demande.nom,
+            prenom: demande.prenom,
+            whatsapp: demande.whatsapp,
+            domaine: demande.domaine || '',
+            date_anniversaire: demande.date_anniversaire || null,
+            statut_activite: demande.statut_activite || null,
+            role: 'membre'
+          })
 
-        if (insertError) {
-          console.log('❌ Erreur insertion utilisateur:', insertError)
-          // Supprimer le compte créé en cas d'erreur
-          await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
-          // Remettre le statut en attente
-          await supabaseAdmin.from('demandes').update({ statut: 'en_attente' }).eq('id', id)
-          return
+          if (insertError) {
+            console.log('❌ Erreur insertion utilisateur:', insertError)
+            showMsg('Erreur insertion membre : ' + insertError.message)
+            if (!authError) await supabaseAdmin.auth.admin.deleteUser(userId)
+            await supabaseAdmin.from('demandes').update({ statut: 'en_attente' }).eq('id', id)
+            return
+          }
         }
 
-        console.log('✅ Membre accepté et créé:', authData.user.id)
+        showMsg(`✅ ${demande.prenom} ${demande.nom} accepté(e) ! Compte créé avec succès.`, 'success')
+      } else {
+        // Refuser
+        const { error: updateError } = await supabaseAdmin.from('demandes').update({ statut }).eq('id', id)
+        if (updateError) {
+          showMsg('Erreur : ' + updateError.message)
+          return
+        }
+        showMsg(`${demande.prenom} ${demande.nom} — demande refusée.`, 'info')
       }
-
-      // Mettre à jour l'état local immédiatement pour l'UI
-      setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut } : d))
 
       // Recharger les données et rafraîchir l'interface
       await loadDemandes()
@@ -220,12 +346,26 @@ function Demandes({ theme, supabase, onRefresh }) {
 
     } catch (error) {
       console.log('❌ Erreur générale:', error)
+      showMsg('Erreur inattendue : ' + error.message)
     }
   }
 
   return (
     <div>
       <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Demandes d'adhésion</h2>
+      
+      {msg && (
+        <div style={{
+          background: msgType === 'success' ? 'rgba(37,211,102,0.1)' : msgType === 'info' ? 'rgba(100,100,100,0.1)' : 'rgba(200,16,46,0.1)',
+          border: `1px solid ${msgType === 'success' ? 'rgba(37,211,102,0.3)' : msgType === 'info' ? 'rgba(100,100,100,0.3)' : 'rgba(200,16,46,0.3)'}`,
+          borderRadius:'10px',padding:'12px 16px',marginBottom:'16px',
+          color: msgType === 'success' ? '#25d366' : msgType === 'info' ? theme.muted : '#C8102E',
+          fontSize:'13px',fontWeight:'500'
+        }}>
+          {msg}
+        </div>
+      )}
+
       {demandes.length===0 && (
         <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
           Aucune demande pour le moment
@@ -247,6 +387,7 @@ function Demandes({ theme, supabase, onRefresh }) {
               {d.date_anniversaire && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>🎂 {new Date(d.date_anniversaire).toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}</div>}
               <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.whatsapp}</div>
               {d.email && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.email}</div>}
+              {!d.email && <div style={{color:'#C8102E',fontSize:'11px',marginTop:'2px',fontWeight:'600'}}>⚠️ Pas d'email</div>}
               <div style={{color:theme.muted,fontSize:'11px',marginTop:'4px'}}>{new Date(d.created_at).toLocaleDateString('fr-FR')}</div>
             </div>
             <div style={{display:'flex',flexDirection:'column',gap:'6px',flexShrink:0}}>
