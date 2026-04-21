@@ -267,6 +267,7 @@ function Accueil({ theme, supabase, dark, profile }) {
         <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.7, marginBottom: '12px' }}>Dévotion du jour</div>
         {devotion ? (
           <>
+            {devotion.titre && <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', opacity: 0.9 }}>{devotion.titre}</div>}
             <div style={{ fontFamily: 'Georgia,serif', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
             <div style={{ fontSize: '12px', fontWeight: '700', opacity: 0.8 }}>— {devotion.reference}</div>
           </>
@@ -436,6 +437,7 @@ function Devotion({ theme, supabase, dark }) {
         <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.7, marginBottom: '12px' }}>{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
         {devotion ? (
           <>
+            {devotion.titre && <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', opacity: 0.9 }}>{devotion.titre}</div>}
             <div style={{ fontFamily: 'Georgia,serif', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
             <div style={{ fontSize: '13px', fontWeight: '700', opacity: 0.85 }}>— {devotion.reference}</div>
           </>

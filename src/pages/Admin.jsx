@@ -1136,16 +1136,15 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
   }
 
   async function publierDevotion() {
-    if (!titre || !verset || !reference || !dateDevotion) { setMsg('Renseignez tous les champs obligatoires'); return }
+    if (!verset || !reference || !dateDevotion) { setMsg('Renseignez le verset, la référence et la date'); return }
     const { error } = await supabaseAdmin.from('devotions').insert({
-      titre,
+      titre: titre || reference,
       verset,
       reference,
       priere,
       date_devotion: dateDevotion
     })
-    if (error) { console.log('❌ Erreur création dévotion:', error); setMsg('Erreur : ' + error.message); return }
-    console.log('✅ Dévotion créée')
+    if (error) { console.log('Erreur création dévotion:', error); setMsg('Erreur : ' + error.message); return }
     setMsg('Dévotion publiée !')
     setTitre(''); setVerset(''); setReference(''); setPriere(''); setDateDevotion('')
     loadDevotions()
@@ -1215,11 +1214,11 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
           <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'24px',marginTop:'20px'}}>
             <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Nouvelle dévotion</div>
             {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
-            <input placeholder="Titre *" value={titre} onChange={e=>setTitre(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-            <input placeholder="Verset *" value={verset} onChange={e=>setVerset(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-            <input placeholder="Référence *" value={reference} onChange={e=>setReference(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-            <input type="date" value={dateDevotion} onChange={e=>setDateDevotion(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',cursor:'pointer'}} />
-            <textarea placeholder="Prière du matin (optionnel)" value={priere} onChange={e=>setPriere(e.target.value)} rows={3} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',resize:'none'}} />
+            <textarea placeholder="Verset biblique * (ex: Je puis tout par Christ qui me fortifie)" value={verset} onChange={e=>setVerset(e.target.value)} rows={2} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',resize:'none',boxSizing:'border-box'}} />
+            <input placeholder="Référence * (ex: Philippiens 4:13)" value={reference} onChange={e=>setReference(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',boxSizing:'border-box'}} />
+            <input placeholder="Titre (optionnel, sinon la référence sera utilisée)" value={titre} onChange={e=>setTitre(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',boxSizing:'border-box'}} />
+            <input type="date" value={dateDevotion} onChange={e=>setDateDevotion(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',cursor:'pointer',boxSizing:'border-box'}} />
+            <textarea placeholder="Prière du matin (optionnel)" value={priere} onChange={e=>setPriere(e.target.value)} rows={3} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',resize:'none',boxSizing:'border-box'}} />
             <button onClick={publierDevotion} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
               Publier
             </button>

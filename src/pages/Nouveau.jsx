@@ -328,6 +328,16 @@ export default function Nouveau() {
 
   return (
     <div style={{minHeight:'100vh',background:theme.bg,transition:'background 0.3s'}}>
+      <style>{`
+        @media (max-width: 768px) {
+          .nouveau-bureau-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+          .nouveau-bureau-grid .bureau-card { padding: 12px !important; }
+          .nouveau-bureau-grid .bureau-avatar { width: 52px !important; height: 52px !important; font-size: 16px !important; }
+          .nouveau-form { padding: 16px !important; }
+          .nouveau-statut-grid { grid-template-columns: 1fr 1fr !important; }
+          .nouveau-photo-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+      `}</style>
 
       {/* Boutons fixes */}
       <button onClick={() => navigate('/')} style={{position:'fixed',top:'16px',left:'16px',zIndex:100,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'20px',padding:'6px 14px',color:theme.text,fontSize:'12px',cursor:'pointer',fontFamily:'inherit',backdropFilter:'blur(10px)',display:'flex',alignItems:'center',gap:'6px'}}>
@@ -437,10 +447,10 @@ export default function Nouveau() {
           <div style={{marginBottom:'32px'}}>
             <h2 style={{color:theme.text,fontSize:'18px',fontWeight:'700',marginBottom:'6px'}}>Notre Bureau 2026-2028</h2>
             <p style={{color:theme.muted,fontSize:'12px',marginBottom:'20px'}}>Rencontrez les leaders de la jeunesse</p>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px'}}>
+            <div className="nouveau-bureau-grid" style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px'}}>
               {BUREAU.map((m, i) => (
-                <div key={i} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'16px',textAlign:'center',transition:'all 0.3s ease',cursor:'pointer'}}>
-                  <div style={{width:'72px',height:'72px',borderRadius:'50%',background:'#C8102E',margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'22px',fontWeight:'700',border:'3px solid #C8102E'}}>
+                <div key={i} className="bureau-card" style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'16px',textAlign:'center',transition:'all 0.3s ease',cursor:'pointer'}}>
+                  <div className="bureau-avatar" style={{width:'72px',height:'72px',borderRadius:'50%',background:'#C8102E',margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'22px',fontWeight:'700',border:'3px solid #C8102E'}}>
                     {`${m.prenom?.[0]}${m.nom?.[0]}`}
                   </div>
                   <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'4px'}}>{m.prenom} {m.nom}</div>
@@ -454,7 +464,7 @@ export default function Nouveau() {
         )}
 
         {/* Formulaire rejoindre */}
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'20px',padding:'28px',marginBottom:'32px',boxShadow: dark ? 'none' : '0 4px 24px rgba(0,0,0,0.06)'}}>
+        <div className="nouveau-form" style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'20px',padding:'28px',marginBottom:'32px',boxShadow: dark ? 'none' : '0 4px 24px rgba(0,0,0,0.06)'}}>
           <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'20px'}}>
             <div style={{width:'4px',height:'28px',background:'#C8102E',borderRadius:'2px'}} />
             <div>
@@ -520,7 +530,7 @@ export default function Nouveau() {
           {/* Statut d'activité */}
           <div style={{marginBottom:'16px'}}>
             <label style={labelStyle}>Tu es *</label>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
+            <div className="nouveau-statut-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
               <button type="button" onClick={() => { setStatutActivite('eleve'); setDomaine(''); }} style={statutBtnStyle(statutActivite === 'eleve')}>
                 <IconBackpack />
                 <span>Élève</span>
