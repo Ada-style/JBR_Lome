@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../lib/supabase'
 import md5 from 'md5'
 
 export default function Membre() {
   const navigate = useNavigate()
-  const { supabase, profile, signOut, fetchProfile } = useAuth()
+  const { profile, signOut } = useAuth()
   const [tab, setTab] = useState('accueil')
   const [dark, setDark] = useState(true)
   const [notifs, setNotifs] = useState([])
@@ -548,6 +549,7 @@ function Evenements({ theme, supabase, profile }) {
 function Communion({ theme, supabase }) {
   const [membres, setMembres] = useState([])
   const [selected, setSelected] = useState(null)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -557,38 +559,120 @@ function Communion({ theme, supabase }) {
     load()
   }, [supabase])
 
+  const filteredMembres = membres.filter(m => {
+    if (!search) return true
+    const s = search.toLowerCase()
+    return (m.prenom?.toLowerCase().includes(s) || m.nom?.toLowerCase().includes(s) || m.domaine?.toLowerCase().includes(s))
+  })
+
+  function formatBirthday(dateStr) {
+    if (!dateStr) return null
+    try {
+      const d = new Date(dateStr)
+      return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+    } catch { return null }
+  }
+
+  function getStatutLabel(statut) {
+    const labels = { 'eleve': 'Élève', 'etudiant': 'Étudiant', 'apprenti': 'Apprenti', 'professionnel': 'Professionnel' }
+    return labels[statut] || ''
+  }
+
   return (
     <div style={{padding:'16px',maxWidth:'960px',margin:'0 auto'}}>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Communion</h2>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'14px'}}>
-        {membres.map(m => (
-          <button key={m.id} onClick={() => setSelected(m)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'16px',padding:'18px',textAlign:'left',cursor:'pointer',color:'inherit',fontFamily:'inherit',display:'flex',flexDirection:'column',gap:'12px',overflow:'hidden'}}>
-            <div style={{width:'56px',height:'56px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700'}}>
-              {`${m.prenom?.[0] || ''}${m.nom?.[0] || ''}`.toUpperCase()}
+      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'6px'}}>Communion</h2>
+      <p style={{color:theme.muted,fontSize:'12px',marginBottom:'16px'}}>Annuaire des membres de la jeunesse</p>
+      
+      {/* Barre de recherche */}
+      <div style={{position:'relative',marginBottom:'16px'}}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{position:'absolute',left:'12px',top:'50%',transform:'translateY(-50%)'}}>
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input 
+          placeholder="Chercher un membre..." 
+          value={search} 
+          onChange={e=>setSearch(e.target.value)} 
+          style={{width:'100%',background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'10px 12px 10px 36px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit',boxSizing:'border-box'}}
+        />
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:'14px'}}>
+        {filteredMembres.map(m => (
+          <button key={m.id} onClick={() => setSelected(m)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'16px',padding:'18px',textAlign:'left',cursor:'pointer',color:'inherit',fontFamily:'inherit',display:'flex',flexDirection:'column',gap:'12px',overflow:'hidden',transition:'border-color 0.2s, transform 0.2s'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
+              {m.avatar_url ? (
+                <img src={m.avatar_url} alt="" loading="lazy" style={{width:'50px',height:'50px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} />
+              ) : (
+                <div style={{width:'50px',height:'50px',borderRadius:'50%',background:'linear-gradient(135deg, #C8102E, #a00d24)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'16px',fontWeight:'700',flexShrink:0}}>
+                  {`${m.prenom?.[0] || ''}${m.nom?.[0] || ''}`.toUpperCase()}
+                </div>
+              )}
+              <div style={{minWidth:0}}>
+                <div style={{fontSize:'14px',fontWeight:'700',color:theme.text,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.prenom} {m.nom}</div>
+                <div style={{fontSize:'11px',color:theme.muted,marginTop:'3px'}}>{m.domaine || 'Membre'}</div>
+              </div>
             </div>
-            <div>
-              <div style={{fontSize:'15px',fontWeight:'700',color:theme.text}}>{m.prenom} {m.nom}</div>
-              <div style={{fontSize:'12px',color:theme.muted,marginTop:'4px'}}>{m.domaine || 'Domaine non renseigné'}</div>
-            </div>
-            <div style={{fontSize:'12px',color:theme.muted,lineHeight:'1.6'}}>{m.bio ? (m.bio.length > 50 ? `${m.bio.slice(0,50)}...` : m.bio) : 'Aucune bio renseignée.'}</div>
+            {m.date_anniversaire && (
+              <div style={{display:'flex',alignItems:'center',gap:'6px',fontSize:'11px',color:theme.muted}}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 3-3.87"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                Anniversaire : {formatBirthday(m.date_anniversaire)}
+              </div>
+            )}
+            {m.bio && <div style={{fontSize:'11px',color:theme.muted,lineHeight:'1.5'}}>{m.bio.length > 60 ? `${m.bio.slice(0,60)}...` : m.bio}</div>}
           </button>
         ))}
       </div>
 
+      {filteredMembres.length === 0 && (
+        <div style={{textAlign:'center',padding:'32px',color:theme.muted,fontSize:'13px'}}>Aucun membre trouvé</div>
+      )}
+
       {selected && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}} onClick={() => setSelected(null)}>
-          <div style={{background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'20px',width:'100%',maxWidth:'520px',padding:'24px',position:'relative'}} onClick={e => e.stopPropagation()}>
+          <div style={{background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'20px',width:'100%',maxWidth:'520px',padding:'28px',position:'relative'}} onClick={e => e.stopPropagation()}>
             <button onClick={() => setSelected(null)} style={{position:'absolute',top:'16px',right:'16px',background:'none',border:'none',color:theme.muted,fontSize:'22px',cursor:'pointer'}}>✕</button>
-            <div style={{width:'72px',height:'72px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'28px',fontWeight:'700',margin:'0 auto 18px'}}>
-              {`${selected.prenom?.[0] || ''}${selected.nom?.[0] || ''}`.toUpperCase()}
+            
+            {selected.avatar_url ? (
+              <img src={selected.avatar_url} alt="" loading="lazy" style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',margin:'0 auto 18px',display:'block',border:'3px solid #C8102E'}} />
+            ) : (
+              <div style={{width:'80px',height:'80px',borderRadius:'50%',background:'linear-gradient(135deg, #C8102E, #a00d24)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'28px',fontWeight:'700',margin:'0 auto 18px'}}>
+                {`${selected.prenom?.[0] || ''}${selected.nom?.[0] || ''}`.toUpperCase()}
+              </div>
+            )}
+            
+            <div style={{textAlign:'center',marginBottom:'20px'}}>
+              <div style={{fontSize:'20px',fontWeight:'700',color:theme.text,fontFamily:'Outfit,sans-serif'}}>{selected.prenom} {selected.nom}</div>
+              {selected.domaine && <div style={{fontSize:'12px',color:theme.muted,marginTop:'6px'}}>{selected.domaine}</div>}
             </div>
-            <div style={{textAlign:'center',marginBottom:'16px'}}>
-              <div style={{fontSize:'18px',fontWeight:'700',color:theme.text}}>{selected.prenom} {selected.nom}</div>
-              <div style={{fontSize:'12px',color:theme.muted,marginTop:'6px'}}>{selected.domaine || 'Domaine non renseigné'}</div>
+
+            {/* Info Cards */}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'16px'}}>
+              {selected.date_anniversaire && (
+                <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'12px',textAlign:'center'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:'4px'}}>
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <div style={{fontSize:'11px',color:theme.muted}}>Anniversaire</div>
+                  <div style={{fontSize:'13px',color:theme.text,fontWeight:'600',marginTop:'2px'}}>{formatBirthday(selected.date_anniversaire)}</div>
+                </div>
+              )}
+              {selected.statut_activite && (
+                <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'12px',textAlign:'center'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:'4px'}}>
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                  </svg>
+                  <div style={{fontSize:'11px',color:theme.muted}}>Statut</div>
+                  <div style={{fontSize:'13px',color:theme.text,fontWeight:'600',marginTop:'2px'}}>{getStatutLabel(selected.statut_activite)}</div>
+                </div>
+              )}
             </div>
+
             <div style={{color:theme.muted,fontSize:'13px',lineHeight:'1.8',marginBottom:'20px'}}>{selected.bio || 'Aucune bio renseignée.'}</div>
             {selected.whatsapp && (
-              <a href={`https://wa.me/${selected.whatsapp.replace(/\+/g,'').replace(/\s/g,'')}?text=${encodeURIComponent(`Bonjour ${selected.prenom}, je t'ai trouvé dans la communion de la Jeunesse EB Le Rocher !`)}`} target="_blank" rel="noreferrer" style={{display:'block',background:'#25d366',color:'white',borderRadius:'12px',padding:'12px',textDecoration:'none',fontSize:'14px',fontWeight:'700',textAlign:'center'}}>
+              <a href={`https://wa.me/${selected.whatsapp.replace(/\+/g,'').replace(/\s/g,'')}?text=${encodeURIComponent(`Bonjour ${selected.prenom}, je t'ai trouvé dans la communion de la Jeunesse EB Le Rocher !`)}`} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:'#25d366',color:'white',borderRadius:'12px',padding:'12px',textDecoration:'none',fontSize:'14px',fontWeight:'700'}}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.632-1.467A11.932 11.932 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.207-.579-5.961-1.591l-.427-.254-2.748.871.879-2.682-.277-.44A9.774 9.774 0 0 1 2.182 12c0-5.423 4.395-9.818 9.818-9.818S21.818 6.577 21.818 12 17.423 21.818 12 21.818z"/></svg>
                 Contacter sur WhatsApp
               </a>
             )}

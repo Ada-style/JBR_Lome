@@ -24,7 +24,7 @@ const supabaseAdmin = createClient(
 
 export default function Admin() {
   const navigate = useNavigate()
-  const { supabase, signOut } = useAuth() 
+  const { signOut } = useAuth() 
   const [tab, setTab] = useState('dashboard')
   const [refreshCount, setRefreshCount] = useState(0)
   const [dark, setDark] = useState(true)
@@ -133,24 +133,29 @@ function Dashboard({ theme, supabase, supabaseAdmin, refreshCount }) {
   )
 }
 
-async function loadDemandes() {
-  console.log('🔄 Chargement des demandes...');
-  
-  const { data, error } = await supabase
-    .from('demandes')
-    .select('*')
-    .order('created_at', { ascending: false });
+function Demandes({ theme, supabase, onRefresh }) {
+  const [demandes, setDemandes] = useState([])
 
-  console.log('📋 Données reçues :', data);
-  console.log('❌ Erreur :', error);
+  useEffect(() => { loadDemandes() }, [])
 
-  if (error) {
-    console.error('Erreur chargement demandes:', error);
-    return;
+  async function loadDemandes() {
+    console.log('🔄 Chargement des demandes...');
+    
+    const { data, error } = await supabaseAdmin
+      .from('demandes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    console.log('📋 Données reçues :', data);
+    console.log('❌ Erreur :', error);
+
+    if (error) {
+      console.error('Erreur chargement demandes:', error);
+      return;
+    }
+
+    setDemandes(data || []);
   }
-
-  setDemandes(data || []);
-}
 
   async function updateStatut(id, statut) {
     try {
@@ -190,6 +195,7 @@ async function loadDemandes() {
           prenom: demande.prenom,
           whatsapp: demande.whatsapp,
           domaine: demande.domaine || '',
+          date_anniversaire: demande.date_anniversaire || null,
           role: 'membre'
         })
 
@@ -232,12 +238,13 @@ async function loadDemandes() {
               <img src={d.avatar_url} loading="lazy" style={{width:'40px',height:'40px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt="Avatar" />
             ) : (
               <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'14px',fontWeight:'700',flexShrink:0}}>
-                {d.nom[0]}
+                {d.prenom?.[0]}{d.nom?.[0]}
               </div>
             )}
             <div style={{flex:1}}>
-              <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{d.nom}</div>
-              <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.domaine || 'Domaine non renseigné'}</div>
+              <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{d.prenom} {d.nom}</div>
+              <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.statut_activite || ''} {d.domaine ? `· ${d.domaine}` : ''}</div>
+              {d.date_anniversaire && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>🎂 {new Date(d.date_anniversaire).toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}</div>}
               <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.whatsapp}</div>
               {d.email && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.email}</div>}
               <div style={{color:theme.muted,fontSize:'11px',marginTop:'4px'}}>{new Date(d.created_at).toLocaleDateString('fr-FR')}</div>
@@ -291,9 +298,10 @@ Le Bureau de la Jeunesse EB Le Rocher`
       ))}
     </div>
   )
-
+}
 
 function Membres({ theme, supabase, refreshCount }) {
+
   const [membres, setMembres] = useState([])
   const [nom, setNom] = useState('')
   const [prenom, setPrenom] = useState('')
