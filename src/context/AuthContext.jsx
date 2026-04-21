@@ -1,31 +1,32 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+ import { createContext, useContext, useEffect, useState } from "react";
+ import { supabase } from "../lib/supabase";
 
-export const supabase = createClient(
-  'https://qzqphzfbkdtglghloplo.supabase.co',
-  'sb_publishable_Gb9QUXMESefgOJy1X6gLlg_p_8saTE0'
-)
-
-const AuthContext = createContext({})
+const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // Récupérer la session active
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+      setUser(session?.user || null)
       if (session?.user) fetchProfile(session.user.id)
+      setLoading(false)
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null)
-        if (session?.user) fetchProfile(session.user.id)
-        else setProfile(null)
-      }
-    )
-    return () => subscription.unsubscribe()
-  }, [])
+
+  // Ecouter les changements de connexion
+  const { data: { subsription } } = supabase.auth.onAuthStateChange(
+    (event, session) => {
+      setUser(session?.user ?? null)
+    if (session?.user) fetchProfile(session.user.id)
+    else setProfile(null)
+    }
+  )
+
+  return () => subscription.unsubscribe()
+ }, [])
 
   async function fetchProfile(userId) {
     const { data } = await supabase
@@ -37,11 +38,11 @@ export function AuthProvider({ children }) {
   }
 
   async function signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
-    return { data, error }
+    return { error }
   }
 
   async function signOut() {
@@ -49,8 +50,8 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, supabase, signIn, signOut, fetchProfile }}>
-      {children}
+    <AuthContext.Provider value={{ user, profile, loading, signIn, signOut }}>
+      {!loading && children}
     </AuthContext.Provider>
   )
 }

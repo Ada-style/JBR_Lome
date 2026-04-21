@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 
 export default function Login() {
-  const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPwd, setShowPwd] = useState(false)
@@ -49,20 +48,6 @@ export default function Login() {
     }
   }
 
-  async function handleSignUp(e) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      setError('Erreur : ' + error.message)
-      setLoading(false)
-    } else {
-      setError('Compte créé ! Vérifiez votre email pour confirmer.')
-      setLoading(false)
-    }
-  }
-
   function handlePin() {
     if (['ROCHER', 'rocher', '2610'].includes(pin)) {
       setShowPin(false)
@@ -70,6 +55,22 @@ export default function Login() {
     } else {
       setError('Code incorrect')
     }
+  }
+
+  async function resetMotDePasse() {
+    if (!email) { setError('Entrez votre email'); return }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://jbr-l.netlify.app/reset-password'
+    })
+    if (error) { setError('Erreur : ' + error.message); return }
+    setError('Email envoyé ! Consultez votre boite mail.')
+  }
+
+  async function magicLink() {
+    if (!email) { setError('Entrez votre email'); return }
+    const { error } = await supabase.auth.signInWithOtp({ email })
+    if (error) { setError('Erreur : ' + error.message); return }
+    setError('Lien envoyé ! Consultez votre boite mail.')
   }
 
   return (
@@ -87,33 +88,8 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Accès sans compte */}
-        <p style={{color:'rgba(255,255,255,0.4)',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'10px'}}>
-          Accès sans compte
-        </p>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'20px'}}>
-          <button onClick={() => navigate('/nouveau')} style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'14px',padding:'16px',cursor:'pointer',textAlign:'left'}}>
-            <div style={{color:'white',fontWeight:'600',fontSize:'13px',marginBottom:'4px'}}>Nouveau</div>
-            <div style={{color:'rgba(255,255,255,0.4)',fontSize:'11px'}}>Découvrir la jeunesse</div>
-          </button>
-          <button onClick={() => navigate('/visiteur')} style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'14px',padding:'16px',cursor:'pointer',textAlign:'left'}}>
-            <div style={{color:'white',fontWeight:'600',fontSize:'13px',marginBottom:'4px'}}>Visiteur</div>
-            <div style={{color:'rgba(255,255,255,0.4)',fontSize:'11px'}}>Annuaire des talents</div>
-          </button>
-        </div>
-
-        {/* Tabs login/signup */}
-        <div style={{display:'flex',background:'rgba(255,255,255,0.06)',borderRadius:'12px',padding:'4px',marginBottom:'16px'}}>
-          <button onClick={() => setMode('login')} style={{flex:1,background:mode==='login'?'#C8102E':'none',border:'none',borderRadius:'9px',padding:'9px',color:'white',fontSize:'13px',fontWeight:mode==='login'?'600':'400',cursor:'pointer',fontFamily:'inherit',transition:'all 0.2s'}}>
-            Connexion
-          </button>
-          <button onClick={() => setMode('signup')} style={{flex:1,background:mode==='signup'?'#C8102E':'none',border:'none',borderRadius:'9px',padding:'9px',color:'white',fontSize:'13px',fontWeight:mode==='signup'?'600':'400',cursor:'pointer',fontFamily:'inherit',transition:'all 0.2s'}}>
-            Créer mon compte
-          </button>
-        </div>
-
-        {/* Formulaire */}
-        <form onSubmit={mode==='login'?handleLogin:handleSignUp} style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'16px',padding:'20px'}}>
+        {/* Formulaire de connexion */}
+        <form onSubmit={handleLogin} style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'16px',padding:'20px'}}>
           {error && (
             <div style={{background:'rgba(200,16,46,0.2)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'10px',padding:'10px 12px',marginBottom:'12px',color:'rgba(255,255,255,0.8)',fontSize:'13px'}}>
               {error}
@@ -153,9 +129,26 @@ export default function Login() {
             disabled={loading}
             style={{width:'100%',background:'#C8102E',color:'white',border:'none',borderRadius:'10px',padding:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',opacity:loading?0.6:1}}
           >
-            {loading ? 'Chargement...' : mode==='login' ? 'Se connecter' : 'Créer mon compte'}
+            {loading ? 'Chargement...' : 'Se connecter'}
+          </button>
+          <button
+            type="button"
+            onClick={resetMotDePasse}
+            style={{width:'100%',background:'transparent',color:'rgba(255,255,255,0.6)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'10px',padding:'10px',fontSize:'12px',fontWeight:'500',cursor:'pointer',fontFamily:'inherit',marginTop:'8px'}}
+          >
+            Mot de passe oublié ?
           </button>
         </form>
+
+        {/* Lien vers demande d'adhésion */}
+        <div style={{textAlign:'center',marginTop:'20px'}}>
+          <button
+            onClick={() => navigate('/nouveau')}
+            style={{background:'none',border:'none',color:'rgba(255,255,255,0.6)',fontSize:'13px',cursor:'pointer',fontFamily:'inherit',textDecoration:'underline'}}
+          >
+            Pas encore membre ? Faire une demande d'adhésion
+          </button>
+        </div>
 
         {/* Pin admin secret */}
         {showPin && (

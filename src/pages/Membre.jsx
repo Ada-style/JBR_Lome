@@ -43,8 +43,8 @@ export default function Membre() {
   const tabs = [
     { id: 'accueil', label: 'Accueil' },
     { id: 'devotion', label: 'Dévotion' },
-    { id: 'annuaire', label: 'Annuaire' },
     { id: 'evenements', label: 'Événements' },
+    { id: 'communion', label: 'Communion' },
   ]
 
   async function handleSignOut() {
@@ -148,8 +148,8 @@ export default function Membre() {
       <div style={{paddingBottom:'70px'}}>
         {tab==='accueil' && <Accueil theme={theme} supabase={supabase} dark={dark} />}
         {tab==='devotion' && <Devotion theme={theme} supabase={supabase} dark={dark} />}
-        {tab==='annuaire' && <Annuaire theme={theme} supabase={supabase} />}
         {tab==='evenements' && <Evenements theme={theme} supabase={supabase} profile={profile} />}
+        {tab==='communion' && <Communion theme={theme} supabase={supabase} />}
       </div>
 
       {/* Panel Profil - side modal */}
@@ -213,7 +213,8 @@ function Accueil({ theme, supabase, dark }) {
   useEffect(() => {
     async function load() {
       const today = new Date().toISOString().split('T')[0]
-      const { data: dev } = await supabase.from('devotions').select('*').order('date_devotion', {ascending: false}).limit(1).single()
+      const { data: devData } = await supabase.from('devotions').select('*').order('date_devotion', {ascending: false}).limit(1)
+      const dev = devData?.[0] || null
       setDevotion(dev)
       const { data: ann } = await supabase.from('annonces').select('*').order('created_at', { ascending: false }).limit(5)
       if (ann) setAnnonces(ann)
@@ -228,6 +229,7 @@ function Accueil({ theme, supabase, dark }) {
       const { data: cotisations } = await supabase
         .from('cotisations')
         .select('*')
+        .eq('utilisateur_id', profile?.id)
         .order('created_at', { ascending: false })
         .limit(1)
       if (cotisations && cotisations.length > 0) setDerniereCotisation(cotisations[0])
@@ -394,14 +396,15 @@ function Devotion({ theme, supabase, dark }) {
 
   useEffect(() => {
     async function load() {
-      const { data: dev } = await supabase.from('devotions').select('*').order('date_devotion', { ascending: false }).limit(1).single()
+      const { data: devData } = await supabase.from('devotions').select('*').order('date_devotion', { ascending: false }).limit(1)
+      const dev = devData?.[0] || null
       setDevotion(dev)
-      const { data: d } = await supabase
+      const { data: defiData } = await supabase
         .from('defis_lecture')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1)
-        .single()
+      const d = defiData?.[0] || null
       setDefi(d)
     }
     load()
@@ -458,155 +461,6 @@ function Devotion({ theme, supabase, dark }) {
 }
 
 
-function Annuaire({ theme, supabase }) {
-  const [membres, setMembres] = useState([])
-  const [search, setSearch] = useState('')
-  const [filtre, setFiltre] = useState('Tous')
-  const [domaines, setDomaines] = useState(['Tous'])
-  const [selected, setSelected] = useState(null)
-  const [fichiers, setFichiers] = useState([])
-
-  useEffect(() => {
-    async function load() {
-      const { data } = await supabase.from('utilisateurs').select('*').order('nom')
-      if (data) {
-        setMembres(data)
-        const ds = ['Tous', ...new Set(data.map(m => m.domaine).filter(Boolean))]
-        setDomaines(ds)
-      }
-    }
-    load()
-  }, [])
-
-  async function openProfil(m) {
-    setSelected(m)
-    const { data } = await supabase.from('fichiers').select('*').eq('utilisateur_id', m.id).eq('statut', 'approuve')
-    setFichiers(data || [])
-  }
-
-  const filtered = membres.filter(m => {
-    const matchSearch = m.nom?.toLowerCase().includes(search.toLowerCase()) || m.prenom?.toLowerCase().includes(search.toLowerCase()) || m.domaine?.toLowerCase().includes(search.toLowerCase())
-    const matchFiltre = filtre === 'Tous' || m.domaine === filtre
-    return matchSearch && matchFiltre
-  })
-
-  return (
-    <div style={{padding:'16px',maxWidth:'700px',margin:'0 auto'}}>
-      <h2 style={{color:theme.text,fontSize:'20px',fontWeight:'700',marginBottom:'14px'}}>Annuaire</h2>
-      <input placeholder="Chercher par nom, domaine..." value={search} onChange={e=>setSearch(e.target.value)} style={{width:'100%',background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'10px',padding:'11px 14px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'12px',fontFamily:'inherit'}} />
-      <div style={{display:'flex',gap:'6px',overflowX:'auto',marginBottom:'16px',paddingBottom:'4px',scrollbarWidth:'none'}}>
-        {domaines.map(d => (
-          <button key={d} onClick={() => setFiltre(d)} style={{background:filtre===d?'#C8102E':theme.card,border:`1px solid ${filtre===d?'#C8102E':theme.border}`,borderRadius:'18px',padding:'6px 14px',color:filtre===d?'white':theme.muted,fontSize:'11px',cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit',fontWeight:filtre===d?'600':'400',flexShrink:0}}>
-            {d}
-          </button>
-        ))}
-      </div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
-        {filtered.map(m => (
-          <div key={m.id} onClick={() => openProfil(m)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',cursor:'pointer',transition:'all 0.3s ease-in-out',position:'relative',overflow:'hidden',transform:'translateX(0)',':hover':{transform:'translateX(3px)'}}}>
-            <style>{`
-              [data-member-id="${m.id}"]:hover {
-                transform: translateX(3px);
-                border-color: #C8102E;
-              }
-            `}</style>
-            <div data-member-id={m.id} style={{display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',gap:'10px'}}>
-              <img 
-                src={m.avatar_url || gravatarUrl(m.email)} 
-                alt="Avatar"
-                loading="lazy"
-                style={{width:'56px',height:'56px',objectFit:'cover',borderRadius:'50%',border:'3px solid #C8102E'}}
-              />
-              <div style={{flex:1}}>
-                <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',marginBottom:'4px'}}>{m.prenom} {m.nom}</div>
-                <div style={{display:'flex',justifyContent:'center',marginBottom:'8px'}}>
-                  <span style={{background:'rgba(200,16,46,0.15)',color:'#C8102E',fontSize:'10px',fontWeight:'700',padding:'2px 10px',borderRadius:'12px',textTransform:'uppercase',letterSpacing:'0.5px'}}>
-                    {m.domaine || 'Domaine'}
-                  </span>
-                </div>
-                {m.bio && (
-                  <p style={{color:theme.muted,fontSize:'11px',lineHeight:'1.5',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
-                    {m.bio}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div style={{marginTop:'10px',paddingTop:'10px',borderTop:`1px solid ${theme.border}`,display:'flex',justifyContent:'center'}}>
-              <div style={{fontSize:'12px',color:'#C8102E',fontWeight:'600'}}>Voir le profil →</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
-          Aucun membre trouvé
-        </div>
-      )}
-
-      {/* Fiche membre */}
-      {selected && (
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:200,display:'flex',alignItems:'flex-end',justifyContent:'center'}} onClick={() => setSelected(null)}>
-          <div style={{background:theme.bg,borderRadius:'20px 20px 0 0',width:'100%',maxWidth:'600px',maxHeight:'85vh',overflowY:'auto'}} onClick={e=>e.stopPropagation()}>
-
-            {/* Header */}
-            <div style={{background:'linear-gradient(135deg,#C8102E,#8b0000)',padding:'28px 20px',textAlign:'center',color:'white',borderRadius:'20px 20px 0 0'}}>
-              {selected.avatar_url ? (
-                <img src={selected.avatar_url} loading="lazy" alt="Avatar" style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',border:'4px solid rgba(255,255,255,0.6)',margin:'0 auto 12px',display:'block'}} />
-              ) : (
-                <div style={{width:'80px',height:'80px',borderRadius:'50%',background:'rgba(255,255,255,0.2)',border:'4px solid rgba(255,255,255,0.6)',margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'28px',fontWeight:'700'}}>
-                  {selected.prenom?.[0]}{selected.nom?.[0]}
-                </div>
-              )}
-              <div style={{fontSize:'18px',fontWeight:'700',fontFamily:'Outfit,sans-serif'}}>{selected.prenom} {selected.nom}</div>
-              <div style={{fontSize:'12px',opacity:0.85,marginTop:'6px',background:'rgba(255,255,255,0.15)',padding:'4px 12px',borderRadius:'20px',display:'inline-block',marginTop:'6px'}}>{selected.domaine}</div>
-            </div>
-
-            <div style={{padding:'20px'}}>
-
-              {/* Bio */}
-              {selected.bio && (
-                <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'12px'}}>
-                  <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'8px'}}>Bio</div>
-                  <p style={{color:theme.muted,fontSize:'13px',lineHeight:'1.9'}}>{selected.bio}</p>
-                </div>
-              )}
-
-              {/* Fichiers approuvés */}
-              {fichiers.length > 0 && (
-                <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'12px'}}>
-                  <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'10px'}}>Documents</div>
-                  {fichiers.map(f => (
-                    <div key={f.id} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'8px'}}>
-                      <div style={{fontSize:'18px'}}>📄</div>
-                      <div style={{flex:1}}>
-                        <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{f.nom_fichier}</div>
-                        <div style={{color:theme.muted,fontSize:'11px'}}>{f.type_fichier}</div>
-                      </div>
-                      <a href={f.url} target="_blank" rel="noreferrer" style={{color:'#C8102E',fontSize:'12px',textDecoration:'none',fontWeight:'600'}}>Voir</a>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Contacter */}
-              {selected.whatsapp && (
-                <a href={`https://wa.me/${selected.whatsapp.replace(/\+/g,'').replace(/\s/g,'')}?text=${encodeURIComponent(`Bonjour ${selected.prenom}, je t'ai trouvé sur la plateforme de la Jeunesse EB Le Rocher !`)}`} target="_blank" rel="noreferrer" style={{display:'block',background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'12px',padding:'14px',color:'#25d366',fontSize:'14px',fontWeight:'700',textDecoration:'none',textAlign:'center',marginBottom:'12px'}}>
-                  Contacter sur WhatsApp
-                </a>
-              )}
-
-              <button onClick={() => setSelected(null)} style={{width:'100%',background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'12px',color:theme.muted,fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
 function Evenements({ theme, supabase, profile }) {
   const [evenements, setEvenements] = useState([])
   const [feedbackEv, setFeedbackEv] = useState(null)
@@ -616,7 +470,11 @@ function Evenements({ theme, supabase, profile }) {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from('annonces').select('*').order('created_at', { ascending: false })
+      const { data, error } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true })
+      if (error) {
+        console.log('❌ Erreur chargement événements:', error)
+        return
+      }
       if (data) setEvenements(data)
     }
     load()
@@ -644,13 +502,13 @@ function Evenements({ theme, supabase, profile }) {
       )}
       {evenements.map(ev => (
         <div key={ev.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',overflow:'hidden',marginBottom:'12px'}}>
-          <div style={{background:ev.urgent?'#C8102E':'#16a34a',padding:'6px 14px'}}>
+          <div style={{background:ev.urgent ? '#C8102E' : '#16a34a',padding:'6px 14px'}}>
             <span style={{color:'white',fontSize:'10px',fontWeight:'700',letterSpacing:'1.5px',textTransform:'uppercase'}}>{ev.urgent ? 'URGENT' : 'ÉVÉNEMENT'}</span>
           </div>
           <div style={{padding:'14px'}}>
             <div style={{color:theme.text,fontSize:'15px',fontWeight:'700',marginBottom:'4px'}}>{ev.titre}</div>
-            <div style={{color:theme.muted,fontSize:'12px',marginBottom:'8px'}}>{new Date(ev.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>
-            {ev.contenu && <p style={{color:theme.muted,fontSize:'13px',lineHeight:'1.7',marginBottom:'12px'}}>{ev.contenu}</p>}
+            <div style={{color:theme.muted,fontSize:'12px',marginBottom:'8px'}}>{new Date(ev.date_evenement).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>
+            {ev.description && <p style={{color:theme.muted,fontSize:'13px',lineHeight:'1.7',marginBottom:'12px'}}>{ev.description}</p>}
             <div style={{display:'flex',gap:'8px'}}>
               <button style={{flex:1,background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'9px',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>
                 Je participe
@@ -687,30 +545,77 @@ function Evenements({ theme, supabase, profile }) {
   )
 }
 
+function Communion({ theme, supabase }) {
+  const [membres, setMembres] = useState([])
+  const [selected, setSelected] = useState(null)
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase.from('utilisateurs').select('*').order('nom', { ascending: true })
+      if (data) setMembres(data)
+    }
+    load()
+  }, [supabase])
+
+  return (
+    <div style={{padding:'16px',maxWidth:'960px',margin:'0 auto'}}>
+      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Communion</h2>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'14px'}}>
+        {membres.map(m => (
+          <button key={m.id} onClick={() => setSelected(m)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'16px',padding:'18px',textAlign:'left',cursor:'pointer',color:'inherit',fontFamily:'inherit',display:'flex',flexDirection:'column',gap:'12px',overflow:'hidden'}}>
+            <div style={{width:'56px',height:'56px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700'}}>
+              {`${m.prenom?.[0] || ''}${m.nom?.[0] || ''}`.toUpperCase()}
+            </div>
+            <div>
+              <div style={{fontSize:'15px',fontWeight:'700',color:theme.text}}>{m.prenom} {m.nom}</div>
+              <div style={{fontSize:'12px',color:theme.muted,marginTop:'4px'}}>{m.domaine || 'Domaine non renseigné'}</div>
+            </div>
+            <div style={{fontSize:'12px',color:theme.muted,lineHeight:'1.6'}}>{m.bio ? (m.bio.length > 50 ? `${m.bio.slice(0,50)}...` : m.bio) : 'Aucune bio renseignée.'}</div>
+          </button>
+        ))}
+      </div>
+
+      {selected && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}} onClick={() => setSelected(null)}>
+          <div style={{background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'20px',width:'100%',maxWidth:'520px',padding:'24px',position:'relative'}} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelected(null)} style={{position:'absolute',top:'16px',right:'16px',background:'none',border:'none',color:theme.muted,fontSize:'22px',cursor:'pointer'}}>✕</button>
+            <div style={{width:'72px',height:'72px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'28px',fontWeight:'700',margin:'0 auto 18px'}}>
+              {`${selected.prenom?.[0] || ''}${selected.nom?.[0] || ''}`.toUpperCase()}
+            </div>
+            <div style={{textAlign:'center',marginBottom:'16px'}}>
+              <div style={{fontSize:'18px',fontWeight:'700',color:theme.text}}>{selected.prenom} {selected.nom}</div>
+              <div style={{fontSize:'12px',color:theme.muted,marginTop:'6px'}}>{selected.domaine || 'Domaine non renseigné'}</div>
+            </div>
+            <div style={{color:theme.muted,fontSize:'13px',lineHeight:'1.8',marginBottom:'20px'}}>{selected.bio || 'Aucune bio renseignée.'}</div>
+            {selected.whatsapp && (
+              <a href={`https://wa.me/${selected.whatsapp.replace(/\+/g,'').replace(/\s/g,'')}?text=${encodeURIComponent(`Bonjour ${selected.prenom}, je t'ai trouvé dans la communion de la Jeunesse EB Le Rocher !`)}`} target="_blank" rel="noreferrer" style={{display:'block',background:'#25d366',color:'white',borderRadius:'12px',padding:'12px',textDecoration:'none',fontSize:'14px',fontWeight:'700',textAlign:'center'}}>
+                Contacter sur WhatsApp
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfile }) {
   const [bio, setBio] = useState(profile?.bio || '')
   const [editing, setEditing] = useState(false)
-  const [fichiers, setFichiers] = useState([])
   const [cotisations, setCotisations] = useState([])
   const [tab, setTab] = useState('info')
   const [msg, setMsg] = useState('')
-  const [uploading, setUploading] = useState(false)
-  const [passwordNew, setPasswordNew] = useState('')
-  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [nouveauMdp, setNouveauMdp] = useState('')
+  const [confirmerMdp, setConfirmerMdp] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [preview, setPreview] = useState(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     if (profile?.id) {
-      loadFichiers()
       loadCotisations()
     }
   }, [profile])
-
-  async function loadFichiers() {
-    const { data } = await supabase.from('fichiers').select('*').eq('utilisateur_id', profile.id).order('created_at', { ascending: false })
-    if (data) setFichiers(data)
-  }
 
   async function loadCotisations() {
     const { data } = await supabase.from('cotisations').select('*').eq('utilisateur_id', profile.id).order('created_at', { ascending: false })
@@ -723,18 +628,14 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfil
     setMsg('Profil mis à jour !')
   }
 
-  async function changePassword() {
-    if (!passwordNew || !passwordConfirm) { setMsg('Remplissez les deux champs'); return }
-    if (passwordNew !== passwordConfirm) { setMsg('Les mots de passe ne correspondent pas'); return }
-    if (passwordNew.length < 6) { setMsg('Minimum 6 caractères'); return }
-    try {
-      await supabase.auth.updateUser({ password: passwordNew })
-      setMsg('Mot de passe mis à jour !')
-      setPasswordNew('')
-      setPasswordConfirm('')
-    } catch (error) {
-      setMsg('Erreur : ' + error.message)
-    }
+  async function changerMotDePasse() {
+    if (nouveauMdp !== confirmerMdp) { setMsg('Les mots de passe ne correspondent pas'); return }
+    if (nouveauMdp.length < 6) { setMsg('Minimum 6 caractères'); return }
+    const { error } = await supabase.auth.updateUser({ password: nouveauMdp })
+    if (error) { setMsg('Erreur : ' + error.message); return }
+    setMsg('Mot de passe mis à jour !')
+    setNouveauMdp('')
+    setConfirmerMdp('')
   }
 
   async function uploadAvatar(e) {
@@ -755,25 +656,6 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfil
     window.location.reload()
   }
 
-  async function uploadFichier(e, type) {
-    const file = e.target.files[0]
-    if (!file) return
-    setUploading(true)
-    const fileName = `${profile.id}-${Date.now()}-${file.name}`
-    await supabase.storage.from('fichiers_membres').upload(`membres/${fileName}`, file)
-    const { data: { publicUrl } } = supabase.storage.from('fichiers_membres').getPublicUrl(`membres/${fileName}`)
-    await supabase.from('fichiers').insert({
-      utilisateur_id: profile.id,
-      nom_fichier: file.name,
-      type_fichier: type,
-      url: publicUrl,
-      statut: 'en_attente'
-    })
-    setMsg('Fichier envoyé — en attente de validation')
-    loadFichiers()
-    setUploading(false)
-  }
-
   const cotisOk = cotisations.filter(c => c.statut === 'paye').length
   const statutColor = { paye: '#25d366', en_retard: '#C8102E', en_attente: '#f59e0b' }
   const statutLabel = { paye: 'Payé', en_retard: 'En retard', en_attente: 'En attente' }
@@ -789,9 +671,9 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfil
       </div>
 
       <div style={{display:'flex',background:theme.card,borderBottom:`1px solid ${theme.border}`,overflowX:'auto'}}>
-        {['info','fichiers','cotisations','parametres'].map(t => (
+        {['info','cotisations','parametres'].map(t => (
           <button key={t} onClick={() => setTab(t)} style={{flex:1,padding:'12px 4px',background:'none',border:'none',borderBottom:`2px solid ${tab===t?'#C8102E':'transparent'}`,color:tab===t?'#C8102E':theme.muted,fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:tab===t?'600':'400',textTransform:'capitalize',whiteSpace:'nowrap'}}>
-            {t==='info'?'Infos':t==='fichiers'?'Fichiers':t==='cotisations'?'Cotisations':'Paramètres'}
+            {t==='info'?'Infos':t==='cotisations'?'Cotisations':'Paramètres'}
           </button>
         ))}
       </div>
@@ -817,40 +699,6 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfil
                 </button>
               </div>
             )}
-          </div>
-        )}
-
-        {tab==='fichiers' && (
-          <div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'14px'}}>
-              <label style={{display:'block',background:theme.card,border:`2px dashed ${theme.border}`,borderRadius:'12px',padding:'16px',textAlign:'center',cursor:'pointer'}}>
-                <div style={{color:theme.muted,fontSize:'12px',fontWeight:'600',marginBottom:'4px'}}>CV</div>
-                <div style={{color:theme.muted,fontSize:'11px'}}>{uploading?'Upload...':'Ajouter'}</div>
-                <input type="file" accept=".pdf,.docx" onChange={e=>uploadFichier(e,'cv')} style={{display:'none'}} />
-              </label>
-              <label style={{display:'block',background:theme.card,border:`2px dashed ${theme.border}`,borderRadius:'12px',padding:'16px',textAlign:'center',cursor:'pointer'}}>
-                <div style={{color:theme.muted,fontSize:'12px',fontWeight:'600',marginBottom:'4px'}}>Portfolio</div>
-                <div style={{color:theme.muted,fontSize:'11px'}}>{uploading?'Upload...':'Ajouter'}</div>
-                <input type="file" accept=".pdf,.docx" onChange={e=>uploadFichier(e,'portfolio')} style={{display:'none'}} />
-              </label>
-            </div>
-            {fichiers.map(f => (
-              <div key={f.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'10px',padding:'12px',marginBottom:'6px',display:'flex',alignItems:'center',gap:'8px'}}>
-                <div style={{fontSize:'20px'}}>📄</div>
-                <div style={{flex:1}}>
-                  <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{f.nom_fichier}</div>
-                  <div style={{color:statutColor[f.statut],fontSize:'11px',marginTop:'2px'}}>{statutLabel[f.statut]}</div>
-                </div>
-                <a 
-                  href={f.url} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  style={{color:'#C8102E',fontSize:'12px',fontWeight:'600',textDecoration:'none'}}
-                >
-                  Voir
-                </a>
-              </div>
-            ))}
           </div>
         )}
 
@@ -892,22 +740,22 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, fetchProfil
               <input 
                 type={showPassword?'text':'password'}
                 placeholder="Nouveau mot de passe" 
-                value={passwordNew} 
-                onChange={e=>setPasswordNew(e.target.value)} 
+                value={nouveauMdp} 
+                onChange={e=>setNouveauMdp(e.target.value)} 
                 style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} 
               />
               <input 
                 type={showPassword?'text':'password'}
                 placeholder="Confirmer mot de passe" 
-                value={passwordConfirm} 
-                onChange={e=>setPasswordConfirm(e.target.value)} 
+                value={confirmerMdp} 
+                onChange={e=>setConfirmerMdp(e.target.value)} 
                 style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} 
               />
               <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',marginBottom:'12px'}}>
                 <input type="checkbox" checked={showPassword} onChange={e=>setShowPassword(e.target.checked)} style={{accentColor:'#C8102E'}} />
                 <span style={{color:theme.muted,fontSize:'12px'}}>Afficher le mot de passe</span>
               </label>
-              <button onClick={changePassword} style={{width:'100%',background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
+              <button onClick={changerMotDePasse} style={{width:'100%',background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
                 Mettre à jour
               </button>
             </div>

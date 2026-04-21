@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 
 const EVENEMENTS_LOCAUX = [
   {
@@ -32,15 +33,23 @@ const EVENEMENTS_LOCAUX = [
 
 export default function Nouveau() {
   const navigate = useNavigate()
+  const { session } = useAuth()
   const [dark, setDark] = useState(false)
   const [evenements, setEvenements] = useState(EVENEMENTS_LOCAUX)
   const [activeEv, setActiveEv] = useState('local-detente')
   const [lightbox, setLightbox] = useState(null)
   const [nom, setNom] = useState('')
+  const [prenom, setPrenom] = useState('')
   const [tel, setTel] = useState('')
   const [domaine, setDomaine] = useState('')
   const [msg, setMsg] = useState('')
   const [email, setEmail] = useState('')
+
+  useEffect(() => {
+    if (session) {
+      navigate('/membre')
+    }
+  }, [session, navigate])
 
   const BUREAU = [
     { prenom: 'Benjamin', nom: 'EZIAN', role: 'Président' },
@@ -48,7 +57,7 @@ export default function Nouveau() {
     { prenom: 'Prunelle', nom: 'ADOSSI', role: 'Secrétaire' },
     { prenom: 'Levi', nom: 'AGBETOWOKA', role: 'Vice-Secrétaire & Communication' },
     { prenom: 'Dorcas', nom: 'ADJINARE', role: 'Trésorière' },
-    { prenom: 'Messan', nom: 'KOUMAYI', role: 'Vice-Trésorier' },
+    { prenom: 'Messan', nom: 'KOUMAI', role: 'Vice-Trésorier' },
     { prenom: 'Esther', nom: 'KPEMOUA', role: 'Présidente JCF' },
     { prenom: 'Gloria', nom: 'HOUNGLONOU', role: 'Évangélisation' },
     { prenom: 'John', nom: 'AFATSAWO', role: 'Prière' },
@@ -76,14 +85,49 @@ export default function Nouveau() {
       setActiveEv(data[0].id)
     }
   }
-
-  async function envoyerDemande() {
-    if (!nom || !tel) { setMsg('Renseignez votre nom et numéro WhatsApp'); return }
-    await supabase.from('demandes').insert({ nom, whatsapp: tel, domaine, email })
-    setMsg('Demande envoyée ! Le bureau vous contactera bientôt.')
-    setNom(''); setTel(''); setDomaine('')
+  console.log(import.meta.env.VITE_SUPABASE_URL)
+console.log(import.meta.env.VITE_SUPABASE_ANON_KEY)
+async function envoyerDemande() {
+  if (!prenom || !nom || !tel) {
+    setMsg('Veuillez renseigner prénom, nom et numéro WhatsApp');
+    return;
   }
 
+  const payload = {
+    nom: nom.trim(),
+    prenom: prenom.trim(),
+    whatsapp: tel.trim(),
+    email: email ? email.trim() : null,
+    domaine: domaine ? domaine.trim() : null,
+    statut: 'en_attente'
+  };
+
+  console.log('🚀 Payload envoyé à Supabase :', payload);
+
+  const { data, error } = await supabase
+    .from('demandes')
+    .insert(payload)
+    .select();
+
+  if (error) {
+    console.error('❌ Erreur 400 complète :', error);
+    console.error('Code :', error.code);
+    console.error('Message :', error.message);
+    console.error('Détails :', error.details);
+    console.error('Hint :', error.hint);
+    setMsg('Erreur : ' + (error.message || 'Vérifie la console'));
+    return;
+  }
+
+  console.log('✅ Insertion réussie !', data);
+  setMsg('Demande envoyée avec succès ! Le bureau vous contactera bientôt.');
+
+  setPrenom('');
+  setNom('');
+  setTel('');
+  setEmail(''); 
+  setDomaine('');
+}
   const evActif = evenements.find(e => e.id === activeEv)
 
   return (
@@ -104,7 +148,7 @@ export default function Nouveau() {
           Bienvenue parmi nous
         </h1>
         <p style={{fontSize:'14px',opacity:0.8,maxWidth:'320px',margin:'0 auto',lineHeight:'1.7'}}>
-          La Jeunesse EB Le Rocher est un espace de foi, de croissance et de fraternité.
+          Comme les premiers chrétiens, on se retrouve, on apprend, on prie et on partage la vie ensemble. Actes 2:42
         </p>
       </div>
 
@@ -221,7 +265,8 @@ export default function Nouveau() {
               {msg}
             </div>
           )}
-          <input placeholder="Nom complet *" value={nom} onChange={e=>setNom(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
+          <input placeholder="Prénom *" value={prenom} onChange={e=>setPrenom(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
+          <input placeholder="Nom *" value={nom} onChange={e=>setNom(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
           <input placeholder="Adresse email *" value={email} onChange={e=>setEmail(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
           <input placeholder="Numéro WhatsApp *" value={tel} onChange={e=>setTel(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
           <input placeholder="Domaine d'études ou d'activité" value={domaine} onChange={e=>setDomaine(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'14px',fontFamily:'inherit'}} />

@@ -2,13 +2,31 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { createClient } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabase'
 
-const supabaseAdmin = createClient('https://qzqphzfbkdtglghloplo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6cXBoemZia2R0Z2xnaGxvcGxvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA3MjUyNCwiZXhwIjoyMDg5NjQ4NTI0fQ.8NSCK72hcwTz_pcxn4yWVXvY8E3kbV_2qZR1OjCzeDo')
+const supabaseAdmin = createClient(
+  'https://qzqphzfbkdtglghloplo.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6cXBoemZia2R0Z2xnaGxvcGxvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA3MjUyNCwiZXhwIjoyMDg5NjQ4NTI0fQ.8NSCK72hcwTz_pcxn4yWVXvY8E3kbV_2qZR1OjCzeDo',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false
+    },
+    global: {
+      headers: {
+        apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6cXBoemZia2R0Z2xnaGxvcGxvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA3MjUyNCwiZXhwIjoyMDg5NjQ4NTI0fQ.8NSCK72hcwTz_pcxn4yWVXvY8E3kbV_2qZR1OjCzeDo',
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6cXBoemZia2R0Z2xnaGxvcGxvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA3MjUyNCwiZXhwIjoyMDg5NjQ4NTI0fQ.8NSCK72hcwTz_pcxn4yWVXvY8E3kbV_2qZR1OjCzeDo`
+      }
+    }
+  }
+)
 
 export default function Admin() {
   const navigate = useNavigate()
   const { supabase, signOut } = useAuth() 
-  const [tab, setTab] = useState('dashboard') 
+  const [tab, setTab] = useState('dashboard')
+  const [refreshCount, setRefreshCount] = useState(0)
   const [dark, setDark] = useState(true)
 
   const theme = {
@@ -66,34 +84,34 @@ export default function Admin() {
         </div>
       </div>
       <div style={{marginLeft:'220px',flex:1,padding:'24px',maxWidth:'1000px'}}>
-        {tab==='dashboard' && <Dashboard theme={theme} supabase={supabase} />}
-        {tab==='membres' && <Membres theme={theme} supabase={supabase} />}
-        {tab==='demandes' && <Demandes theme={theme} supabase={supabase} />}
-        {tab==='cotisations' && <Cotisations theme={theme} supabase={supabase} />}
-        {tab==='fichiers' && <Fichiers theme={theme} supabase={supabase} />}
-        {tab==='galerie' && <Galerie theme={theme} supabase={supabase} />}
-        {tab==='evenements' && <Evenements theme={theme} supabase={supabase} />}
-        {tab==='devotions' && <Devotions theme={theme} supabase={supabase} />}
+        {tab==='dashboard' && <Dashboard theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} refreshCount={refreshCount} />}
+        {tab==='membres' && <Membres key={tab} theme={theme} supabase={supabase} refreshCount={refreshCount} />}
+        {tab==='demandes' && <Demandes key={tab} theme={theme} supabase={supabase} onRefresh={() => setRefreshCount(r => r+1)} />}
+        {tab==='cotisations' && <Cotisations theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
+        {tab==='fichiers' && <Fichiers theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
+        {tab==='galerie' && <Galerie theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
+        {tab==='evenements' && <Evenements theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
+        {tab==='devotions' && <Devotions theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
         {tab==='feedbacks' && <Feedbacks theme={theme} supabase={supabase} />}
-        {tab==='annonces' && <Annonces theme={theme} supabase={supabase} />}
+        {tab==='annonces' && <Annonces theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
       </div>
     </div>
   )
 }
 
-function Dashboard({ theme, supabase }) {
+function Dashboard({ theme, supabase, supabaseAdmin, refreshCount }) {
   const [stats, setStats] = useState({membres:0, cotisOk:0, fichiers:0, demandes:0})
 
   useEffect(() => {
     async function load() {
-      const {count:membres} = await supabase.from('utilisateurs').select('*',{count:'exact',head:true})
-      const {count:cotisOk} = await supabase.from('cotisations').select('*',{count:'exact',head:true}).eq('statut','paye')
-      const {count:fichiers} = await supabase.from('fichiers').select('*',{count:'exact',head:true}).eq('statut','en_attente')
-      const {count:demandes} = await supabase.from('demandes').select('*',{count:'exact',head:true}).eq('statut','en_attente')
+      const {count:membres} = await supabaseAdmin.from('utilisateurs').select('*',{count:'exact',head:true})
+      const {count:cotisOk} = await supabaseAdmin.from('cotisations').select('*',{count:'exact',head:true}).eq('statut','paye')
+      const {count:fichiers} = await supabaseAdmin.from('fichiers').select('*',{count:'exact',head:true}).eq('statut','en_attente')
+      const {count:demandes} = await supabaseAdmin.from('demandes').select('*',{count:'exact',head:true}).eq('statut','en_attente')
       setStats({membres:membres||0, cotisOk:cotisOk||0, fichiers:fichiers||0, demandes:demandes||0})
     }
     load()
-  }, [])
+  }, [refreshCount])
 
   return (
     <div>
@@ -115,32 +133,88 @@ function Dashboard({ theme, supabase }) {
   )
 }
 
-function Demandes({ theme, supabase }) {
-  const [demandes, setDemandes] = useState([])
+async function loadDemandes() {
+  console.log('🔄 Chargement des demandes...');
+  
+  const { data, error } = await supabase
+    .from('demandes')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-  useEffect(() => { loadDemandes() }, [])
+  console.log('📋 Données reçues :', data);
+  console.log('❌ Erreur :', error);
 
-  async function loadDemandes() {
-    const {data} = await supabase.from('demandes').select('*').order('created_at',{ascending:false})
-    if (data) setDemandes(data)
+  if (error) {
+    console.error('Erreur chargement demandes:', error);
+    return;
   }
 
+  setDemandes(data || []);
+}
+
   async function updateStatut(id, statut) {
-    await supabaseAdmin.from('demandes').update({statut}).eq('id', id)
-    if (statut === 'accepte') {
-      const demande = demandes.find(d => d.id === id)
-      if (demande) {
-        await supabaseAdmin.from('utilisateurs').insert({
-          nom: demande.nom.split(' ').slice(1).join(' ') || demande.nom,
-          prenom: demande.nom.split(' ')[0],
-          email: demande.email || null,
+    try {
+      // Mettre à jour le statut de la demande
+      const { error: updateError } = await supabaseAdmin.from('demandes').update({ statut }).eq('id', id)
+      if (updateError) {
+        console.log('❌ Erreur mise à jour demande:', updateError)
+        return
+      }
+
+      if (statut === 'accepte') {
+        const demande = demandes.find(d => d.id === id)
+        if (!demande) {
+          console.log('❌ Demande non trouvée')
+          return
+        }
+
+        // Créer le compte utilisateur
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+          email: demande.email,
+          password: 'rocher2026',
+          email_confirm: true
+        })
+
+        if (authError || !authData.user) {
+          console.log('❌ Erreur création compte:', authError)
+          // Remettre le statut en attente en cas d'erreur
+          await supabaseAdmin.from('demandes').update({ statut: 'en_attente' }).eq('id', id)
+          return
+        }
+
+        // Ajouter dans la table utilisateurs
+        const { error: insertError } = await supabaseAdmin.from('utilisateurs').insert({
+          id: authData.user.id,
+          email: demande.email,
+          nom: demande.nom,
+          prenom: demande.prenom,
           whatsapp: demande.whatsapp,
           domaine: demande.domaine || '',
           role: 'membre'
         })
+
+        if (insertError) {
+          console.log('❌ Erreur insertion utilisateur:', insertError)
+          // Supprimer le compte créé en cas d'erreur
+          await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+          // Remettre le statut en attente
+          await supabaseAdmin.from('demandes').update({ statut: 'en_attente' }).eq('id', id)
+          return
+        }
+
+        console.log('✅ Membre accepté et créé:', authData.user.id)
       }
+
+      // Mettre à jour l'état local immédiatement pour l'UI
+      setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut } : d))
+
+      // Recharger les données et rafraîchir l'interface
+      await loadDemandes()
+      onRefresh()
+
+    } catch (error) {
+      console.log('❌ Erreur générale:', error)
     }
-    loadDemandes()
   }
 
   return (
@@ -188,7 +262,20 @@ function Demandes({ theme, supabase }) {
                 <a
                   href={`https://wa.me/${d.whatsapp.replace(/\+/g,'').replace(/\s/g,'')}?text=${encodeURIComponent(
                     d.statut==='accepte'
-                      ? `Bonjour ${d.nom} ! Votre demande a été acceptée ! Bienvenue dans la famille Jeunesse EB Le Rocher 🙏\n\nVoici vos accès :\nEmail : ${d.email||'à définir'}\nMot de passe : rocher2026`
+                      ? `Bonjour ${d.prenom} !
+
+Ta demande d'adhésion à la Jeunesse EB Le Rocher a été acceptée.
+
+Voici tes accès pour te connecter :
+Email : ${d.email}
+Mot de passe temporaire : rocher2026
+
+Lien : https://jbr-l.netlify.app
+
+N'oublie pas de changer ton mot de passe dès ta première connexion depuis Profil > Paramètres.
+
+A très bientôt !
+Le Bureau de la Jeunesse EB Le Rocher`
                       : `Bonjour ${d.nom}, votre demande d'adhésion à la Jeunesse EB Le Rocher a été refusée. Merci de votre intérêt.`
                   )}`}
                   target="_blank"
@@ -204,16 +291,79 @@ function Demandes({ theme, supabase }) {
       ))}
     </div>
   )
-}
 
-function Membres({ theme, supabase }) {
+
+function Membres({ theme, supabase, refreshCount }) {
   const [membres, setMembres] = useState([])
+  const [nom, setNom] = useState('')
+  const [prenom, setPrenom] = useState('')
+  const [email, setEmail] = useState('')
+  const [domaine, setDomaine] = useState('')
+  const [whatsapp, setWhatsapp] = useState('')
+  const [msg, setMsg] = useState('')
+  const [lastMembre, setLastMembre] = useState(null)
+  const [editingMembre, setEditingMembre] = useState(null)
 
-  useEffect(() => { loadMembres() }, [])
+  useEffect(() => { loadMembres() }, [refreshCount])
 
   async function loadMembres() {
     const {data} = await supabase.from('utilisateurs').select('*').order('created_at',{ascending:false})
     if (data) setMembres(data)
+  }
+
+  async function addMembre() {
+    if (!nom || !prenom || !email) { setMsg('Remplissez tous les champs obligatoires'); return }
+
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: email,
+      password: 'rocher2026',
+      email_confirm: true
+    })
+
+    if (authError) { setMsg('Erreur : ' + authError.message); return }
+
+    const { error: dbError } = await supabaseAdmin.from('utilisateurs').insert({
+      id: authData.user.id,
+      email,
+      nom,
+      prenom,
+      domaine,
+      whatsapp,
+      role: 'membre'
+    })
+
+    if (dbError) { setMsg('Erreur : ' + dbError.message); return }
+
+    setLastMembre({ prenom, nom, email, whatsapp })
+    setMsg('Compte créé !')
+    setNom(''); setPrenom(''); setEmail(''); setDomaine(''); setWhatsapp('')
+    loadMembres()
+  }
+
+  function modifierMembre(membre) {
+    setEditingMembre(membre)
+    setNom(membre.nom || '')
+    setPrenom(membre.prenom || '')
+    setEmail(membre.email || '')
+    setDomaine(membre.domaine || '')
+    setWhatsapp(membre.whatsapp || '')
+  }
+
+  async function saveMembreModifie() {
+    if (!editingMembre) return
+    const { error } = await supabaseAdmin.from('utilisateurs').update({
+      nom,
+      prenom,
+      domaine,
+      whatsapp
+    }).eq('id', editingMembre.id)
+
+    if (error) { setMsg('Erreur : ' + error.message); return }
+
+    setMsg('Membre modifié !')
+    setEditingMembre(null)
+    setNom(''); setPrenom(''); setEmail(''); setDomaine(''); setWhatsapp('')
+    loadMembres()
   }
 
   async function retirerMembre(id) {
@@ -264,12 +414,15 @@ A bientôt.
               </div>
             )}
             <div style={{flex:1}}>
-              <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{m.prenom} {m.nom}</div>
-              <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{m.email}</div>
+              <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{m.prenom && m.nom ? `${m.prenom} ${m.nom}` : m.email}</div>
+              {m.prenom && m.nom && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{m.email}</div>}
               {m.whatsapp && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{m.whatsapp}</div>}
               <div style={{color:theme.muted,fontSize:'11px',marginTop:'4px'}}>{m.domaine} · {m.role}</div>
             </div>
             <div style={{display:'flex',gap:'6px',flexDirection:'column',flexShrink:0}}>
+              <button onClick={() => modifierMembre(m)} style={{background:'rgba(0,123,255,0.1)',border:'1px solid rgba(0,123,255,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#007bff',fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>
+                Modifier
+              </button>
               {m.whatsapp && (
                 <button onClick={() => envoyerAcces(m)} style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#25d366',fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>
                   Envoyer les accès
@@ -282,11 +435,40 @@ A bientôt.
           </div>
         ))}
       </div>
+
+      {/* Modal modification membre */}
+      {editingMembre && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'16px'}}>
+          <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'16px',padding:'24px',maxWidth:'400px',width:'100%'}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'20px'}}>
+              <h3 style={{color:theme.text,fontSize:'18px',fontWeight:'700'}}>Modifier le membre</h3>
+              <button onClick={() => setEditingMembre(null)} style={{background:'none',border:'none',fontSize:'24px',color:theme.muted,cursor:'pointer'}}>✕</button>
+            </div>
+            {msg && (
+              <div style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#25d366',fontSize:'13px',marginBottom:'16px'}}>
+                {msg}
+              </div>
+            )}
+            <input placeholder="Prénom" value={prenom} onChange={e=>setPrenom(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'10px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'12px',fontFamily:'inherit'}} />
+            <input placeholder="Nom" value={nom} onChange={e=>setNom(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'10px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'12px',fontFamily:'inherit'}} />
+            <input placeholder="Domaine" value={domaine} onChange={e=>setDomaine(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'10px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'12px',fontFamily:'inherit'}} />
+            <input placeholder="WhatsApp" value={whatsapp} onChange={e=>setWhatsapp(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'10px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'16px',fontFamily:'inherit'}} />
+            <div style={{display:'flex',gap:'8px'}}>
+              <button onClick={saveMembreModifie} style={{flex:1,background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
+                Sauvegarder
+              </button>
+              <button onClick={() => setEditingMembre(null)} style={{flex:1,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'12px',color:theme.text,fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-function Cotisations({ theme, supabase }) {
+function Cotisations({ theme, supabase, supabaseAdmin }) {
   const [membres, setMembres] = useState([])
   const [selected, setSelected] = useState(null)
   const [montant, setMontant] = useState('2000')
@@ -303,11 +485,13 @@ function Cotisations({ theme, supabase }) {
 
   async function saveCotis() {
     if (!selected||!mois) { setMsg('Sélectionnez un membre et un mois'); return }
-    const {data:existing} = await supabase.from('cotisations').select('id').eq('utilisateur_id',selected.id).eq('mois',mois).single()
-    if (existing) {
-      await supabaseAdmin.from('cotisations').update({statut,montant:parseInt(montant)}).eq('id',existing.id)
+    const {data:existing} = await supabase.from('cotisations').select('id').eq('utilisateur_id',selected.id).eq('mois',mois).limit(1)
+    if (existing?.length > 0) {
+      const { error } = await supabaseAdmin.from('cotisations').update({statut,montant:parseInt(montant)}).eq('id',existing[0].id)
+      if (error) { setMsg('Erreur : ' + error.message); return }
     } else {
-      await supabaseAdmin.from('cotisations').insert({utilisateur_id:selected.id,mois,montant:parseInt(montant),statut})
+      const { error } = await supabaseAdmin.from('cotisations').insert({utilisateur_id:selected.id,mois,montant:parseInt(montant),statut})
+      if (error) { setMsg('Erreur : ' + error.message); return }
     }
     setMsg('Cotisation enregistrée !')
     loadMembres()
@@ -390,9 +574,8 @@ function Cotisations({ theme, supabase }) {
   )
 }
 
-function Fichiers({ theme, supabase }) {
+function Fichiers({ theme, supabase, supabaseAdmin }) {
   const [fichiers, setFichiers] = useState([])
-  const [preview, setPreview] = useState(null)
 
   useEffect(() => { loadFichiers() }, [])
 
@@ -402,14 +585,16 @@ function Fichiers({ theme, supabase }) {
   }
 
   async function approuver(id) {
-    await supabaseAdmin.from('fichiers').update({statut:'approuve'}).eq('id',id)
-    setPreview(null)
+    const { error } = await supabaseAdmin.from('fichiers').update({statut:'approuve'}).eq('id',id)
+    if (error) console.log('❌ Erreur approbation fichier:', error)
+    else console.log('✅ Fichier approuvé')
     loadFichiers()
   }
 
   async function supprimer(id) {
-    await supabaseAdmin.from('fichiers').update({statut:'supprime'}).eq('id',id)
-    setPreview(null)
+    const { error } = await supabaseAdmin.from('fichiers').update({statut:'supprime'}).eq('id',id)
+    if (error) console.log(' Erreur suppression fichier:', error)
+    else console.log(' Fichier supprimé')
     loadFichiers()
   }
 
@@ -417,51 +602,28 @@ function Fichiers({ theme, supabase }) {
     <div>
       <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Fichiers en attente</h2>
       {fichiers.length===0 && (
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
+        <div style={{background:theme.card,border:'1px solid ' + theme.border,borderRadius:'14px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
           Aucun fichier en attente de validation
         </div>
       )}
       {fichiers.map(f => (
-        <div key={f.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'12px'}}>
+        <div key={f.id} style={{background:theme.card,border:'1px solid ' + theme.border,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'12px'}}>
           <div style={{fontSize:'24px',flexShrink:0}}>📄</div>
           <div style={{flex:1}}>
             <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{f.nom_fichier}</div>
             <div style={{color:theme.muted,fontSize:'11px'}}>{f.utilisateurs?.prenom} {f.utilisateurs?.nom} · {f.type_fichier}</div>
           </div>
           <div style={{display:'flex',gap:'8px'}}>
-            <button onClick={() => setPreview(f)} style={{background:'rgba(255,193,7,0.1)',border:'1px solid rgba(255,193,7,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#ffc107',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Aperçu</button>
             <button onClick={() => approuver(f.id)} style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#25d366',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Approuver</button>
             <button onClick={() => supprimer(f.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>Supprimer</button>
           </div>
         </div>
       ))}
-
-      {/* Modal aperçu */}
-      {preview && (
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:'16px'}} onClick={() => setPreview(null)}>
-          <div style={{background:theme.bg,borderRadius:'14px',padding:'20px',maxWidth:'90vw',maxHeight:'90vh',overflowY:'auto',display:'flex',flexDirection:'column'}} onClick={e=>e.stopPropagation()}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
-              <h3 style={{color:theme.text,fontSize:'16px',fontWeight:'700'}}>{preview.nom_fichier}</h3>
-              <button onClick={() => setPreview(null)} style={{background:'none',border:'none',fontSize:'24px',color:theme.muted,cursor:'pointer'}}>✕</button>
-            </div>
-            <iframe 
-              src={`https://docs.google.com/viewer?url=${encodeURIComponent(preview.url)}&embedded=true`}
-              style={{width:'100%',height:'500px',border:`1px solid ${theme.border}`,borderRadius:'10px',marginBottom:'16px'}}
-              title="Aperçu"
-            />
-            <div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}>
-              <button onClick={() => setPreview(null)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 16px',color:theme.text,fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>Fermer</button>
-              <button onClick={() => approuver(preview.id)} style={{background:'#25d366',border:'none',borderRadius:'8px',padding:'8px 16px',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>Approuver</button>
-              <button onClick={() => supprimer(preview.id)} style={{background:'#C8102E',border:'none',borderRadius:'8px',padding:'8px 16px',color:'white',fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>Supprimer</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
-function Galerie({ theme, supabase }) {
+function Galerie({ theme, supabase, supabaseAdmin }) {
   const [nom, setNom] = useState('')
   const [date, setDate] = useState('')
   const [photos, setPhotos] = useState([])
@@ -474,7 +636,7 @@ function Galerie({ theme, supabase }) {
   useEffect(() => { loadEvenements() }, [])
 
   async function loadEvenements() {
-    const {data} = await supabase.from('evenements_galerie').select('*, photos_galerie(*)').order('date_evenement',{ascending:false})
+    const {data} = await supabaseAdmin.from('evenements_galerie').select('*, photos_galerie(*)').order('date_evenement',{ascending:false})
     if (data) setEvenements(data)
   }
 
@@ -489,13 +651,15 @@ function Galerie({ theme, supabase }) {
     if (!nom||!date) { setMsg('Renseignez le nom et la date'); return }
     if (photos.length===0) { setMsg('Ajoutez au moins une photo'); return }
     setUploading(true)
-    const {data:ev, error} = await supabaseAdmin.from('evenements_galerie').insert({nom, date_evenement:date}).select().single()
-    if (error) { setMsg('Erreur création événement'); setUploading(false); return }
+    const {data:ev, error} = await supabaseAdmin.from('evenements_galerie').insert({nom, date_evenement:date}).select().limit(1)
+    if (error || !ev || ev.length===0) { setMsg('Erreur création événement'); setUploading(false); return }
     for (const photo of photos) {
       const fileName = `${Date.now()}-${photo.name}`
-      await supabase.storage.from('fichiers_membres').upload(`galerie/${fileName}`, photo)
+      const { error: uploadError } = await supabase.storage.from('fichiers_membres').upload(`galerie/${fileName}`, photo)
+      if (uploadError) { setMsg('Erreur upload photo'); setUploading(false); return }
       const {data:{publicUrl}} = supabase.storage.from('fichiers_membres').getPublicUrl(`galerie/${fileName}`)
-      await supabaseAdmin.from('photos_galerie').insert({evenement_id:ev.id, url:publicUrl})
+      const { error: photoError } = await supabaseAdmin.from('photos_galerie').insert({evenement_id:ev[0].id, url:publicUrl})
+      if (photoError) { setMsg('Erreur enregistrement photo'); setUploading(false); return }
     }
     setMsg('Événement publié !')
     setNom(''); setDate(''); setPhotos([]); setPreviews([])
@@ -505,7 +669,9 @@ function Galerie({ theme, supabase }) {
   }
 
   async function supprimerEv(id) {
-    await supabaseAdmin.from('evenements_galerie').delete().eq('id',id)
+    const { error } = await supabaseAdmin.from('evenements_galerie').delete().eq('id',id)
+    if (error) console.log('❌ Erreur suppression événement galerie:', error)
+    else console.log('✅ Événement galerie supprimé')
     loadEvenements()
   }
 
@@ -612,7 +778,7 @@ function Feedbacks({ theme, supabase }) {
   )
 }
 
-function Evenements({ theme, supabase }) {
+function Evenements({ theme, supabase, supabaseAdmin }) {
   const [titre, setTitre] = useState('')
   const [date, setDate] = useState('')
   const [lieu, setLieu] = useState('')
@@ -623,20 +789,24 @@ function Evenements({ theme, supabase }) {
   useEffect(() => { loadEvenements() }, [])
 
   async function loadEvenements() {
-    const { data } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true })
+    const { data } = await supabaseAdmin.from('evenements').select('*').order('date_evenement', { ascending: true })
     if (data) setEvenements(data)
   }
 
   async function publier() {
     if (!titre || !date) { setMsg('Renseignez le titre et la date'); return }
-    await supabaseAdmin.from('evenements').insert({ titre, date_evenement: date, lieu, description })
+    const { error } = await supabaseAdmin.from('evenements').insert({ titre, date_evenement: date, lieu, description })
+    if (error) { console.log('❌ Erreur création événement:', error); setMsg('Erreur : ' + error.message); return }
+    console.log('✅ Événement créé')
     setMsg('Événement publié !')
     setTitre(''); setDate(''); setLieu(''); setDescription('')
     loadEvenements()
   }
 
   async function supprimer(id) {
-    await supabaseAdmin.from('evenements').delete().eq('id', id)
+    const { error } = await supabaseAdmin.from('evenements').delete().eq('id', id)
+    if (error) { console.log('❌ Erreur suppression événement:', error); return }
+    console.log('✅ Événement supprimé')
     loadEvenements()
   }
 
@@ -677,7 +847,7 @@ function Evenements({ theme, supabase }) {
   )
 }
 
-function Annonces({ theme, supabase }) {
+function Annonces({ theme, supabase, supabaseAdmin }) {
   const [titre, setTitre] = useState('')
   const [contenu, setContenu] = useState('')
   const [urgent, setUrgent] = useState(false)
@@ -693,14 +863,18 @@ function Annonces({ theme, supabase }) {
 
   async function publier() {
     if (!titre) { setMsg('Renseignez un titre'); return }
-    await supabaseAdmin.from('annonces').insert({titre, contenu, urgent})
+    const { error } = await supabaseAdmin.from('annonces').insert({titre, contenu, urgent})
+    if (error) { console.log('❌ Erreur création annonce:', error); setMsg('Erreur : ' + error.message); return }
+    console.log('✅ Annonce créée')
     setMsg('Annonce publiée !')
     setTitre(''); setContenu(''); setUrgent(false)
     loadAnnonces()
   }
 
   async function supprimer(id) {
-    await supabaseAdmin.from('annonces').delete().eq('id',id)
+    const { error } = await supabaseAdmin.from('annonces').delete().eq('id',id)
+    if (error) { console.log('❌ Erreur suppression annonce:', error); return }
+    console.log('✅ Annonce supprimée')
     loadAnnonces()
   }
 
@@ -784,7 +958,7 @@ function Annonces({ theme, supabase }) {
   )
 }
 
-function Devotions({ theme, supabase }) {
+function Devotions({ theme, supabase, supabaseAdmin }) {
   const [titre, setTitre] = useState('')
   const [verset, setVerset] = useState('')
   const [reference, setReference] = useState('')
@@ -793,6 +967,7 @@ function Devotions({ theme, supabase }) {
   const [devotions, setDevotions] = useState([])
   const [defis, setDefis] = useState([])
   const [lectures, setLectures] = useState([{ jour: '', ref: '' }])
+  const [semaine, setSemaine] = useState('')
   const [msg, setMsg] = useState('')
   const [tab, setTab] = useState('devotions')
 
@@ -802,46 +977,58 @@ function Devotions({ theme, supabase }) {
   }, [])
 
   async function loadDevotions() {
-    const { data } = await supabase.from('devotions').select('*').order('date_devotion', { ascending: false })
+    const { data } = await supabaseAdmin.from('devotions').select('*').order('date_devotion', { ascending: false })
     if (data) setDevotions(data)
   }
 
   async function loadDefis() {
-    const { data } = await supabase.from('defis_lecture').select('*').order('created_at', { ascending: false })
+    const { data } = await supabaseAdmin.from('defis_lecture').select('*').order('created_at', { ascending: false })
     if (data) setDefis(data)
   }
 
   async function publierDevotion() {
     if (!titre || !verset || !reference || !dateDevotion) { setMsg('Renseignez tous les champs obligatoires'); return }
-    await supabaseAdmin.from('devotions').insert({
+    const { error } = await supabaseAdmin.from('devotions').insert({
       titre,
       verset,
       reference,
       priere,
       date_devotion: dateDevotion
     })
+    if (error) { console.log('❌ Erreur création dévotion:', error); setMsg('Erreur : ' + error.message); return }
+    console.log('✅ Dévotion créée')
     setMsg('Dévotion publiée !')
     setTitre(''); setVerset(''); setReference(''); setPriere(''); setDateDevotion('')
     loadDevotions()
   }
 
   async function publierDefi() {
-    if (!lectures.some(l => l.jour && l.ref)) { setMsg('Ajoutez au moins une lecture'); return }
-    await supabaseAdmin.from('defis_lecture').insert({
-      lectures: lectures.filter(l => l.jour && l.ref)
+    if (!semaine || !lectures.some(l => l.jour && l.ref)) { setMsg('Renseignez la semaine et ajoutez au moins une lecture'); return }
+    const lecturesFilled = lectures.filter(l => l.jour && l.ref)
+    const { error } = await supabaseAdmin.from('defis_lecture').insert({
+      semaine: parseInt(semaine),
+      annee: new Date().getFullYear(),
+      lectures: lecturesFilled
     })
+    if (error) { console.log('❌ Erreur création défi:', error); setMsg('Erreur : ' + error.message); return }
+      console.log('✅ Défi créé')
     setMsg('Défi publié !')
     setLectures([{ jour: '', ref: '' }])
+    setSemaine('')
     loadDefis()
   }
 
   async function supprimerDevotion(id) {
-    await supabaseAdmin.from('devotions').delete().eq('id', id)
+    const { error } = await supabaseAdmin.from('devotions').delete().eq('id', id)
+    if (error) { console.log('❌ Erreur suppression dévotion:', error); return }
+    console.log('✅ Dévotion supprimée')
     loadDevotions()
   }
 
   async function supprimerDefi(id) {
-    await supabaseAdmin.from('defis_lecture').delete().eq('id', id)
+    const { error } = await supabaseAdmin.from('defis_lecture').delete().eq('id', id)
+    if (error) { console.log('❌ Erreur suppression défi:', error); return }
+    console.log('✅ Défi supprimé')
     loadDefis()
   }
 
@@ -913,6 +1100,14 @@ function Devotions({ theme, supabase }) {
           <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'24px',marginTop:'20px'}}>
             <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Nouveau défi lecture</div>
             {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
+            
+            <input 
+              type="number"
+              placeholder="Numéro de la semaine" 
+              value={semaine} 
+              onChange={e=>setSemaine(e.target.value)} 
+              style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit',marginBottom:'12px'}} 
+            />
             
             {lectures.map((lecture, index) => (
               <div key={index} style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'8px'}}>
