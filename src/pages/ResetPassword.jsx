@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -22,10 +22,10 @@ export default function ResetPassword() {
       <div style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'16px',padding:'32px',width:'100%',maxWidth:'400px'}}>
         <div style={{textAlign:'center',marginBottom:'24px'}}>
           <img src="/logo.png" alt="Logo" style={{width:'60px',marginBottom:'12px'}} />
-          <h2 style={{color:'white',fontFamily:'Outfit,sans-serif',fontSize:'20px',fontWeight:'700'}}>Crée ton mot de passe</h2>
+          <h2 style={{color:'white',fontFamily:'Founders Grotesk,sans-serif',fontSize:'20px',fontWeight:'700'}}>Crée ton mot de passe</h2>
           <p style={{color:'rgba(255,255,255,0.5)',fontSize:'13px',marginTop:'6px'}}>Bienvenue dans la Jeunesse EB Le Rocher !</p>
         </div>
-        {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'10px',color:'#C8102E',fontSize:'12px',marginBottom:'16px',textAlign:'center'}}>{msg}</div>}
+        {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'10px',color:'#FC1713',fontSize:'12px',marginBottom:'16px',textAlign:'center'}}>{msg}</div>}
         <input
           type="password"
           placeholder="Nouveau mot de passe"
@@ -42,7 +42,7 @@ export default function ResetPassword() {
         />
         <button
           onClick={updatePassword}
-          style={{width:'100%',background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}
+          style={{width:'100%',background:'#FC1713',color:'white',border:'none',borderRadius:'8px',padding:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}
         >
           Confirmer
         </button>

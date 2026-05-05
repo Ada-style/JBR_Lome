@@ -5,8 +5,8 @@ import { createClient } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
 const supabaseAdmin = createClient(
-  'https://qzqphzfbkdtglghloplo.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6cXBoemZia2R0Z2xnaGxvcGxvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA3MjUyNCwiZXhwIjoyMDg5NjQ4NTI0fQ.8NSCK72hcwTz_pcxn4yWVXvY8E3kbV_2qZR1OjCzeDo',
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY,
   {
     auth: {
       autoRefreshToken: false,
@@ -15,8 +15,8 @@ const supabaseAdmin = createClient(
     },
     global: {
       headers: {
-        apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6cXBoemZia2R0Z2xnaGxvcGxvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA3MjUyNCwiZXhwIjoyMDg5NjQ4NTI0fQ.8NSCK72hcwTz_pcxn4yWVXvY8E3kbV_2qZR1OjCzeDo',
-        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6cXBoemZia2R0Z2xnaGxvcGxvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA3MjUyNCwiZXhwIjoyMDg5NjQ4NTI0fQ.8NSCK72hcwTz_pcxn4yWVXvY8E3kbV_2qZR1OjCzeDo`
+        apikey: import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY}`
       }
     }
   }
@@ -24,7 +24,7 @@ const supabaseAdmin = createClient(
 
 export default function Admin() {
   const navigate = useNavigate()
-  const { signOut } = useAuth() 
+  const { signOut } = useAuth()
   const [tab, setTab] = useState('dashboard')
   const [refreshCount, setRefreshCount] = useState(0)
   const [dark, setDark] = useState(true)
@@ -41,27 +41,27 @@ export default function Admin() {
 
   // SVG Icon components
   const I = (p) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>{p.children}</svg>
-  const IconDashboard = () => <I><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></I>
-  const IconUsers = () => <I><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></I>
-  const IconInbox = () => <I><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></I>
-  const IconWallet = () => <I><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></I>
-  const IconFolder = () => <I><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></I>
-  const IconImage = () => <I><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></I>
-  const IconCalendar = () => <I><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></I>
-  const IconBook = () => <I><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></I>
-  const IconMessage = () => <I><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></I>
-  const IconMegaphone = () => <I><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></I>
-  const IconMenu = () => <I width="22" height="22"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></I>
-  const IconX = () => <I width="22" height="22"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></I>
-  const IconSun = () => <I width="14" height="14"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></I>
-  const IconMoon = () => <I width="14" height="14"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></I>
-
+  const IconDashboard = () => <I><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></I>
+  const IconUsers = () => <I><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></I>
+  const IconInbox = () => <I><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></I>
+  const IconWallet = () => <I><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></I>
+  const IconFolder = () => <I><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></I>
+  const IconImage = () => <I><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></I>
+  const IconCalendar = () => <I><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></I>
+  const IconBook = () => <I><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></I>
+  const IconMessage = () => <I><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></I>
+  const IconMegaphone = () => <I><path d="M3 11l18-5v12L3 13v-2z" /><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" /></I>
+  const IconMenu = () => <I width="22" height="22"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></I>
+  const IconX = () => <I width="22" height="22"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></I>
+  const IconSun = () => <I width="14" height="14"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></I>
+  const IconMoon = () => <I width="14" height="14"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></I>
+  const IconPray = () => <I><path d="M9 12h6" /><path d="M12 9v6" /><circle cx="12" cy="12" r="10" /></I>
   const tabs = [
     { id: 'dashboard', label: 'Tableau de bord', icon: <IconDashboard /> },
     { id: 'membres', label: 'Membres', icon: <IconUsers /> },
     { id: 'demandes', label: 'Demandes', icon: <IconInbox /> },
     { id: 'cotisations', label: 'Cotisations', icon: <IconWallet /> },
-    { id: 'fichiers', label: 'Fichiers', icon: <IconFolder /> },
+    { id: 'priere', label: 'Prière', icon: <IconPray /> },
     { id: 'galerie', label: 'Galerie', icon: <IconImage /> },
     { id: 'evenements', label: 'Événements', icon: <IconCalendar /> },
     { id: 'devotions', label: 'Dévotions', icon: <IconBook /> },
@@ -82,7 +82,7 @@ export default function Admin() {
   const currentTab = tabs.find(t => t.id === tab)
 
   return (
-    <div style={{minHeight:'100vh',background:theme.bg,transition:'background 0.3s'}}>
+    <div style={{ minHeight: '100vh', background: theme.bg, transition: 'background 0.3s' }}>
       <style>{`
         @media (min-width: 769px) {
           .admin-sidebar { display: flex !important; }
@@ -112,11 +112,11 @@ export default function Admin() {
         }}>
           {menuOpen ? <IconX /> : <IconMenu />}
         </button>
-        <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'24px',height:'24px',objectFit:'contain',borderRadius:'4px'}} />
-        <div style={{flex:1}}>
-          <div style={{color:theme.text,fontSize:'13px',fontWeight:'700',display:'flex',alignItems:'center',gap:'6px'}}><span style={{display:'inline-flex'}}>{currentTab?.icon}</span> {currentTab?.label}</div>
+        <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '24px', height: '24px', objectFit: 'contain', borderRadius: '4px' }} />
+        <div style={{ flex: 1 }}>
+          <div style={{ color: theme.text, fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ display: 'inline-flex' }}>{currentTab?.icon}</span> {currentTab?.label}</div>
         </div>
-        <button onClick={() => setDark(!dark)} style={{background:'none',border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'4px 10px',color:theme.muted,fontSize:'10px',cursor:'pointer',fontFamily:'inherit'}}>
+        <button onClick={() => setDark(!dark)} style={{ background: 'none', border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '4px 10px', color: theme.muted, fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' }}>
           {dark ? <IconSun /> : <IconMoon />}
         </button>
       </div>
@@ -130,83 +130,83 @@ export default function Admin() {
 
       {/* Sidebar */}
       <div className="admin-sidebar" style={{
-        width:'220px',background:theme.sidebar,borderRight:`1px solid ${theme.border}`,
-        display:'flex',flexDirection:'column',position:'fixed',height:'100vh',zIndex:50,overflowY:'auto'
+        width: '220px', background: theme.sidebar, borderRight: `1px solid ${theme.border}`,
+        display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 50, overflowY: 'auto'
       }}>
-        <div style={{padding:'20px 16px',borderBottom:`1px solid ${theme.border}`}}>
-          <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'36px',height:'36px',objectFit:'contain',borderRadius:'8px',marginBottom:'8px'}} />
-          <div style={{color:theme.text,fontSize:'13px',fontWeight:'700'}}>Bureau · Admin</div>
-          <div style={{color:theme.muted,fontSize:'11px',marginTop:'2px'}}>Accès restreint</div>
+        <div style={{ padding: '20px 16px', borderBottom: `1px solid ${theme.border}` }}>
+          <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '36px', height: '36px', objectFit: 'contain', borderRadius: '8px', marginBottom: '8px' }} />
+          <div style={{ color: theme.text, fontSize: '13px', fontWeight: '700' }}>Bureau · Admin</div>
+          <div style={{ color: theme.muted, fontSize: '11px', marginTop: '2px' }}>Accès restreint</div>
         </div>
-        <div style={{padding:'12px 8px',flex:1}}>
+        <div style={{ padding: '12px 8px', flex: 1 }}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => selectTab(t.id)} style={{width:'100%',background:tab===t.id?'rgba(200,16,46,0.15)':'none',border:'none',borderRadius:'10px',padding:'10px 12px',color:tab===t.id?'#C8102E':theme.muted,fontSize:'13px',fontWeight:tab===t.id?'600':'400',cursor:'pointer',textAlign:'left',marginBottom:'2px',fontFamily:'inherit',transition:'all 0.2s',display:'flex',alignItems:'center',gap:'8px'}}>
-              <span style={{display:'inline-flex',flexShrink:0}}>{t.icon}</span> {t.label} 
+            <button key={t.id} onClick={() => selectTab(t.id)} style={{ width: '100%', background: tab === t.id ? 'rgba(200,16,46,0.15)' : 'none', border: 'none', borderRadius: '10px', padding: '10px 12px', color: tab === t.id ? '#FC1713' : theme.muted, fontSize: '13px', fontWeight: tab === t.id ? '600' : '400', cursor: 'pointer', textAlign: 'left', marginBottom: '2px', fontFamily: 'inherit', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ display: 'inline-flex', flexShrink: 0 }}>{t.icon}</span> {t.label}
             </button>
           ))}
         </div>
-        <div style={{padding:'12px',borderTop:`1px solid ${theme.border}`,display:'flex',flexDirection:'column',gap:'6px'}}>
-          <button onClick={() => navigate('/membre')} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>
+        <div style={{ padding: '12px', borderTop: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <button onClick={() => navigate('/membre')} style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px', color: '#FC1713', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' }}>
             Espace membre
           </button>
-          <button onClick={() => setDark(!dark)} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px',color:theme.text,fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
+          <button onClick={() => setDark(!dark)} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '8px', color: theme.text, fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
             {dark ? 'Mode clair' : 'Mode sombre'}
           </button>
-          <button onClick={handleSignOut} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
+          <button onClick={handleSignOut} style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px', color: '#FC1713', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
             Déconnexion
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="admin-content" style={{marginLeft:'220px',flex:1,padding:'24px',maxWidth:'1000px'}}>
-        {tab==='dashboard' && <Dashboard theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} refreshCount={refreshCount} />}
-        {tab==='membres' && <Membres key={tab} theme={theme} supabase={supabase} refreshCount={refreshCount} />}
-        {tab==='demandes' && <Demandes key={tab} theme={theme} supabase={supabase} onRefresh={() => setRefreshCount(r => r+1)} />}
-        {tab==='cotisations' && <Cotisations theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
-        {tab==='fichiers' && <Fichiers theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
-        {tab==='galerie' && <Galerie theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
-        {tab==='evenements' && <Evenements theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
-        {tab==='devotions' && <Devotions theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
-        {tab==='feedbacks' && <Feedbacks theme={theme} supabase={supabase} />}
-        {tab==='annonces' && <Annonces theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
+      <div className="admin-content" style={{ marginLeft: '220px', flex: 1, padding: '24px', maxWidth: '1000px' }}>
+        {tab === 'dashboard' && <Dashboard theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} refreshCount={refreshCount} />}
+        {tab === 'membres' && <Membres key={tab} theme={theme} supabase={supabase} refreshCount={refreshCount} />}
+        {tab === 'demandes' && <Demandes key={tab} theme={theme} supabase={supabase} onRefresh={() => setRefreshCount(r => r + 1)} />}
+        {tab === 'cotisations' && <Cotisations theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
+        {tab === 'priere' && <Priere theme={theme} supabase={supabase} />}
+        {tab === 'galerie' && <Galerie theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
+        {tab === 'evenements' && <Evenements theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
+        {tab === 'devotions' && <Devotions theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
+        {tab === 'feedbacks' && <Feedbacks theme={theme} supabase={supabase} />}
+        {tab === 'annonces' && <Annonces theme={theme} supabase={supabase} supabaseAdmin={supabaseAdmin} />}
       </div>
     </div>
   )
 }
 
 function Dashboard({ theme, supabase, supabaseAdmin, refreshCount }) {
-  const [stats, setStats] = useState({membres:0, cotisOk:0, fichiers:0, demandes:0})
+  const [stats, setStats] = useState({ membres: 0, cotisOk: 0, fichiers: 0, demandes: 0 })
 
   useEffect(() => {
     async function load() {
-      const {count:membres} = await supabaseAdmin.from('utilisateurs').select('*',{count:'exact',head:true})
-      const {count:cotisOk} = await supabaseAdmin.from('cotisations').select('*',{count:'exact',head:true}).eq('statut','paye')
-      const {count:fichiers} = await supabaseAdmin.from('fichiers').select('*',{count:'exact',head:true}).eq('statut','en_attente')
-      const {count:demandes} = await supabaseAdmin.from('demandes').select('*',{count:'exact',head:true}).eq('statut','en_attente')
-      setStats({membres:membres||0, cotisOk:cotisOk||0, fichiers:fichiers||0, demandes:demandes||0})
+      const { count: membres } = await supabaseAdmin.from('utilisateurs').select('*', { count: 'exact', head: true })
+      const { count: cotisOk } = await supabaseAdmin.from('cotisations').select('*', { count: 'exact', head: true }).eq('statut', 'paye')
+      const { count: fichiers } = await supabaseAdmin.from('fichiers').select('*', { count: 'exact', head: true }).eq('statut', 'en_attente')
+      const { count: demandes } = await supabaseAdmin.from('demandes').select('*', { count: 'exact', head: true }).eq('statut', 'en_attente')
+      setStats({ membres: membres || 0, cotisOk: cotisOk || 0, fichiers: fichiers || 0, demandes: demandes || 0 })
     }
     load()
   }, [refreshCount])
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Tableau de bord</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Tableau de bord</h2>
       <style>{`
         @media (max-width: 768px) {
           .dashboard-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
-      <div className="dashboard-grid" style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px'}}>
+      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px' }}>
         {[
-          {label:'Membres',val:stats.membres},
-          {label:'Cotisations payées',val:stats.cotisOk},
-          {label:'Fichiers en attente',val:stats.fichiers},
-          {label:'Demandes en attente',val:stats.demandes},
+          { label: 'Membres', val: stats.membres },
+          { label: 'Cotisations payées', val: stats.cotisOk },
+          { label: 'Fichiers en attente', val: stats.fichiers },
+          { label: 'Demandes en attente', val: stats.demandes },
         ].map(s => (
-          <div key={s.label} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',textAlign:'center'}}>
-            <div style={{color:'#C8102E',fontSize:'32px',fontWeight:'700',fontFamily:'Outfit,sans-serif'}}>{s.val}</div>
-            <div style={{color:theme.muted,fontSize:'11px',marginTop:'4px'}}>{s.label}</div>
+          <div key={s.label} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', textAlign: 'center' }}>
+            <div style={{ color: '#FC1713', fontSize: '32px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif' }}>{s.val}</div>
+            <div style={{ color: theme.muted, fontSize: '11px', marginTop: '4px' }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -290,7 +290,7 @@ function Demandes({ theme, supabase, onRefresh }) {
 
         // Vérifier si l'utilisateur existe déjà dans la table utilisateurs
         const { data: existingProfile } = await supabaseAdmin.from('utilisateurs').select('id').eq('id', userId).single()
-        
+
         if (existingProfile) {
           // Mettre à jour le profil existant avec les données de la demande
           const { error: updateErr } = await supabaseAdmin.from('utilisateurs').update({
@@ -298,7 +298,7 @@ function Demandes({ theme, supabase, onRefresh }) {
             prenom: demande.prenom,
             whatsapp: demande.whatsapp,
             domaine: demande.domaine || '',
-            date_anniversaire: demande.date_anniversaire || null,
+            date_naissance: demande.date_naissance || null,
             statut_activite: demande.statut_activite || null,
           }).eq('id', userId)
           if (updateErr) {
@@ -315,7 +315,7 @@ function Demandes({ theme, supabase, onRefresh }) {
             prenom: demande.prenom,
             whatsapp: demande.whatsapp,
             domaine: demande.domaine || '',
-            date_anniversaire: demande.date_anniversaire || null,
+            date_naissance: demande.date_naissance || null,
             statut_activite: demande.statut_activite || null,
             role: 'membre'
           })
@@ -352,64 +352,64 @@ function Demandes({ theme, supabase, onRefresh }) {
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Demandes d'adhésion</h2>
-      
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Demandes d'adhésion</h2>
+
       {msg && (
         <div style={{
           background: msgType === 'success' ? 'rgba(37,211,102,0.1)' : msgType === 'info' ? 'rgba(100,100,100,0.1)' : 'rgba(200,16,46,0.1)',
           border: `1px solid ${msgType === 'success' ? 'rgba(37,211,102,0.3)' : msgType === 'info' ? 'rgba(100,100,100,0.3)' : 'rgba(200,16,46,0.3)'}`,
-          borderRadius:'10px',padding:'12px 16px',marginBottom:'16px',
-          color: msgType === 'success' ? '#25d366' : msgType === 'info' ? theme.muted : '#C8102E',
-          fontSize:'13px',fontWeight:'500'
+          borderRadius: '10px', padding: '12px 16px', marginBottom: '16px',
+          color: msgType === 'success' ? '#25d366' : msgType === 'info' ? theme.muted : '#FC1713',
+          fontSize: '13px', fontWeight: '500'
         }}>
           {msg}
         </div>
       )}
 
-      {demandes.length===0 && (
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
+      {demandes.length === 0 && (
+        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
           Aucune demande pour le moment
         </div>
       )}
       {demandes.map(d => (
-        <div key={d.id} style={{background:theme.card,border:`1px solid ${d.statut==='en_attente'?'#C8102E':theme.border}`,borderRadius:'12px',padding:'16px',marginBottom:'8px'}}>
-          <div style={{display:'flex',alignItems:'flex-start',gap:'12px'}}>
+        <div key={d.id} style={{ background: theme.card, border: `1px solid ${d.statut === 'en_attente' ? '#FC1713' : theme.border}`, borderRadius: '12px', padding: '16px', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
             {d.avatar_url ? (
-              <img src={d.avatar_url} loading="lazy" style={{width:'40px',height:'40px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt="Avatar" />
+              <img src={d.avatar_url} loading="lazy" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt="Avatar" />
             ) : (
-              <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'14px',fontWeight:'700',flexShrink:0}}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#FC1713', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '14px', fontWeight: '700', flexShrink: 0 }}>
                 {d.prenom?.[0]}{d.nom?.[0]}
               </div>
             )}
-            <div style={{flex:1}}>
-              <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{d.prenom} {d.nom}</div>
-              <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.statut_activite || ''} {d.domaine ? `· ${d.domaine}` : ''}</div>
-              {d.date_anniversaire && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>🎂 {new Date(d.date_anniversaire).toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}</div>}
-              <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.whatsapp}</div>
-              {d.email && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{d.email}</div>}
-              {!d.email && <div style={{color:'#C8102E',fontSize:'11px',marginTop:'2px',fontWeight:'600'}}>⚠️ Pas d'email</div>}
-              <div style={{color:theme.muted,fontSize:'11px',marginTop:'4px'}}>{new Date(d.created_at).toLocaleDateString('fr-FR')}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ color: theme.text, fontSize: '14px', fontWeight: '700' }}>{d.prenom} {d.nom}</div>
+              <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{d.statut_activite || ''} {d.domaine ? `· ${d.domaine}` : ''}</div>
+              {d.date_naissance && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>🎂 {new Date(d.date_naissance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}</div>}
+              <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{d.whatsapp}</div>
+              {d.email && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{d.email}</div>}
+              {!d.email && <div style={{ color: '#FC1713', fontSize: '11px', marginTop: '2px', fontWeight: '600' }}>⚠️ Pas d'email</div>}
+              <div style={{ color: theme.muted, fontSize: '11px', marginTop: '4px' }}>{new Date(d.created_at).toLocaleDateString('fr-FR')}</div>
             </div>
-            <div style={{display:'flex',flexDirection:'column',gap:'6px',flexShrink:0}}>
-              {d.statut==='en_attente' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
+              {d.statut === 'en_attente' && (
                 <>
-                  <button onClick={() => updateStatut(d.id,'accepte')} style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#25d366',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>
+                  <button onClick={() => updateStatut(d.id, 'accepte')} style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: '8px', padding: '6px 12px', color: '#25d366', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' }}>
                     Accepter
                   </button>
-                  <button onClick={() => updateStatut(d.id,'refuse')} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
+                  <button onClick={() => updateStatut(d.id, 'refuse')} style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '6px 12px', color: '#FC1713', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
                     Refuser
                   </button>
                 </>
               )}
-              {d.statut!=='en_attente' && (
-                <span style={{background:d.statut==='accepte'?'rgba(37,211,102,0.1)':'rgba(200,16,46,0.1)',border:`1px solid ${d.statut==='accepte'?'rgba(37,211,102,0.3)':'rgba(200,16,46,0.3)'}`,borderRadius:'8px',padding:'6px 12px',color:d.statut==='accepte'?'#25d366':'#C8102E',fontSize:'12px',fontWeight:'600'}}>
-                  {d.statut==='accepte'?'Acceptée':'Refusée'}
+              {d.statut !== 'en_attente' && (
+                <span style={{ background: d.statut === 'accepte' ? 'rgba(37,211,102,0.1)' : 'rgba(200,16,46,0.1)', border: `1px solid ${d.statut === 'accepte' ? 'rgba(37,211,102,0.3)' : 'rgba(200,16,46,0.3)'}`, borderRadius: '8px', padding: '6px 12px', color: d.statut === 'accepte' ? '#25d366' : '#FC1713', fontSize: '12px', fontWeight: '600' }}>
+                  {d.statut === 'accepte' ? 'Acceptée' : 'Refusée'}
                 </span>
               )}
               {d.whatsapp && (
                 <a
-                  href={`https://wa.me/${d.whatsapp.replace(/\+/g,'').replace(/\s/g,'')}?text=${encodeURIComponent(
-                    d.statut==='accepte'
+                  href={`https://wa.me/${d.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}?text=${encodeURIComponent(
+                    d.statut === 'accepte'
                       ? `Bonjour ${d.prenom} !
 
 Ta demande d'adhésion à la Jeunesse EB Le Rocher a été acceptée.
@@ -428,7 +428,7 @@ Le Bureau de la Jeunesse EB Le Rocher`
                   )}`}
                   target="_blank"
                   rel="noreferrer"
-                  style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#25d366',fontSize:'12px',textDecoration:'none',textAlign:'center',fontWeight:'600'}}
+                  style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: '8px', padding: '6px 12px', color: '#25d366', fontSize: '12px', textDecoration: 'none', textAlign: 'center', fontWeight: '600' }}
                 >
                   WhatsApp
                 </a>
@@ -456,7 +456,7 @@ function Membres({ theme, supabase, refreshCount }) {
   useEffect(() => { loadMembres() }, [refreshCount])
 
   async function loadMembres() {
-    const {data} = await supabase.from('utilisateurs').select('*').order('created_at',{ascending:false})
+    const { data } = await supabase.from('utilisateurs').select('*').order('created_at', { ascending: false })
     if (data) setMembres(data)
   }
 
@@ -516,13 +516,13 @@ function Membres({ theme, supabase, refreshCount }) {
   }
 
   async function retirerMembre(id) {
-    await supabaseAdmin.from('utilisateurs').delete().eq('id',id)
+    await supabaseAdmin.from('utilisateurs').delete().eq('id', id)
     loadMembres()
   }
 
   function envoyerAcces(m) {
     const message = encodeURIComponent(
-`Bonjour ${m.prenom},
+      `Bonjour ${m.prenom},
 
 La Jeunesse EB Le Rocher dispose désormais d'une plateforme numérique dédiée à ses membres.
 
@@ -540,44 +540,44 @@ Pense à changer ton mot de passe dès ta première connexion dans Profil > Para
 A bientôt.
 - Le Bureau de la Jeunesse EB Le Rocher`
     )
-    const lien = `https://wa.me/${m.whatsapp?.replace(/\+/g,'').replace(/\s/g,'')}?text=${message}`
+    const lien = `https://wa.me/${m.whatsapp?.replace(/\+/g, '').replace(/\s/g, '')}?text=${message}`
     window.open(lien, '_blank')
   }
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Membres</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Membres</h2>
       <div>
         {membres.length === 0 && (
-          <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
+          <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
             Aucun membre pour le moment
           </div>
         )}
         {membres.map(m => (
-          <div key={m.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
+          <div key={m.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '14px', marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
             {m.avatar_url ? (
-              <img src={m.avatar_url} loading="lazy" style={{width:'48px',height:'48px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt="Avatar" />
+              <img src={m.avatar_url} loading="lazy" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt="Avatar" />
             ) : (
-              <div style={{width:'48px',height:'48px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'14px',fontWeight:'700',flexShrink:0}}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#FC1713', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '14px', fontWeight: '700', flexShrink: 0 }}>
                 {m.prenom?.[0]}{m.nom?.[0]}
               </div>
             )}
-            <div style={{flex:1}}>
-              <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{m.prenom && m.nom ? `${m.prenom} ${m.nom}` : m.email}</div>
-              {m.prenom && m.nom && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{m.email}</div>}
-              {m.whatsapp && <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{m.whatsapp}</div>}
-              <div style={{color:theme.muted,fontSize:'11px',marginTop:'4px'}}>{m.domaine} · {m.role}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ color: theme.text, fontSize: '14px', fontWeight: '700' }}>{m.prenom && m.nom ? `${m.prenom} ${m.nom}` : m.email}</div>
+              {m.prenom && m.nom && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{m.email}</div>}
+              {m.whatsapp && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{m.whatsapp}</div>}
+              <div style={{ color: theme.muted, fontSize: '11px', marginTop: '4px' }}>{m.domaine} · {m.role}</div>
             </div>
-            <div style={{display:'flex',gap:'6px',flexDirection:'column',flexShrink:0}}>
-              <button onClick={() => modifierMembre(m)} style={{background:'rgba(0,123,255,0.1)',border:'1px solid rgba(0,123,255,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#007bff',fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>
+            <div style={{ display: 'flex', gap: '6px', flexDirection: 'column', flexShrink: 0 }}>
+              <button onClick={() => modifierMembre(m)} style={{ background: 'rgba(0,123,255,0.1)', border: '1px solid rgba(0,123,255,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#007bff', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                 Modifier
               </button>
               {m.whatsapp && (
-                <button onClick={() => envoyerAcces(m)} style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#25d366',fontSize:'12px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>
+                <button onClick={() => envoyerAcces(m)} style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#25d366', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                   Envoyer les accès
                 </button>
               )}
-              <button onClick={() => retirerMembre(m.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
+              <button onClick={() => retirerMembre(m.id)} style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Retirer
               </button>
             </div>
@@ -587,26 +587,26 @@ A bientôt.
 
       {/* Modal modification membre */}
       {editingMembre && (
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'16px'}}>
-          <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'16px',padding:'24px',maxWidth:'400px',width:'100%'}} onClick={e=>e.stopPropagation()}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'20px'}}>
-              <h3 style={{color:theme.text,fontSize:'18px',fontWeight:'700'}}>Modifier le membre</h3>
-              <button onClick={() => setEditingMembre(null)} style={{background:'none',border:'none',fontSize:'24px',color:theme.muted,cursor:'pointer'}}>✕</button>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', maxWidth: '400px', width: '100%' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ color: theme.text, fontSize: '18px', fontWeight: '700' }}>Modifier le membre</h3>
+              <button onClick={() => setEditingMembre(null)} style={{ background: 'none', border: 'none', fontSize: '24px', color: theme.muted, cursor: 'pointer' }}>✕</button>
             </div>
             {msg && (
-              <div style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#25d366',fontSize:'13px',marginBottom:'16px'}}>
+              <div style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#25d366', fontSize: '13px', marginBottom: '16px' }}>
                 {msg}
               </div>
             )}
-            <input placeholder="Prénom" value={prenom} onChange={e=>setPrenom(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'10px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'12px',fontFamily:'inherit'}} />
-            <input placeholder="Nom" value={nom} onChange={e=>setNom(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'10px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'12px',fontFamily:'inherit'}} />
-            <input placeholder="Domaine" value={domaine} onChange={e=>setDomaine(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'10px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'12px',fontFamily:'inherit'}} />
-            <input placeholder="WhatsApp" value={whatsapp} onChange={e=>setWhatsapp(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'10px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'16px',fontFamily:'inherit'}} />
-            <div style={{display:'flex',gap:'8px'}}>
-              <button onClick={saveMembreModifie} style={{flex:1,background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
+            <input placeholder="Prénom" value={prenom} onChange={e => setPrenom(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }} />
+            <input placeholder="Nom" value={nom} onChange={e => setNom(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }} />
+            <input placeholder="Domaine" value={domaine} onChange={e => setDomaine(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }} />
+            <input placeholder="WhatsApp" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '16px', fontFamily: 'inherit' }} />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={saveMembreModifie} style={{ flex: 1, background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Sauvegarder
               </button>
-              <button onClick={() => setEditingMembre(null)} style={{flex:1,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'12px',color:theme.text,fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>
+              <button onClick={() => setEditingMembre(null)} style={{ flex: 1, background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '12px', color: theme.text, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Annuler
               </button>
             </div>
@@ -620,96 +620,239 @@ A bientôt.
 function Cotisations({ theme, supabase, supabaseAdmin }) {
   const [membres, setMembres] = useState([])
   const [selected, setSelected] = useState(null)
-  const [montant, setMontant] = useState('2000')
-  const [mois, setMois] = useState('')
-  const [statut, setStatut] = useState('paye')
+  const [montant, setMontant] = useState('200')
   const [msg, setMsg] = useState('')
+  const [msgType, setMsgType] = useState('success')
+  const MONTANT_BASE = 200
 
   useEffect(() => { loadMembres() }, [])
 
   async function loadMembres() {
-    const {data} = await supabase.from('utilisateurs').select('*, cotisations(*)').order('nom')
+    const { data } = await supabase
+      .from('utilisateurs')
+      .select('*, cotisations(*)')
+      .order('nom')
     if (data) setMembres(data)
   }
 
-  async function saveCotis() {
-    if (!selected||!mois) { setMsg('Sélectionnez un membre et un mois'); return }
-    const {data:existing} = await supabase.from('cotisations').select('id').eq('utilisateur_id',selected.id).eq('mois',mois).limit(1)
-    if (existing?.length > 0) {
-      const { error } = await supabaseAdmin.from('cotisations').update({statut,montant:parseInt(montant)}).eq('id',existing[0].id)
-      if (error) { setMsg('Erreur : ' + error.message); return }
-    } else {
-      const { error } = await supabaseAdmin.from('cotisations').insert({utilisateur_id:selected.id,mois,montant:parseInt(montant),statut})
-      if (error) { setMsg('Erreur : ' + error.message); return }
+  async function nouveauPaiement() {
+    if (!selected) return
+    const total = parseInt(montant) || 0
+    if (total <= 0) { showMsg('Montant invalide', 'error'); return }
+
+    // Récupérer reliquat existant
+    const reliquat = selected.reliquat_cotisation || 0
+    const totalAvecReliquat = total + reliquat
+
+    // Calculer mois couverts
+    const moisCouverts = Math.floor(totalAvecReliquat / MONTANT_BASE)
+    const nouveauReliquat = totalAvecReliquat % MONTANT_BASE
+
+    if (moisCouverts === 0) {
+      showMsg(`Montant insuffisant. Il faut au moins ${MONTANT_BASE - reliquat} FCFA de plus.`, 'error')
+      return
     }
-    setMsg('Cotisation enregistrée !')
-    loadMembres()
+
+    // Déterminer les mois à couvrir
+    const moisPayes = (selected.cotisations || [])
+      .filter(c => c.statut === 'paye')
+      .map(c => c.mois)
+
+    const tousLesMois = [
+      'Janvier 2026', 'Février 2026', 'Mars 2026', 'Avril 2026',
+      'Mai 2026', 'Juin 2026', 'Juillet 2026', 'Août 2026',
+      'Septembre 2026', 'Octobre 2026', 'Novembre 2026', 'Décembre 2026'
+    ]
+    const moisNonPayes = tousLesMois.filter(m => !moisPayes.includes(m))
+    const moisACouvrir = moisNonPayes.slice(0, moisCouverts)
+
+    if (moisACouvrir.length === 0) {
+      showMsg('Tous les mois sont déjà payés !', 'error')
+      return
+    }
+
+    // Insérer les cotisations
+    for (const mois of moisACouvrir) {
+      const existing = (selected.cotisations || []).find(c => c.mois === mois)
+      if (existing) {
+        await supabaseAdmin.from('cotisations').update({ statut: 'paye', montant: MONTANT_BASE }).eq('id', existing.id)
+      } else {
+        await supabaseAdmin.from('cotisations').insert({
+          utilisateur_id: selected.id, mois, montant: MONTANT_BASE, statut: 'paye'
+        })
+      }
+    }
+
+    // Mettre à jour reliquat
+    await supabaseAdmin.from('utilisateurs').update({
+      reliquat_cotisation: nouveauReliquat
+    }).eq('id', selected.id)
+
+    // Historique
+    await supabaseAdmin.from('cotisations_historique').insert({
+      membre_id: selected.id,
+      montant_verse: total,
+      reliquat: nouveauReliquat,
+      date_paiement: new Date().toISOString().split('T')[0]
+    })
+
+    const msg = moisACouvrir.length === 1
+      ? `${moisACouvrir[0]} couvert !`
+      : `${moisACouvrir.length} mois couverts : ${moisACouvrir.join(', ')}.`
+    const reliqMsg = nouveauReliquat > 0 ? ` Reliquat : ${nouveauReliquat} FCFA.` : ''
+    showMsg(msg + reliqMsg, 'success')
+
+    setMontant('200')
+    await loadMembres()
+    // Rafraîchir le membre sélectionné
+    const updated = membres.find(m => m.id === selected.id)
+    if (updated) setSelected(updated)
   }
 
-  const moisList = ['Janvier 2026','Février 2026','Mars 2026','Avril 2026','Mai 2026','Juin 2026','Juillet 2026','Août 2026','Septembre 2026','Octobre 2026','Novembre 2026','Décembre 2026']
+  async function relancer(m) {
+    if (!m.whatsapp) return
+    const moisPayes = (m.cotisations || []).filter(c => c.statut === 'paye').length
+    const msg = encodeURIComponent(
+      `Bonjour ${m.prenom} !\n\nRappel : ta cotisation du mois n'est pas encore réglée.\nMontant : ${MONTANT_BASE} FCFA/mois · ${moisPayes} mois réglés sur 12.\n\nMerci de régulariser dès que possible.\n\n• Le Bureau`
+    )
+    window.open(`https://wa.me/${m.whatsapp.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
+  }
+
+  function showMsg(text, type) {
+    setMsg(text); setMsgType(type)
+    setTimeout(() => setMsg(''), 6000)
+  }
+
+  const moisPayesCount = (m) => (m.cotisations || []).filter(c => c.statut === 'paye').length
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Cotisations</h2>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>
+        Cotisations
+      </h2>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        {/* Liste membres */}
         <div>
-          <div style={{color:theme.muted,fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'10px'}}>Sélectionner un membre</div>
-          {membres.map(m => (
-            <div key={m.id} onClick={() => setSelected(m)} style={{background:selected?.id===m.id?'rgba(200,16,46,0.15)':theme.card,border:`1px solid ${selected?.id===m.id?'#C8102E':theme.border}`,borderRadius:'10px',padding:'12px',marginBottom:'6px',cursor:'pointer',display:'flex',alignItems:'center',gap:'10px'}}>
-              {m.avatar_url ? (
-                <img src={m.avatar_url} loading="lazy" style={{width:'34px',height:'34px',borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt="Avatar" />
-              ) : (
-                <div style={{width:'34px',height:'34px',borderRadius:'50%',background:'#C8102E',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'11px',fontWeight:'600',flexShrink:0}}>
+          <div style={{ color: theme.muted, fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
+            Membres
+          </div>
+          {membres.map(m => {
+            const ok = moisPayesCount(m)
+            const retard = ok < new Date().getMonth() + 1
+            return (
+              <div key={m.id} onClick={() => { setSelected(m); setMsg('') }}
+                style={{
+                  background: selected?.id === m.id ? 'rgba(200,16,46,0.15)' : theme.card,
+                  border: `1px solid ${selected?.id === m.id ? '#FC1713' : theme.border}`,
+                  borderRadius: '10px', padding: '12px', marginBottom: '6px',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px'
+                }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#FC1713', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
                   {m.prenom?.[0]}{m.nom?.[0]}
                 </div>
-              )}
-              <div>
-                <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{m.prenom} {m.nom}</div>
-                <div style={{color:theme.muted,fontSize:'11px'}}>{m.cotisations?.length||0} cotisation(s)</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: theme.text, fontSize: '13px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {m.prenom} {m.nom}
+                  </div>
+                  <div style={{ color: retard ? '#FC1713' : '#25d366', fontSize: '11px' }}>
+                    {ok} / 12 mois
+                    {(m.reliquat_cotisation || 0) > 0 && <span style={{ color: '#f59e0b' }}> · +{m.reliquat_cotisation} F reliquat</span>}
+                  </div>
+                </div>
+                <button
+                  onClick={e => { e.stopPropagation(); relancer(m) }}
+                  style={{ background: 'none', border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '4px 8px', color: theme.muted, fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}
+                >
+                  Relance
+                </button>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
+
+        {/* Panneau paiement */}
         <div>
-          <div style={{color:theme.muted,fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'10px'}}>
-            {selected ? `Enregistrer pour ${selected.prenom}` : 'Sélectionnez un membre'}
+          <div style={{ color: theme.muted, fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
+            {selected ? `Paiement · ${selected.prenom}` : 'Sélectionne un membre'}
           </div>
+
           {selected && (
-            <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px'}}>
-              {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
-              <select value={mois} onChange={e=>setMois(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',cursor:'pointer'}}>
-                <option value="">Choisir le mois</option>
-                {moisList.map(m => <option key={m}>{m}</option>)}
-              </select>
-              <div style={{display:'flex',gap:'8px',marginBottom:'10px'}}>
-                {['paye','en_retard','en_attente'].map(s => (
-                  <button key={s} onClick={() => setStatut(s)} style={{flex:1,background:statut===s?'#C8102E':'none',border:`1px solid ${statut===s?'#C8102E':theme.border}`,borderRadius:'8px',padding:'8px',color:statut===s?'white':theme.muted,fontSize:'11px',cursor:'pointer',fontFamily:'inherit',fontWeight:statut===s?'600':'400'}}>
-                    {s==='paye'?'Payé':s==='en_retard'?'En retard':'En attente'}
-                  </button>
-                ))}
+            <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px' }}>
+              {msg && (
+                <div style={{
+                  background: msgType === 'success' ? 'rgba(37,211,102,0.1)' : 'rgba(200,16,46,0.1)',
+                  border: `1px solid ${msgType === 'success' ? 'rgba(37,211,102,0.3)' : 'rgba(200,16,46,0.3)'}`,
+                  borderRadius: '8px', padding: '10px 12px', color: msgType === 'success' ? '#25d366' : '#FC1713',
+                  fontSize: '12px', marginBottom: '14px'
+                }}>
+                  {msg}
+                </div>
+              )}
+
+              {/* Résumé */}
+              <div style={{ background: theme.bg, borderRadius: '10px', padding: '12px', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ color: theme.muted, fontSize: '12px' }}>Mois réglés</span>
+                  <span style={{ color: theme.text, fontSize: '12px', fontWeight: '600' }}>{moisPayesCount(selected)} / 12</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ color: theme.muted, fontSize: '12px' }}>Reliquat</span>
+                  <span style={{ color: '#f59e0b', fontSize: '12px', fontWeight: '600' }}>{selected.reliquat_cotisation || 0} FCFA</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: theme.muted, fontSize: '12px' }}>Tarif</span>
+                  <span style={{ color: theme.text, fontSize: '12px', fontWeight: '600' }}>{MONTANT_BASE} FCFA / mois</span>
+                </div>
               </div>
-              <input placeholder="Montant (FCFA)" value={montant} onChange={e=>setMontant(e.target.value)} type="number" style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-              <button onClick={saveCotis} style={{width:'100%',background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',marginBottom:'8px'}}>
-                Enregistrer
+
+              {/* Saisie montant */}
+              <label style={{ color: theme.muted, fontSize: '11px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>
+                Montant reçu (FCFA)
+              </label>
+              <input
+                type="number"
+                value={montant}
+                onChange={e => setMontant(e.target.value)}
+                style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '14px', fontWeight: '600', outline: 'none', marginBottom: '8px', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              />
+
+              {/* Calcul prévisuel */}
+              {parseInt(montant) > 0 && (
+                <div style={{ background: 'rgba(9,101,186,0.08)', border: '1px solid rgba(9,101,186,0.2)', borderRadius: '8px', padding: '8px 12px', marginBottom: '12px', fontSize: '12px', color: '#0965BA' }}>
+                  {(() => {
+                    const total = parseInt(montant) + (selected.reliquat_cotisation || 0)
+                    const mois = Math.floor(total / MONTANT_BASE)
+                    const rest = total % MONTANT_BASE
+                    return `${mois} mois couverts${rest > 0 ? ` · ${rest} FCFA reliquat` : ''}`
+                  })()}
+                </div>
+              )}
+
+              <button onClick={nouveauPaiement}
+                style={{ width: '100%', background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', marginBottom: '8px' }}>
+                Enregistrer le paiement
               </button>
-{selected.whatsapp && mois && (
-  
-    <a href={'https://wa.me/' + selected.whatsapp.replace(/\+/g,'').replace(/\s/g,'') + '?text=' + encodeURIComponent(statut==='paye' ? 'Bonjour ' + selected.prenom + ' ! Cotisation de ' + mois + ' reçue (' + montant + ' FCFA). Merci !' : statut==='en_retard' ? 'Bonjour ' + selected.prenom + ', cotisation de ' + mois + ' (' + montant + ' FCFA) non reçue. Merci de régulariser.' : 'Bonjour ' + selected.prenom + ', cotisation de ' + mois + ' en attente. Contactez-nous.')}
-    target="_blank"
-    rel="noreferrer"
-    style={{display:'block',textAlign:'center',background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'10px',color:'#25d366',fontSize:'13px',fontWeight:'600',textDecoration:'none',marginBottom:'10px'}}
-  >
-    Notifier par WhatsApp
-  </a>
-)}
+
+              {selected.whatsapp && (
+                <a href={`https://wa.me/${selected.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${selected.prenom} ! Paiement de ${montant} FCFA reçu. Merci !`)}`}
+                  target="_blank" rel="noreferrer"
+                  style={{ display: 'block', textAlign: 'center', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: '8px', padding: '10px', color: '#25d366', fontSize: '12px', fontWeight: '600', textDecoration: 'none', marginBottom: '14px' }}>
+                  Notifier sur WhatsApp
+                </a>
+              )}
+
+              {/* Historique */}
               {selected.cotisations?.length > 0 && (
-                <div style={{marginTop:'10px'}}>
-                  <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'8px'}}>Historique</div>
-                  {selected.cotisations.map(c => (
-                    <div key={c.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:`1px solid ${theme.border}`}}>
-                      <span style={{color:theme.text,fontSize:'13px'}}>{c.mois}</span>
-                      <span style={{color:c.statut==='paye'?'#25d366':c.statut==='en_retard'?'#C8102E':'#f59e0b',fontSize:'12px',fontWeight:'600'}}>
-                        {c.statut==='paye'?'Payé':c.statut==='en_retard'?'En retard':'En attente'} — {c.montant?.toLocaleString()} F
+                <div>
+                  <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                    Historique
+                  </div>
+                  {[...selected.cotisations].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(c => (
+                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: `1px solid ${theme.border}` }}>
+                      <span style={{ color: theme.text, fontSize: '12px' }}>{c.mois}</span>
+                      <span style={{ color: c.statut === 'paye' ? '#25d366' : '#FC1713', fontSize: '11px', fontWeight: '600' }}>
+                        {c.statut === 'paye' ? 'Payé' : 'En attente'} · {(c.montant || MONTANT_BASE).toLocaleString()} F
                       </span>
                     </div>
                   ))}
@@ -723,51 +866,122 @@ function Cotisations({ theme, supabase, supabaseAdmin }) {
   )
 }
 
-function Fichiers({ theme, supabase, supabaseAdmin }) {
-  const [fichiers, setFichiers] = useState([])
+function Priere({ theme, supabase }) {
+  const [requetes, setRequetes] = useState([])
+  const [temoignages, setTemoignages] = useState([])
+  const [selected, setSelected] = useState(null)
 
-  useEffect(() => { loadFichiers() }, [])
+  useEffect(() => { load() }, [])
 
-  async function loadFichiers() {
-    const {data} = await supabase.from('fichiers').select('*, utilisateurs(prenom, nom)').eq('statut','en_attente')
-    if (data) setFichiers(data)
+  async function load() {
+    const { data: r } = await supabase
+      .from('requetes_priere')
+      .select('*, utilisateurs(prenom, nom, avatar_url)')
+      .eq('type', 'requete')
+      .order('created_at', { ascending: false })
+    const { data: t } = await supabase
+      .from('requetes_priere')
+      .select('*, utilisateurs(prenom, nom, avatar_url)')
+      .eq('type', 'temoignage')
+      .order('created_at', { ascending: false })
+    if (r) setRequetes(r)
+    if (t) setTemoignages(t)
   }
 
-  async function approuver(id) {
-    const { error } = await supabaseAdmin.from('fichiers').update({statut:'approuve'}).eq('id',id)
-    if (error) console.log('❌ Erreur approbation fichier:', error)
-    else console.log('✅ Fichier approuvé')
-    loadFichiers()
-  }
-
-  async function supprimer(id) {
-    const { error } = await supabaseAdmin.from('fichiers').update({statut:'supprime'}).eq('id',id)
-    if (error) console.log(' Erreur suppression fichier:', error)
-    else console.log(' Fichier supprimé')
-    loadFichiers()
+  function Card({ item }) {
+    return (
+      <div onClick={() => setSelected(item)} style={{
+        background: theme.card, border: `1px solid ${theme.border}`,
+        borderRadius: '12px', padding: '14px', marginBottom: '8px', cursor: 'pointer'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+          {item.utilisateurs?.avatar_url ? (
+            <img src={item.utilisateurs.avatar_url} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
+          ) : (
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#FC1713', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '11px', fontWeight: '700' }}>
+              {item.utilisateurs?.prenom?.[0]}{item.utilisateurs?.nom?.[0]}
+            </div>
+          )}
+          <div>
+            <div style={{ color: theme.text, fontSize: '13px', fontWeight: '600' }}>
+              {item.utilisateurs?.prenom} {item.utilisateurs?.nom}
+            </div>
+            <div style={{ color: theme.muted, fontSize: '11px' }}>
+              {new Date(item.created_at).toLocaleDateString('fr-FR')}
+            </div>
+          </div>
+        </div>
+        <div style={{
+          color: theme.muted, fontSize: '12px', lineHeight: '1.6',
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+        }}>
+          {item.contenu}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Fichiers en attente</h2>
-      {fichiers.length===0 && (
-        <div style={{background:theme.card,border:'1px solid ' + theme.border,borderRadius:'14px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
-          Aucun fichier en attente de validation
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>
+        Prière
+      </h2>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <div>
+          <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>
+            Requêtes ({requetes.length})
+          </div>
+          {requetes.length === 0 && (
+            <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '20px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
+              Aucune requête
+            </div>
+          )}
+          {requetes.map(r => <Card key={r.id} item={r} />)}
+        </div>
+
+        <div>
+          <div style={{ color: '#0965BA', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>
+            Témoignages ({temoignages.length})
+          </div>
+          {temoignages.length === 0 && (
+            <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '20px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
+              Aucun témoignage
+            </div>
+          )}
+          {temoignages.map(t => <Card key={t.id} item={t} />)}
+        </div>
+      </div>
+
+      {/* Modal détail */}
+      {selected && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+          onClick={() => setSelected(null)}>
+          <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', maxWidth: '480px', width: '100%' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#FC1713', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700' }}>
+                  {selected.utilisateurs?.prenom?.[0]}{selected.utilisateurs?.nom?.[0]}
+                </div>
+                <div>
+                  <div style={{ color: theme.text, fontSize: '14px', fontWeight: '700' }}>
+                    {selected.utilisateurs?.prenom} {selected.utilisateurs?.nom}
+                  </div>
+                  <div style={{ color: selected.type === 'requete' ? '#FC1713' : '#0965BA', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    {selected.type === 'requete' ? 'Requête de prière' : 'Témoignage'}
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: theme.muted, fontSize: '22px', cursor: 'pointer' }}>✕</button>
+            </div>
+            <p style={{ color: theme.text, fontSize: '14px', lineHeight: '1.8' }}>{selected.contenu}</p>
+            <div style={{ color: theme.muted, fontSize: '11px', marginTop: '12px' }}>
+              {new Date(selected.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
         </div>
       )}
-      {fichiers.map(f => (
-        <div key={f.id} style={{background:theme.card,border:'1px solid ' + theme.border,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'12px'}}>
-          <div style={{fontSize:'24px',flexShrink:0}}>📄</div>
-          <div style={{flex:1}}>
-            <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{f.nom_fichier}</div>
-            <div style={{color:theme.muted,fontSize:'11px'}}>{f.utilisateurs?.prenom} {f.utilisateurs?.nom} · {f.type_fichier}</div>
-          </div>
-          <div style={{display:'flex',gap:'8px'}}>
-            <button onClick={() => approuver(f.id)} style={{background:'rgba(37,211,102,0.1)',border:'1px solid rgba(37,211,102,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#25d366',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:'600'}}>Approuver</button>
-            <button onClick={() => supprimer(f.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>Supprimer</button>
-          </div>
-        </div>
-      ))}
     </div>
   )
 }
@@ -785,29 +999,29 @@ function Galerie({ theme, supabase, supabaseAdmin }) {
   useEffect(() => { loadEvenements() }, [])
 
   async function loadEvenements() {
-    const {data} = await supabaseAdmin.from('evenements_galerie').select('*, photos_galerie(*)').order('date_evenement',{ascending:false})
+    const { data } = await supabaseAdmin.from('evenements_galerie').select('*, photos_galerie(*)').order('date_evenement', { ascending: false })
     if (data) setEvenements(data)
   }
 
   function handlePhotos(e) {
-    const files = Array.from(e.target.files).slice(0,5)
+    const files = Array.from(e.target.files).slice(0, 5)
     setPhotos(files)
     const urls = files.map(f => URL.createObjectURL(f))
     setPreviews(urls)
   }
 
   async function publier() {
-    if (!nom||!date) { setMsg('Renseignez le nom et la date'); return }
-    if (photos.length===0) { setMsg('Ajoutez au moins une photo'); return }
+    if (!nom || !date) { setMsg('Renseignez le nom et la date'); return }
+    if (photos.length === 0) { setMsg('Ajoutez au moins une photo'); return }
     setUploading(true)
-    const {data:ev, error} = await supabaseAdmin.from('evenements_galerie').insert({nom, date_evenement:date}).select().limit(1)
-    if (error || !ev || ev.length===0) { setMsg('Erreur création événement'); setUploading(false); return }
+    const { data: ev, error } = await supabaseAdmin.from('evenements_galerie').insert({ nom, date_evenement: date }).select().limit(1)
+    if (error || !ev || ev.length === 0) { setMsg('Erreur création événement'); setUploading(false); return }
     for (const photo of photos) {
       const fileName = `${Date.now()}-${photo.name}`
       const { error: uploadError } = await supabase.storage.from('fichiers_membres').upload(`galerie/${fileName}`, photo)
       if (uploadError) { setMsg('Erreur upload photo'); setUploading(false); return }
-      const {data:{publicUrl}} = supabase.storage.from('fichiers_membres').getPublicUrl(`galerie/${fileName}`)
-      const { error: photoError } = await supabaseAdmin.from('photos_galerie').insert({evenement_id:ev[0].id, url:publicUrl})
+      const { data: { publicUrl } } = supabase.storage.from('fichiers_membres').getPublicUrl(`galerie/${fileName}`)
+      const { error: photoError } = await supabaseAdmin.from('photos_galerie').insert({ evenement_id: ev[0].id, url: publicUrl })
       if (photoError) { setMsg('Erreur enregistrement photo'); setUploading(false); return }
     }
     setMsg('Événement publié !')
@@ -818,7 +1032,7 @@ function Galerie({ theme, supabase, supabaseAdmin }) {
   }
 
   async function supprimerEv(id) {
-    const { error } = await supabaseAdmin.from('evenements_galerie').delete().eq('id',id)
+    const { error } = await supabaseAdmin.from('evenements_galerie').delete().eq('id', id)
     if (error) console.log('❌ Erreur suppression événement galerie:', error)
     else console.log('✅ Événement galerie supprimé')
     loadEvenements()
@@ -826,52 +1040,52 @@ function Galerie({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Galerie</h2>
-      <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'24px'}}>
-        <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Publier un événement</div>
-        {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
-        <input placeholder="Nom de l'événement" value={nom} onChange={e=>setNom(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-        <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',cursor:'pointer'}} />
-        <label style={{display:'block',background:theme.bg,border:`2px dashed ${theme.border}`,borderRadius:'10px',padding:'16px',textAlign:'center',cursor:'pointer',marginBottom:'10px'}}>
-          <div style={{color:theme.muted,fontSize:'13px'}}>{photos.length>0?`${photos.length} photo(s) sélectionnée(s)`:"Choisir jusqu'à 5 photos"}</div>
-          <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{display:'none'}} />
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Galerie</h2>
+      <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
+        <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Publier un événement</div>
+        {msg && <div style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', marginBottom: '12px' }}>{msg}</div>}
+        <input placeholder="Nom de l'événement" value={nom} onChange={e => setNom(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit' }} />
+        <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit', cursor: 'pointer' }} />
+        <label style={{ display: 'block', background: theme.bg, border: `2px dashed ${theme.border}`, borderRadius: '10px', padding: '16px', textAlign: 'center', cursor: 'pointer', marginBottom: '10px' }}>
+          <div style={{ color: theme.muted, fontSize: '13px' }}>{photos.length > 0 ? `${photos.length} photo(s) sélectionnée(s)` : "Choisir jusqu'à 5 photos"}</div>
+          <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{ display: 'none' }} />
         </label>
         {previews.length > 0 && (
-          <div style={{marginBottom:'12px'}}>
-            <div style={{color:theme.muted,fontSize:'11px',marginBottom:'8px'}}>Aperçu :</div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'6px'}}>
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ color: theme.muted, fontSize: '11px', marginBottom: '8px' }}>Aperçu :</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '6px' }}>
               {previews.map((url, i) => (
-                <img 
-                  key={i} 
-                  src={url} 
-                  alt="" 
+                <img
+                  key={i}
+                  src={url}
+                  alt=""
                   loading="lazy"
                   onClick={() => setLightbox(url)}
-                  style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'8px',cursor:'pointer',border:`1px solid ${theme.border}`}} 
+                  style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: `1px solid ${theme.border}` }}
                 />
               ))}
             </div>
           </div>
         )}
-        <button onClick={publier} disabled={uploading} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',opacity:uploading?0.6:1}}>
-          {uploading?'Publication...':'Publier'}
+        <button onClick={publier} disabled={uploading} style={{ background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', opacity: uploading ? 0.6 : 1 }}>
+          {uploading ? 'Publication...' : 'Publier'}
         </button>
       </div>
       <div>
         {evenements.map(ev => (
-          <div key={ev.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'16px',marginBottom:'12px'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
+          <div key={ev.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '16px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <div>
-                <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{ev.nom}</div>
-                <div style={{color:theme.muted,fontSize:'11px'}}>{new Date(ev.date_evenement).toLocaleDateString('fr-FR')} · {ev.photos_galerie?.length} photo(s)</div>
+                <div style={{ color: theme.text, fontSize: '14px', fontWeight: '700' }}>{ev.nom}</div>
+                <div style={{ color: theme.muted, fontSize: '11px' }}>{new Date(ev.date_evenement).toLocaleDateString('fr-FR')} · {ev.photos_galerie?.length} photo(s)</div>
               </div>
-              <button onClick={() => supprimerEv(ev.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
+              <button onClick={() => supprimerEv(ev.id)} style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '6px 12px', color: '#FC1713', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Supprimer
               </button>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'6px',cursor:'pointer'}}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '6px', cursor: 'pointer' }}>
               {ev.photos_galerie?.map(p => (
-                <img key={p.id} src={p.url} alt="" loading="lazy" onClick={() => setLightbox(p.url)} style={{width:'100%',height:'80px',objectFit:'cover',borderRadius:'8px',transition:'transform 0.2s'}} />
+                <img key={p.id} src={p.url} alt="" loading="lazy" onClick={() => setLightbox(p.url)} style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.2s' }} />
               ))}
             </div>
           </div>
@@ -880,8 +1094,8 @@ function Galerie({ theme, supabase, supabaseAdmin }) {
 
       {/* Lightbox */}
       {lightbox && (
-        <div onClick={() => setLightbox(null)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.92)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
-          <img src={lightbox} alt="" loading="lazy" style={{maxWidth:'95%',maxHeight:'90vh',borderRadius:'10px'}} />
+        <div onClick={() => setLightbox(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <img src={lightbox} alt="" loading="lazy" style={{ maxWidth: '95%', maxHeight: '90vh', borderRadius: '10px' }} />
         </div>
       )}
     </div>
@@ -894,33 +1108,33 @@ function Feedbacks({ theme, supabase }) {
   useEffect(() => { loadFeedbacks() }, [])
 
   async function loadFeedbacks() {
-    const {data} = await supabase.from('feedbacks').select('*, utilisateurs(prenom, nom)').order('created_at',{ascending:false})
+    const { data } = await supabase.from('feedbacks').select('*, utilisateurs(prenom, nom)').order('created_at', { ascending: false })
     if (data) setFeedbacks(data)
   }
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Feedbacks</h2>
-      {feedbacks.length===0 && (
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Feedbacks</h2>
+      {feedbacks.length === 0 && (
+        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
           Aucun feedback pour le moment
         </div>
       )}
       {feedbacks.map(f => (
-        <div key={f.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px'}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
+        <div key={f.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '14px', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <div>
-              <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{f.utilisateurs?.prenom} {f.utilisateurs?.nom}</div>
-              <div style={{color:theme.muted,fontSize:'11px'}}>{f.evenements?.titre}</div>
+              <div style={{ color: theme.text, fontSize: '13px', fontWeight: '600' }}>{f.utilisateurs?.prenom} {f.utilisateurs?.nom}</div>
+              <div style={{ color: theme.muted, fontSize: '11px' }}>{f.evenements?.titre}</div>
             </div>
-            <div style={{display:'flex',gap:'2px'}}>
-              {[1,2,3,4,5].map(n => (
-                <span key={n} style={{color:n<=f.note?'#f59e0b':'#444',fontSize:'14px'}}>★</span>
+            <div style={{ display: 'flex', gap: '2px' }}>
+              {[1, 2, 3, 4, 5].map(n => (
+                <span key={n} style={{ color: n <= f.note ? '#f59e0b' : '#444', fontSize: '14px' }}>★</span>
               ))}
             </div>
           </div>
-          <div style={{color:theme.muted,fontSize:'13px',lineHeight:'1.6'}}>{f.contenu}</div>
-          <div style={{color:theme.muted,fontSize:'11px',marginTop:'6px'}}>{new Date(f.created_at).toLocaleDateString('fr-FR')}</div>
+          <div style={{ color: theme.muted, fontSize: '13px', lineHeight: '1.6' }}>{f.contenu}</div>
+          <div style={{ color: theme.muted, fontSize: '11px', marginTop: '6px' }}>{new Date(f.created_at).toLocaleDateString('fr-FR')}</div>
         </div>
       ))}
     </div>
@@ -961,32 +1175,32 @@ function Evenements({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Événements</h2>
-      <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'24px'}}>
-        <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Nouvel événement</div>
-        {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
-        <input placeholder="Titre *" value={titre} onChange={e=>setTitre(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-        <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',cursor:'pointer'}} />
-        <input placeholder="Lieu" value={lieu} onChange={e=>setLieu(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-        <textarea placeholder="Description (optionnel)" value={description} onChange={e=>setDescription(e.target.value)} rows={3} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',resize:'none'}} />
-        <button onClick={publier} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Événements</h2>
+      <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
+        <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Nouvel événement</div>
+        {msg && <div style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', marginBottom: '12px' }}>{msg}</div>}
+        <input placeholder="Titre *" value={titre} onChange={e => setTitre(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit' }} />
+        <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit', cursor: 'pointer' }} />
+        <input placeholder="Lieu" value={lieu} onChange={e => setLieu(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit' }} />
+        <textarea placeholder="Description (optionnel)" value={description} onChange={e => setDescription(e.target.value)} rows={3} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit', resize: 'none' }} />
+        <button onClick={publier} style={{ background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
           Publier
         </button>
       </div>
       <div>
         {evenements.length === 0 && (
-          <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'24px',textAlign:'center',color:theme.muted,fontSize:'13px'}}>
+          <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
             Aucun événement pour le moment
           </div>
         )}
         {evenements.map(ev => (
-          <div key={ev.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
-            <div style={{flex:1}}>
-              <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{ev.titre}</div>
-              <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{new Date(ev.date_evenement).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})} {ev.lieu ? `· ${ev.lieu}` : ''}</div>
-              {ev.description && <div style={{color:theme.muted,fontSize:'12px',marginTop:'4px'}}>{ev.description}</div>}
+          <div key={ev.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '14px', marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ color: theme.text, fontSize: '14px', fontWeight: '700' }}>{ev.titre}</div>
+              <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{new Date(ev.date_evenement).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} {ev.lieu ? `· ${ev.lieu}` : ''}</div>
+              {ev.description && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '4px' }}>{ev.description}</div>}
             </div>
-            <button onClick={() => supprimer(ev.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
+            <button onClick={() => supprimer(ev.id)} style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '6px 12px', color: '#FC1713', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>
               Supprimer
             </button>
           </div>
@@ -1006,13 +1220,13 @@ function Annonces({ theme, supabase, supabaseAdmin }) {
   useEffect(() => { loadAnnonces() }, [])
 
   async function loadAnnonces() {
-    const {data} = await supabase.from('annonces').select('*').order('created_at',{ascending:false})
+    const { data } = await supabase.from('annonces').select('*').order('created_at', { ascending: false })
     if (data) setAnnonces(data)
   }
 
   async function publier() {
     if (!titre) { setMsg('Renseignez un titre'); return }
-    const { error } = await supabaseAdmin.from('annonces').insert({titre, contenu, urgent})
+    const { error } = await supabaseAdmin.from('annonces').insert({ titre, contenu, urgent })
     if (error) { console.log('❌ Erreur création annonce:', error); setMsg('Erreur : ' + error.message); return }
     console.log('✅ Annonce créée')
     setMsg('Annonce publiée !')
@@ -1021,7 +1235,7 @@ function Annonces({ theme, supabase, supabaseAdmin }) {
   }
 
   async function supprimer(id) {
-    const { error } = await supabaseAdmin.from('annonces').delete().eq('id',id)
+    const { error } = await supabaseAdmin.from('annonces').delete().eq('id', id)
     if (error) { console.log('❌ Erreur suppression annonce:', error); return }
     console.log('✅ Annonce supprimée')
     loadAnnonces()
@@ -1036,68 +1250,68 @@ function Annonces({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Annonces</h2>
-      <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'24px'}}>
-        <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Nouvelle annonce</div>
-        {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
-        <input placeholder="Titre" value={titre} onChange={e=>setTitre(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}} />
-        <textarea placeholder="Contenu (optionnel)" value={contenu} onChange={e=>setContenu(e.target.value)} rows={3} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',resize:'none'}} />
-        <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',marginBottom:'14px'}}>
-          <input type="checkbox" checked={urgent} onChange={e=>setUrgent(e.target.checked)} style={{accentColor:'#C8102E'}} />
-          <span style={{color:theme.muted,fontSize:'13px'}}>Marquer comme urgente</span>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Annonces</h2>
+      <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
+        <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Nouvelle annonce</div>
+        {msg && <div style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', marginBottom: '12px' }}>{msg}</div>}
+        <input placeholder="Titre" value={titre} onChange={e => setTitre(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit' }} />
+        <textarea placeholder="Contenu (optionnel)" value={contenu} onChange={e => setContenu(e.target.value)} rows={3} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit', resize: 'none' }} />
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '14px' }}>
+          <input type="checkbox" checked={urgent} onChange={e => setUrgent(e.target.checked)} style={{ accentColor: '#FC1713' }} />
+          <span style={{ color: theme.muted, fontSize: '13px' }}>Marquer comme urgente</span>
         </label>
-        <button onClick={publier} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
+        <button onClick={publier} style={{ background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
           Publier
         </button>
       </div>
       <div>
         {annonces.map(a => (
-          <div key={a.id} style={{background:theme.card,border:`1px solid ${a.urgent?'#C8102E':theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
-            <div style={{flex:1}}>
-              <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}}>
-                <div style={{color:theme.text,fontSize:'13px',fontWeight:'600'}}>{a.titre}</div>
-                {a.urgent && <span style={{background:'rgba(200,16,46,0.15)',color:'#C8102E',fontSize:'10px',fontWeight:'700',padding:'2px 8px',borderRadius:'10px'}}>URGENT</span>}
+          <div key={a.id} style={{ background: theme.card, border: `1px solid ${a.urgent ? '#FC1713' : theme.border}`, borderRadius: '12px', padding: '14px', marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ color: theme.text, fontSize: '13px', fontWeight: '600' }}>{a.titre}</div>
+                {a.urgent && <span style={{ background: 'rgba(200,16,46,0.15)', color: '#FC1713', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '10px' }}>URGENT</span>}
               </div>
-              {a.contenu && <div style={{color:theme.muted,fontSize:'12px',lineHeight:'1.6'}}>{a.contenu}</div>}
-              <div style={{color:theme.muted,fontSize:'11px',marginTop:'6px'}}>{new Date(a.created_at).toLocaleDateString('fr-FR')}</div>
-              <div style={{display:'flex',gap:'8px',marginTop:'8px'}}>
-                <button 
+              {a.contenu && <div style={{ color: theme.muted, fontSize: '12px', lineHeight: '1.6' }}>{a.contenu}</div>}
+              <div style={{ color: theme.muted, fontSize: '11px', marginTop: '6px' }}>{new Date(a.created_at).toLocaleDateString('fr-FR')}</div>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <button
                   onClick={() => copierMessage(a)}
                   style={{
-                    background:'rgba(37,211,102,0.1)',
-                    border:'1px solid rgba(37,211,102,0.3)',
-                    borderRadius:'8px',
-                    padding:'8px 14px',
-                    color:'#25d366',
-                    fontSize:'12px',
-                    fontWeight:'600',
-                    cursor:'pointer',
-                    fontFamily:'inherit'
+                    background: 'rgba(37,211,102,0.1)',
+                    border: '1px solid rgba(37,211,102,0.3)',
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    color: '#25d366',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit'
                   }}
                 >
                   Copier le message
                 </button>
-                <a 
+                <a
                   href="https://chat.whatsapp.com/FLeruqQMOJ7AuqPsOWVwiD"
                   target="_blank"
                   rel="noreferrer"
                   style={{
-                    background:'rgba(37,211,102,0.1)',
-                    border:'1px solid rgba(37,211,102,0.3)',
-                    borderRadius:'8px',
-                    padding:'8px 14px',
-                    color:'#25d366',
-                    fontSize:'12px',
-                    fontWeight:'600',
-                    textDecoration:'none',
-                    display:'inline-block'
+                    background: 'rgba(37,211,102,0.1)',
+                    border: '1px solid rgba(37,211,102,0.3)',
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    color: '#25d366',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    textDecoration: 'none',
+                    display: 'inline-block'
                   }}
                 >
                   Ouvrir le groupe
                 </a>
               </div>
             </div>
-            <button onClick={() => supprimer(a.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
+            <button onClick={() => supprimer(a.id)} style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '6px 12px', color: '#FC1713', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>
               Supprimer
             </button>
           </div>
@@ -1114,29 +1328,24 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
   const [priere, setPriere] = useState('')
   const [dateDevotion, setDateDevotion] = useState('')
   const [devotions, setDevotions] = useState([])
-  const [defis, setDefis] = useState([])
-  const [lectures, setLectures] = useState([{ jour: '', ref: '' }])
-  const [semaine, setSemaine] = useState('')
+  const [commentairesOpen, setCommentairesOpen] = useState(null)
   const [msg, setMsg] = useState('')
-  const [tab, setTab] = useState('devotions')
 
-  useEffect(() => {
-    loadDevotions()
-    loadDefis()
-  }, [])
+  useEffect(() => { loadDevotions() }, [])
 
   async function loadDevotions() {
-    const { data } = await supabaseAdmin.from('devotions').select('*').order('date_devotion', { ascending: false })
+    const { data } = await supabaseAdmin
+      .from('devotions')
+      .select('*')
+      .order('date_devotion', { ascending: false })
     if (data) setDevotions(data)
   }
 
-  async function loadDefis() {
-    const { data } = await supabaseAdmin.from('defis_lecture').select('*').order('created_at', { ascending: false })
-    if (data) setDefis(data)
-  }
-
-  async function publierDevotion() {
-    if (!verset || !reference || !dateDevotion) { setMsg('Renseignez le verset, la référence et la date'); return }
+  async function publier() {
+    if (!verset || !reference || !dateDevotion) {
+      setMsg('Verset, référence et date sont obligatoires')
+      return
+    }
     const { error } = await supabaseAdmin.from('devotions').insert({
       titre: titre || reference,
       verset,
@@ -1144,169 +1353,209 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
       priere,
       date_devotion: dateDevotion
     })
-    if (error) { console.log('Erreur création dévotion:', error); setMsg('Erreur : ' + error.message); return }
+    if (error) { setMsg('Erreur : ' + error.message); return }
     setMsg('Dévotion publiée !')
     setTitre(''); setVerset(''); setReference(''); setPriere(''); setDateDevotion('')
     loadDevotions()
+    setTimeout(() => setMsg(''), 4000)
   }
 
-  async function publierDefi() {
-    if (!semaine || !lectures.some(l => l.jour && l.ref)) { setMsg('Renseignez la semaine et ajoutez au moins une lecture'); return }
-    const lecturesFilled = lectures.filter(l => l.jour && l.ref)
-    const { error } = await supabaseAdmin.from('defis_lecture').insert({
-      semaine: parseInt(semaine),
-      annee: new Date().getFullYear(),
-      lectures: lecturesFilled
-    })
-    if (error) { console.log('❌ Erreur création défi:', error); setMsg('Erreur : ' + error.message); return }
-      console.log('✅ Défi créé')
-    setMsg('Défi publié !')
-    setLectures([{ jour: '', ref: '' }])
-    setSemaine('')
-    loadDefis()
-  }
-
-  async function supprimerDevotion(id) {
-    const { error } = await supabaseAdmin.from('devotions').delete().eq('id', id)
-    if (error) { console.log('❌ Erreur suppression dévotion:', error); return }
-    console.log('✅ Dévotion supprimée')
+  async function supprimer(id) {
+    await supabaseAdmin.from('devotions').delete().eq('id', id)
     loadDevotions()
-  }
-
-  async function supprimerDefi(id) {
-    const { error } = await supabaseAdmin.from('defis_lecture').delete().eq('id', id)
-    if (error) { console.log('❌ Erreur suppression défi:', error); return }
-    console.log('✅ Défi supprimé')
-    loadDefis()
-  }
-
-  function ajouterLecture() {
-    setLectures([...lectures, { jour: '', ref: '' }])
-  }
-
-  function modifierLecture(index, field, value) {
-    const nouvelles = [...lectures]
-    nouvelles[index][field] = value
-    setLectures(nouvelles)
-  }
-
-  function supprimerLecture(index) {
-    setLectures(lectures.filter((_, i) => i !== index))
   }
 
   return (
     <div>
-      <h2 style={{color:theme.text,fontSize:'22px',fontWeight:'700',fontFamily:'Outfit,sans-serif',marginBottom:'20px'}}>Dévotions</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>
+        Dévotions
+      </h2>
 
-      <div style={{display:'flex',background:theme.card,borderBottom:`1px solid ${theme.border}`,overflowX:'auto'}}>
-        {[
-          { id: 'devotions', label: 'Dévotions' },
-          { id: 'defis', label: 'Défis lecture' }
-        ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{flex:1,padding:'12px 4px',background:'none',border:'none',borderBottom:`2px solid ${tab===t.id?'#C8102E':'transparent'}`,color:tab===t.id?'#C8102E':theme.muted,fontSize:'12px',cursor:'pointer',fontFamily:'inherit',fontWeight:tab===t.id?'600':'400',textTransform:'capitalize',whiteSpace:'nowrap'}}>
-            {t.label}
-          </button>
-        ))}
+      {/* Formulaire */}
+      <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '28px' }}>
+        <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '16px' }}>
+          Programmer une dévotion
+        </div>
+
+        {msg && (
+          <div style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: '8px', padding: '10px 12px', color: '#25d366', fontSize: '12px', marginBottom: '14px' }}>
+            {msg}
+          </div>
+        )}
+
+        {/* Date en premier */}
+        <label style={{ display: 'block', color: theme.muted, fontSize: '11px', fontWeight: '600', marginBottom: '5px' }}>
+          Date programmée *
+        </label>
+        <input
+          type="date"
+          value={dateDevotion}
+          onChange={e => setDateDevotion(e.target.value)}
+          style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit', boxSizing: 'border-box', cursor: 'pointer' }}
+        />
+
+        <label style={{ display: 'block', color: theme.muted, fontSize: '11px', fontWeight: '600', marginBottom: '5px' }}>
+          Référence biblique * (ex : Philippiens 4:13)
+        </label>
+        <input
+          placeholder="Philippiens 4:13"
+          value={reference}
+          onChange={e => setReference(e.target.value)}
+          style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit', boxSizing: 'border-box' }}
+        />
+
+        <label style={{ display: 'block', color: theme.muted, fontSize: '11px', fontWeight: '600', marginBottom: '5px' }}>
+          Verset *
+        </label>
+        <textarea
+          placeholder="Je puis tout par Christ qui me fortifie."
+          value={verset}
+          onChange={e => setVerset(e.target.value)}
+          rows={3}
+          style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box' }}
+        />
+
+        <label style={{ display: 'block', color: theme.muted, fontSize: '11px', fontWeight: '600', marginBottom: '5px' }}>
+          Titre (optionnel)
+        </label>
+        <input
+          placeholder="La force en Christ"
+          value={titre}
+          onChange={e => setTitre(e.target.value)}
+          style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit', boxSizing: 'border-box' }}
+        />
+
+        <label style={{ display: 'block', color: '#0965BA', fontSize: '11px', fontWeight: '600', marginBottom: '5px' }}>
+          Ma prière (optionnel)
+        </label>
+        <textarea
+          placeholder="Seigneur, aide-moi à puiser ma force en toi aujourd'hui..."
+          value={priere}
+          onChange={e => setPriere(e.target.value)}
+          rows={4}
+          style={{ width: '100%', background: theme.bg, border: `1px solid rgba(9,101,186,0.3)`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '16px', fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box' }}
+        />
+
+        <button
+          onClick={publier}
+          style={{ background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          Publier
+        </button>
       </div>
 
-      {tab === 'devotions' && (
-        <>
-          <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'24px',marginTop:'20px'}}>
-            <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Nouvelle dévotion</div>
-            {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
-            <textarea placeholder="Verset biblique * (ex: Je puis tout par Christ qui me fortifie)" value={verset} onChange={e=>setVerset(e.target.value)} rows={2} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',resize:'none',boxSizing:'border-box'}} />
-            <input placeholder="Référence * (ex: Philippiens 4:13)" value={reference} onChange={e=>setReference(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',boxSizing:'border-box'}} />
-            <input placeholder="Titre (optionnel, sinon la référence sera utilisée)" value={titre} onChange={e=>setTitre(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',boxSizing:'border-box'}} />
-            <input type="date" value={dateDevotion} onChange={e=>setDateDevotion(e.target.value)} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',cursor:'pointer',boxSizing:'border-box'}} />
-            <textarea placeholder="Prière du matin (optionnel)" value={priere} onChange={e=>setPriere(e.target.value)} rows={3} style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'9px 12px',color:theme.text,fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit',resize:'none',boxSizing:'border-box'}} />
-            <button onClick={publierDevotion} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
-              Publier
-            </button>
-          </div>
+      {/* Liste dévotions */}
+      <div style={{ color: theme.text, fontSize: '15px', fontWeight: '700', marginBottom: '14px' }}>
+        Dévotions programmées ({devotions.length})
+      </div>
 
-          <div>
-            <div style={{color:theme.text,fontSize:'16px',fontWeight:'700',marginBottom:'14px'}}>Dévotions publiées</div>
-            {devotions.map(d => (
-              <div key={d.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
-                <div style={{flex:1}}>
-                  <div style={{color:theme.text,fontSize:'14px',fontWeight:'700'}}>{d.titre}</div>
-                  <div style={{color:theme.muted,fontSize:'12px',marginTop:'2px'}}>{new Date(d.date_devotion).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>
-                  <div style={{color:theme.muted,fontSize:'12px',marginTop:'4px',fontStyle:'italic'}}>« {d.verset} » — {d.reference}</div>
-                  {d.priere && <div style={{color:theme.muted,fontSize:'12px',marginTop:'6px'}}>{d.priere}</div>}
-                </div>
-                <button onClick={() => supprimerDevotion(d.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
-                  Supprimer
-                </button>
-              </div>
-            ))}
-          </div>
-        </>
+      {devotions.length === 0 && (
+        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
+          Aucune dévotion programmée
+        </div>
       )}
 
-      {tab === 'defis' && (
-        <>
-          <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'14px',padding:'20px',marginBottom:'24px',marginTop:'20px'}}>
-            <div style={{color:'#C8102E',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'14px'}}>Nouveau défi lecture</div>
-            {msg && <div style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px 12px',color:'#C8102E',fontSize:'12px',marginBottom:'12px'}}>{msg}</div>}
-            
-            <input 
-              type="number"
-              placeholder="Numéro de la semaine" 
-              value={semaine} 
-              onChange={e=>setSemaine(e.target.value)} 
-              style={{width:'100%',background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit',marginBottom:'12px'}} 
-            />
-            
-            {lectures.map((lecture, index) => (
-              <div key={index} style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'8px'}}>
-                <input 
-                  placeholder="Jour (ex: Lundi)" 
-                  value={lecture.jour} 
-                  onChange={e=>modifierLecture(index, 'jour', e.target.value)} 
-                  style={{flex:1,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit'}} 
-                />
-                <input 
-                  placeholder="Référence (ex: Genèse 1:1-5)" 
-                  value={lecture.ref} 
-                  onChange={e=>modifierLecture(index, 'ref', e.target.value)} 
-                  style={{flex:2,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 12px',color:theme.text,fontSize:'13px',outline:'none',fontFamily:'inherit'}} 
-                />
-                {lectures.length > 1 && (
-                  <button onClick={() => supprimerLecture(index)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'8px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
-                    ✕
-                  </button>
-                )}
+      {devotions.map(d => (
+        <div key={d.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '16px', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+            <div style={{ flex: 1 }}>
+              {/* Date */}
+              <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '6px' }}>
+                {new Date(d.date_devotion).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               </div>
-            ))}
-            
-            <button onClick={ajouterLecture} style={{background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 12px',color:theme.muted,fontSize:'12px',cursor:'pointer',fontFamily:'inherit',marginBottom:'12px'}}>
-              + Ajouter une lecture
-            </button>
-            
-            <button onClick={publierDefi} style={{background:'#C8102E',color:'white',border:'none',borderRadius:'8px',padding:'10px 20px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}>
-              Publier le défi
-            </button>
-          </div>
-
-          <div>
-            <div style={{color:theme.text,fontSize:'16px',fontWeight:'700',marginBottom:'14px'}}>Défis publiés</div>
-            {defis.map(d => (
-              <div key={d.id} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:'12px',padding:'14px',marginBottom:'8px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
-                <div style={{flex:1}}>
-                  <div style={{color:theme.text,fontSize:'14px',fontWeight:'700',marginBottom:'8px'}}>Défi du {new Date(d.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>
-                  {d.lectures?.map((l, i) => (
-                    <div key={i} style={{color:theme.muted,fontSize:'12px',marginBottom:'4px'}}>
-                      {l.jour}: {l.ref}
-                    </div>
-                  ))}
+              {/* Titre */}
+              <div style={{ color: theme.text, fontSize: '14px', fontWeight: '700', marginBottom: '6px' }}>
+                {d.titre || d.reference}
+              </div>
+              {/* Verset */}
+              <div style={{ background: '#0965BA', borderRadius: '10px', padding: '10px 14px', marginBottom: '8px' }}>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  {d.reference}
                 </div>
-                <button onClick={() => supprimerDefi(d.id)} style={{background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'8px',padding:'6px 12px',color:'#C8102E',fontSize:'12px',cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
-                  Supprimer
-                </button>
+                <div style={{ color: 'white', fontSize: '13px', fontStyle: 'italic', lineHeight: '1.6' }}>
+                  « {d.verset} »
+                </div>
               </div>
-            ))}
+              {/* Ma prière */}
+              {d.priere && (
+                <div style={{ color: theme.muted, fontSize: '12px', lineHeight: '1.6', fontStyle: 'italic', borderLeft: '3px solid #0965BA', paddingLeft: '10px' }}>
+                  {d.priere}
+                </div>
+              )}
+              {/* Commentaires */}
+              <CommentairesAdmin
+                devotionId={d.id}
+                theme={theme}
+                supabaseAdmin={supabaseAdmin}
+                open={commentairesOpen === d.id}
+                setOpen={(v) => setCommentairesOpen(v ? d.id : null)}
+              />
+            </div>
+            <button
+              onClick={() => supprimer(d.id)}
+              style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '6px 12px', color: '#FC1713', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}
+            >
+              Suppr.
+            </button>
           </div>
-        </>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function CommentairesAdmin({ devotionId, theme, supabaseAdmin }) {
+  const [comms, setComms] = useState([])
+  const [open, setOpen] = useState(false)
+  const longPressTimer = useRef(null)
+
+  useEffect(() => {
+    if (open) load()
+  }, [open])
+
+  async function load() {
+    const { data } = await supabaseAdmin
+      .from('commentaires_devotion')
+      .select('*, utilisateurs(prenom, nom)')
+      .eq('devotion_id', devotionId)
+      .order('created_at', { ascending: true })
+    if (data) setComms(data)
+  }
+
+  async function supprimer(id) {
+    await supabaseAdmin.from('commentaires_devotion').delete().eq('id', id)
+    setComms(c => c.filter(x => x.id !== id))
+  }
+
+  return (
+    <div style={{ marginTop: '8px' }}>
+      <button onClick={() => setOpen(!open)}
+        style={{ background: 'none', border: 'none', color: theme.muted, fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
+        {open ? 'Masquer commentaires' : `Voir commentaires`}
+      </button>
+      {open && (
+        <div style={{ marginTop: '8px' }}>
+          {comms.length === 0 && <div style={{ color: theme.muted, fontSize: '11px' }}>Aucun commentaire</div>}
+          {comms.map(c => (
+            <div key={c.id}
+              onContextMenu={e => { e.preventDefault(); supprimer(c.id) }}
+              onTouchStart={() => { longPressTimer.current = setTimeout(() => supprimer(c.id), 600) }}
+              onTouchEnd={() => clearTimeout(longPressTimer.current)}
+              style={{ background: theme.bg, borderRadius: '8px', padding: '8px 10px', marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer', border: `1px solid ${theme.border}` }}>
+              <div>
+                <span style={{ color: '#FC1713', fontSize: '11px', fontWeight: '600', marginRight: '6px' }}>
+                  {c.utilisateurs?.prenom} {c.utilisateurs?.nom}
+                </span>
+                <span style={{ color: theme.muted, fontSize: '12px' }}>{c.contenu}</span>
+              </div>
+              <button onClick={() => supprimer(c.id)}
+                style={{ background: 'none', border: 'none', color: theme.muted, fontSize: '14px', cursor: 'pointer', padding: '0 4px', flexShrink: 0 }}>
+                ✕
+              </button>
+            </div>
+          ))}
+          <div style={{ color: theme.muted, fontSize: '10px', marginTop: '4px' }}>Appui long ou ✕ pour supprimer</div>
+        </div>
       )}
     </div>
   )

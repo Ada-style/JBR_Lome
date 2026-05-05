@@ -9,10 +9,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png', 'logo.png'],
       manifest: {
-        name: 'Jeunesse EB Le Rocher',
+        name: 'Groupe des jeunes du Rocher',
         short_name: 'JBR',
-        description: 'Plateforme de la Jeunesse EB Le Rocher',
-        theme_color: '#C8102E',
+        description: 'Plateforme de la Groupe des jeunes du Rocher',
+        theme_color: '#FC1713',
         background_color: '#111111',
         display: 'standalone',
         start_url: '/',

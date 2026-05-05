@@ -74,28 +74,28 @@ export default function Login() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#111',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}}>
-      <div style={{width:'100%',maxWidth:'360px'}}>
+    <div style={{ minHeight: '100vh', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ width: '100%', maxWidth: '360px' }}>
 
         {/* Logo */}
-        <div style={{textAlign:'center',marginBottom:'32px',cursor:'pointer'}} onClick={handleLogoClick}>
-          <img src="/logo.png" alt="Logo" loading="lazy" style={{width:'80px',height:'80px',objectFit:'contain',marginBottom:'12px',borderRadius:'16px',filter:'drop-shadow(0 4px 20px rgba(0,0,0,0.4))'}} />
-          <h1 style={{color:'white',fontSize:'22px',fontFamily:'Outfit,sans-serif',fontWeight:'700',margin:'0'}}>
-            Jeunesse EB Le Rocher
+        <div style={{ textAlign: 'center', marginBottom: '32px', cursor: 'pointer' }} onClick={handleLogoClick}>
+          <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '12px', borderRadius: '16px', filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.4))' }} />
+          <h1 style={{ color: 'white', fontSize: '22px', fontFamily: 'Founders Grotesk,sans-serif', fontWeight: '700', margin: '0' }}>
+            GROUPE DES JEUNES DU ROCHER
           </h1>
-          <p style={{color:'rgba(255,255,255,0.4)',fontSize:'11px',marginTop:'4px',letterSpacing:'2px',textTransform:'uppercase'}}>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '4px', letterSpacing: '2px', textTransform: 'uppercase' }}>
             Lomé, Togo · Hountigomé
           </p>
         </div>
 
         {/* Formulaire de connexion */}
-        <form onSubmit={handleLogin} style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'16px',padding:'20px'}}>
+        <form onSubmit={handleLogin} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '20px' }}>
           {error && (
-            <div style={{background:'rgba(200,16,46,0.2)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'10px',padding:'10px 12px',marginBottom:'12px',color:'rgba(255,255,255,0.8)',fontSize:'13px'}}>
+            <div style={{ background: 'rgba(200,16,46,0.2)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '10px', padding: '10px 12px', marginBottom: '12px', color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>
               {error}
             </div>
           )}
-          <label style={{color:'rgba(255,255,255,0.4)',fontSize:'10px',letterSpacing:'1.5px',textTransform:'uppercase',display:'block',marginBottom:'5px'}}>
+          <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' }}>
             Adresse e-mail
           </label>
           <input
@@ -103,23 +103,23 @@ export default function Login() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder="prenom.nom@email.com"
-            style={{width:'100%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'10px',padding:'10px 12px',color:'white',fontSize:'13px',outline:'none',marginBottom:'12px',fontFamily:'inherit'}}
+            style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 12px', color: 'white', fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }}
           />
-          <label style={{color:'rgba(255,255,255,0.4)',fontSize:'10px',letterSpacing:'1.5px',textTransform:'uppercase',display:'block',marginBottom:'5px'}}>
+          <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' }}>
             Mot de passe
           </label>
-          <div style={{position:'relative',marginBottom:'14px'}}>
+          <div style={{ position: 'relative', marginBottom: '14px' }}>
             <input
               type={showPwd ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              style={{width:'100%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'10px',padding:'10px 40px 10px 12px',color:'white',fontSize:'13px',outline:'none',fontFamily:'inherit'}}
+              style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 40px 10px 12px', color: 'white', fontSize: '13px', outline: 'none', fontFamily: 'inherit' }}
             />
             <button
               type="button"
               onClick={() => setShowPwd(!showPwd)}
-              style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:'rgba(255,255,255,0.4)',cursor:'pointer',fontSize:'16px',padding:'0'}}
+              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '16px', padding: '0' }}
             >
               {showPwd ? '🙈' : '👁'}
             </button>
@@ -127,24 +127,24 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            style={{width:'100%',background:'#C8102E',color:'white',border:'none',borderRadius:'10px',padding:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit',opacity:loading?0.6:1}}
+            style={{ width: '100%', background: '#FC1713', color: 'white', border: 'none', borderRadius: '10px', padding: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', opacity: loading ? 0.6 : 1 }}
           >
             {loading ? 'Chargement...' : 'Se connecter'}
           </button>
           <button
             type="button"
             onClick={resetMotDePasse}
-            style={{width:'100%',background:'transparent',color:'rgba(255,255,255,0.6)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'10px',padding:'10px',fontSize:'12px',fontWeight:'500',cursor:'pointer',fontFamily:'inherit',marginTop:'8px'}}
+            style={{ width: '100%', background: 'transparent', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '10px', fontSize: '12px', fontWeight: '500', cursor: 'pointer', fontFamily: 'inherit', marginTop: '8px' }}
           >
             Mot de passe oublié ?
           </button>
         </form>
 
         {/* Lien vers demande d'adhésion */}
-        <div style={{textAlign:'center',marginTop:'20px'}}>
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
           <button
             onClick={() => navigate('/nouveau')}
-            style={{background:'none',border:'none',color:'rgba(255,255,255,0.6)',fontSize:'13px',cursor:'pointer',fontFamily:'inherit',textDecoration:'underline'}}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}
           >
             Pas encore membre ? Faire une demande d'adhésion
           </button>
@@ -152,21 +152,21 @@ export default function Login() {
 
         {/* Pin admin secret */}
         {showPin && (
-          <div style={{marginTop:'14px',background:'rgba(200,16,46,0.1)',border:'1px solid rgba(200,16,46,0.3)',borderRadius:'16px',padding:'20px'}}>
-            <p style={{color:'rgba(200,16,46,0.7)',fontSize:'10px',letterSpacing:'2px',textTransform:'uppercase',marginBottom:'12px'}}>
+          <div style={{ marginTop: '14px', background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '16px', padding: '20px' }}>
+            <p style={{ color: 'rgba(200,16,46,0.7)', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>
               Accès restreint · Bureau
             </p>
             <input
               type="password"
               value={pin}
               onChange={e => setPin(e.target.value)}
-              onKeyDown={e => e.key==='Enter' && handlePin()}
+              onKeyDown={e => e.key === 'Enter' && handlePin()}
               placeholder="Code confidentiel"
-              style={{width:'100%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'10px',padding:'10px 12px',color:'white',fontSize:'13px',outline:'none',marginBottom:'10px',fontFamily:'inherit'}}
+              style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 12px', color: 'white', fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit' }}
             />
             <button
               onClick={handlePin}
-              style={{width:'100%',background:'#C8102E',color:'white',border:'none',borderRadius:'10px',padding:'12px',fontSize:'13px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'}}
+              style={{ width: '100%', background: '#FC1713', color: 'white', border: 'none', borderRadius: '10px', padding: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Confirmer
             </button>
