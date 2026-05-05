@@ -302,58 +302,38 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
     <div style={{ padding: '16px', maxWidth: '600px', margin: '0 auto' }}>
 
       {/* Anniversaire du jour */}
-      {anniversairesDuJour.length > 0 && (
-        <div style={{ marginBottom: '16px' }}>
-          {anniversairesDuJour.map(a => (
-            <div key={a.id} onClick={() => { if (a.whatsapp) window.open(`https://wa.me/${a.whatsapp.replace(/[^0-9]/g, '')}?text=Joyeux%20anniversaire%20${a.prenom}%20!`, '_blank') }} style={{ background: 'linear-gradient(135deg, rgba(252,23,19,0.1), rgba(252,23,19,0.05))', border: '1px solid rgba(252,23,19,0.3)', borderRadius: '18px', padding: '16px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', background: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M20 5L22 15L32 17L22 19L20 29L18 19L8 17L18 15L20 5Z\' fill=\'%23FC1713\' fill-opacity=\'0.1\'/%3E%3C/svg%3E")', backgroundSize: '40px 40px', animation: 'slideBg 10s linear infinite' }} />
-              <style>{`@keyframes slideBg { from { background-position: 0 0; } to { background-position: 40px 40px; } }`}</style>
-              {a.avatar_url ? (
-                <img src={a.avatar_url} alt="" loading="lazy" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid #FC1713' }} />
-              ) : (
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #FC1713, #a00d24)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '18px', fontWeight: '700', flexShrink: 0, boxShadow: '0 4px 10px rgba(252,23,19,0.3)' }}>
-                  {`${a.prenom?.[0] || ''}${a.nom?.[0] || ''}`.toUpperCase()}
-                </div>
-              )}
-              <div>
-                <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '2px', fontWeight: 'bold' }}>Joyeux Anniversaire !</div>
-                <div style={{ color: theme.text, fontSize: '15px', fontWeight: '700' }}>{a.prenom} {a.nom}</div>
-                <div style={{ color: theme.muted, fontSize: '12px' }}>Souhaite-lui un joyeux anniversaire 🎂</div>
-              </div>
-            </div>
-          ))}
+      {anniversairesDuJour.map(a => (
+        <div key={a.id}
+          onClick={() => a.whatsapp && window.open(`https://wa.me/${a.whatsapp.replace(/[^0-9]/g,'')}?text=Joyeux%20anniversaire%20${a.prenom}%20!`, '_blank')}
+          style={{ background: 'linear-gradient(135deg,rgba(252,23,19,0.1),rgba(252,23,19,0.05))', border: '1px solid rgba(252,23,19,0.3)', borderRadius: '16px', padding: '14px 16px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+          <div style={{ fontSize: '28px' }}>🎂</div>
+          <div>
+            <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: '700' }}>Joyeux anniversaire !</div>
+            <div style={{ color: theme.text, fontSize: '15px', fontWeight: '700' }}>{a.prenom} {a.nom}</div>
+            <div style={{ color: theme.muted, fontSize: '11px' }}>Appuie pour lui envoyer un message</div>
+          </div>
         </div>
-      )}
-      {/* Anniversaires du mois avec confettis */}
+      ))}
+
+      {/* Membres nés ce mois (confettis) */}
       {anniversairesDuMois.length > 0 && anniversairesDuJour.length === 0 && (
-        <div style={{ marginBottom: '12px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-          {anniversairesDuMois.map(a => (
-            <div key={a.id} style={{ position: 'relative', flexShrink: 0 }}>
-              <style>{`
-          @keyframes confetti { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-6px) rotate(10deg)} }
-        `}</style>
-              {/* Petits confettis */}
-              {[...Array(4)].map((_, i) => (
-                <div key={i} style={{
-                  position: 'absolute', width: '5px', height: '5px', borderRadius: '50%',
-                  background: ['#FC1713', '#0965BA', '#FFD700', '#25d366'][i],
-                  top: `${[-8, -4, -10, -6][i]}px`, left: `${[4, 14, 22, 10][i]}px`,
-                  animation: `confetti ${[0.8, 1, 0.9, 1.1][i]}s ease-in-out infinite`,
-                  animationDelay: `${[0, 0.2, 0.4, 0.1][i]}s`
-                }} />
-              ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+          <style>{`@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}`}</style>
+          {anniversairesDuMois.slice(0, 5).map((a, i) => (
+            <div key={a.id} style={{ position: 'relative', flexShrink: 0, animation: `bounce ${1 + i * 0.15}s ease-in-out infinite` }}>
               {a.avatar_url ? (
-                <img src={a.avatar_url} alt="" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FC1713' }} />
+                <img src={a.avatar_url} alt="" style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FC1713' }} />
               ) : (
-                <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#FC1713', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '14px', fontWeight: '700', border: '2px solid rgba(252,23,19,0.4)' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#FC1713', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700' }}>
                   {a.prenom?.[0]}{a.nom?.[0]}
                 </div>
               )}
+              <div style={{ position: 'absolute', top: '-4px', right: '-2px', fontSize: '10px' }}>🎂</div>
             </div>
           ))}
-          <div style={{ display: 'flex', alignItems: 'center', color: theme.muted, fontSize: '11px', paddingLeft: '4px' }}>
-            Anniversaires ce mois
-          </div>
+          <span style={{ color: theme.muted, fontSize: '11px', flexShrink: 0 }}>
+            {anniversairesDuMois.length} anniversaire{anniversairesDuMois.length > 1 ? 's' : ''} ce mois
+          </span>
         </div>
       )}
       {/* Verset */}
@@ -1055,7 +1035,6 @@ function InfoEdit({ theme, supabase, profile, setMsg }) {
   const [telephone, setTelephone] = useState(profile?.telephone || '')
   const [domaine, setDomaine] = useState(profile?.domaine || '')
   const [dateNaissance, setDateNaissance] = useState(profile?.date_naissance || '')
-  const [bio, setBio] = useState(profile?.bio || '')
   const [saving, setSaving] = useState(false)
 
   const input = {
@@ -1133,32 +1112,20 @@ function MobileMoney({ theme, profile }) {
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+        <a href={`tel:${ussdMixx}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#0965BA', color: 'white', borderRadius: '12px', padding: '12px 8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }}>
+          <img src="/logo-mixx-by-yas.png" alt="" style={{ width: '24px', height: '24px', objectFit: 'contain', borderRadius: '4px' }} />
+          Mixx / T-Money
+        </a>
+        <a href={`tel:${ussdMoov}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#f59e0b', color: 'white', borderRadius: '12px', padding: '12px 8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }}>
+          <img src="/logo-moov-money.png" alt="" style={{ width: '24px', height: '24px', objectFit: 'contain', borderRadius: '4px' }} />
+          Moov Money
+        </a>
+      </div>
 
-        href={`tel:${ussdMixx}`}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#0965BA', color: 'white', borderRadius: '12px', padding: '12px 8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }}
-        >
-        <img src="/logo-mixx-by-yas.png" alt="" style={{ width: '24px', height: '24px', objectFit: 'contain', borderRadius: '4px' }} />
-        Mixx / T-Money
+      <a href={`https://wa.me/${BUREAU_WA}?text=${msgWA}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#25d366', color: 'white', borderRadius: '12px', padding: '13px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }}>
+        J'ai payé (WhatsApp)
       </a>
-
-      href={`tel:${ussdMoov}`}
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#f59e0b', color: 'white', borderRadius: '12px', padding: '12px 8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }}
-        >
-      <img src="/logo-moov-money.png" alt="" style={{ width: '24px', height: '24px', objectFit: 'contain', borderRadius: '4px' }} />
-      Moov Money
-    </a>
-      </div >
-
-
-    href={ `https://wa.me/${BUREAU_WA}?text=${msgWA}` }
-  target = "_blank"
-  rel = "noreferrer"
-  style = {{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#25d366', color: 'white', borderRadius: '12px', padding: '13px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }
-}
-      >
-  J'ai payé (WhatsApp)
-      </a >
-    </div >
+    </div>
   )
 }
 

@@ -166,8 +166,8 @@ export default function Nouveau() {
   }
 
   async function envoyerDemande() {
-    if (!prenom || !nom || !tel) {
-      showMsg('Veuillez renseigner prénoms, nom et numéro WhatsApp');
+    if (!prenom || !nom) {
+      showMsg('Veuillez renseigner vos prénoms et votre nom');
       return;
     }
 
@@ -483,6 +483,23 @@ export default function Nouveau() {
 
             <label style={labelStyle}>Numéro WhatsApp *</label>
             <input placeholder="+228 90 12 34 56" value={tel} onChange={e => setTel(e.target.value)} style={inputStyle} />
+
+            <label style={labelStyle}>Numéro de téléphone (optionnel)</label>
+            <input type="tel" placeholder="+228..." value={telephone} onChange={e => setTelephone(e.target.value)} style={inputStyle} />
+
+            <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              Quartier
+            </label>
+            <input
+              placeholder="Ex: Adidogomé, Bè, Tokoin..."
+              value={quartier}
+              onChange={e => setQuartier(e.target.value)}
+              style={inputStyle}
+            />
           </div>
 
           {/* Séparateur */}
