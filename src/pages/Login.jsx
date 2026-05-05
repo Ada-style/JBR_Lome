@@ -74,11 +74,11 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+    <div style={{ minHeight: '100vh', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Founders Grotesk, sans-serif' }}>
       <div style={{ width: '100%', maxWidth: '360px' }}>
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '32px', cursor: 'pointer' }} onClick={handleLogoClick}>
+        <div style={{ textAlign: 'center', marginBottom: '32px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={handleLogoClick}>
           <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '12px', borderRadius: '16px', filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.4))' }} />
           <h1 style={{ color: 'white', fontSize: '22px', fontFamily: 'Founders Grotesk,sans-serif', fontWeight: '700', margin: '0' }}>
             GROUPE DES JEUNES DU ROCHER

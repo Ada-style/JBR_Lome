@@ -304,7 +304,7 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
       {/* Anniversaire du jour */}
       {anniversairesDuJour.map(a => (
         <div key={a.id}
-          onClick={() => a.whatsapp && window.open(`https://wa.me/${a.whatsapp.replace(/[^0-9]/g,'')}?text=Joyeux%20anniversaire%20${a.prenom}%20!`, '_blank')}
+          onClick={() => a.whatsapp && window.open(`https://wa.me/${a.whatsapp.replace(/[^0-9]/g, '')}?text=Joyeux%20anniversaire%20${a.prenom}%20!`, '_blank')}
           style={{ background: 'linear-gradient(135deg,rgba(252,23,19,0.1),rgba(252,23,19,0.05))', border: '1px solid rgba(252,23,19,0.3)', borderRadius: '16px', padding: '14px 16px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
           <div style={{ fontSize: '28px' }}>🎂</div>
           <div>
@@ -943,17 +943,17 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, initialTab 
               </div>
             ))}
 
-          {/* Paiement Mobile Money */}
-        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '16px', marginTop: '14px' }}>
-          <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
-            Paiement Mobile Money
-          </div>
-          <p style={{ color: theme.muted, fontSize: '12px', lineHeight: '1.7', marginBottom: '14px' }}>
-            Saisis un montant puis lance le paiement Mixx by Yas (T-Money) ou Moov Money. Ensuite, clique sur "J'ai payé" pour confirmer sur WhatsApp.
-          </p>
+            {/* Paiement Mobile Money */}
+            <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '16px', marginTop: '14px' }}>
+              <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                Paiement Mobile Money
+              </div>
+              <p style={{ color: theme.muted, fontSize: '12px', lineHeight: '1.7', marginBottom: '14px' }}>
+                Saisis un montant puis lance le paiement Mixx by Yas (T-Money) ou Moov Money. Ensuite, clique sur "J'ai payé" pour confirmer sur WhatsApp.
+              </p>
 
-          <MobileMoney theme={theme} profile={profile} />
-        </div>
+              <MobileMoney theme={theme} profile={profile} />
+            </div>
           </div>
         )}
 
@@ -1091,9 +1091,9 @@ function MobileMoney({ theme, profile }) {
   const [montant, setMontant] = useState('200')
 
   // À remplacer par les vrais numéros du bureau
-  const NUMERO_MIXX = '22890000000'   // ← numéro T-Money du bureau
-  const NUMERO_MOOV = '22890000000'   // ← numéro Moov Money du bureau
-  const BUREAU_WA = '22890000000'   // ← WhatsApp du bureau
+  const NUMERO_MIXX = '22892894954'   // ← numéro T-Money du bureau
+  const NUMERO_MOOV = '22897440627'   // ← numéro Moov Money du bureau
+  const BUREAU_WA = '22892894954'   // ← WhatsApp du bureau
 
   const ussdMixx = `*145*1*${NUMERO_MIXX}*${montant}#`
   const ussdMoov = `*155*1*${NUMERO_MOOV}*${montant}#`
