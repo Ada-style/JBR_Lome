@@ -26,6 +26,8 @@ const IconSend2 = ({ size }) => <Ic size={size || 20}><line x1="22" y1="2" x2="1
 const IconGift = ({ size }) => <Ic size={size || 20}><polyline points="20 12 20 22 4 22 4 12" /><rect x="2" y="7" width="20" height="5" /><line x1="12" y1="22" x2="12" y2="7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></Ic>
 
 
+
+
 export default function Membre() {
   const navigate = useNavigate()
   const { profile, signOut } = useAuth()
@@ -34,7 +36,23 @@ export default function Membre() {
   const [notifs, setNotifs] = useState([])
   const [showNotifPanel, setShowNotifPanel] = useState(false)
   const [showProfil, setShowProfil] = useState(false)
+  const [showPaiement, setShowPaiement] = useState(false)
   const [luesAnnonces, setLuesAnnonces] = useState([])
+
+  // Gérer le retour arrière pour les modales
+  useEffect(() => {
+    const isAnyModalOpen = showNotifPanel || showProfil || showPaiement
+    if (isAnyModalOpen) {
+      window.history.pushState({ modal: true }, '')
+    }
+    const handlePopState = () => {
+      setShowNotifPanel(false)
+      setShowProfil(false)
+      setShowPaiement(false)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [showNotifPanel, showProfil, showPaiement])
   const [touchStart, setTouchStart] = useState(null)
   const [profilTab, setProfilTab] = useState('info')
 
@@ -98,10 +116,42 @@ export default function Membre() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: theme.bg, transition: 'background 0.3s' }}>
+    <div
+      style={{ minHeight: '100vh', background: theme.bg, transition: 'background 0.3s' }}
+      onTouchStart={e => setTouchStart(e.touches[0].clientX)}
+      onTouchEnd={e => {
+        if (!touchStart) return
+        const touchEnd = e.changedTouches[0].clientX
+        const diff = touchStart - touchEnd
+        if (diff > 80) handleSwipe('left')
+        if (diff < -80) handleSwipe('right')
+        setTouchStart(null)
+      }}
+    >
+
+      <style>{`
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(5deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
+        }
+        @keyframes confetti-fall {
+          0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .confetti {
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          border-radius: 2px;
+          animation: confetti-fall 4s linear infinite;
+          z-index: 5;
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+      `}</style>
 
       {/* Topbar */}
-      <div style={{ background: dark ? '#1a1a1a' : '#ffffff', borderBottom: '2px solid #FC1713', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', position: 'sticky', top: 0, zIndex: 50 }}>
+      <div style={{ background: dark ? '#1a1a1a' : '#ffffff', borderBottom: '2px solid #0965BA', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', position: 'sticky', top: 0, zIndex: 50 }}>
         <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '28px', height: '28px', objectFit: 'contain', borderRadius: '6px' }} />
         <div style={{ flex: 1 }}>
           <div style={{ color: theme.text, fontSize: '13px', fontWeight: '600' }}>Groupe des jeunes du Rocher</div>
@@ -182,7 +232,7 @@ export default function Membre() {
         onTouchStart={e => setTouchStart(e.touches[0].clientX)}
         onTouchEnd={e => { if (touchStart === null) return; const diff = touchStart - e.changedTouches[0].clientX; if (Math.abs(diff) > 60) handleSwipe(diff > 0 ? 'left' : 'right'); setTouchStart(null); }}
       >
-        {tab === 'accueil' && <Accueil theme={theme} supabase={supabase} dark={dark} profile={profile} setTab={setTab} />}
+
         {tab === 'devotion' && <Devotion theme={theme} supabase={supabase} dark={dark} profile={profile} />}
         {tab === 'evenements' && <Evenements theme={theme} supabase={supabase} profile={profile} />}
         {tab === 'communion' && <Communion theme={theme} supabase={supabase} />}
@@ -279,17 +329,22 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
       if (cotisations && cotisations.length > 0) setDerniereCotisation(cotisations[0])
 
       // Anniversaires
-      const moisActuel = new Date().getMonth() + 1
-      const jourActuel = new Date().getDate()
+      const t = new Date()
+      const moisActuel = t.getMonth() + 1
+      const jourActuel = t.getDate()
       const { data: usersData } = await supabase.from('utilisateurs').select('*')
       if (usersData) {
         const duMois = usersData.filter(u => {
           if (!u.date_naissance) return false
-          const d = new Date(u.date_naissance)
-          return d.getMonth() + 1 === moisActuel
+          const parts = u.date_naissance.split('-')
+          if (parts.length < 2) return false
+          return parseInt(parts[1], 10) === moisActuel
         })
         setAnniversairesDuMois(duMois)
-        setAnniversairesDuJour(duMois.filter(u => new Date(u.date_naissance).getDate() === jourActuel))
+        setAnniversairesDuJour(duMois.filter(u => {
+          const parts = u.date_naissance.split('-')
+          return parts.length >= 3 && parseInt(parts[2], 10) === jourActuel
+        }))
       }
 
     }
@@ -300,55 +355,62 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
 
   return (
     <div style={{ padding: '16px', maxWidth: '600px', margin: '0 auto' }}>
+      <style>{`
+        @keyframes confetti-fall {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(5deg); }
+        }
+        @keyframes bounce-mini {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-7px); }
+        }
+      `}</style>
 
-      {/* Anniversaire du jour */}
-      {anniversairesDuJour.map(a => (
-        <div key={a.id}
-          onClick={() => a.whatsapp && window.open(`https://wa.me/${a.whatsapp.replace(/[^0-9]/g, '')}?text=Joyeux%20anniversaire%20${a.prenom}%20!`, '_blank')}
-          style={{ background: 'linear-gradient(135deg,rgba(252,23,19,0.1),rgba(252,23,19,0.05))', border: '1px solid rgba(252,23,19,0.3)', borderRadius: '16px', padding: '14px 16px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-          <div style={{ fontSize: '28px' }}>🎂</div>
-          <div>
-            <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: '700' }}>Joyeux anniversaire !</div>
-            <div style={{ color: theme.text, fontSize: '15px', fontWeight: '700' }}>{a.prenom} {a.nom}</div>
-            <div style={{ color: theme.muted, fontSize: '11px' }}>Appuie pour lui envoyer un message</div>
-          </div>
-        </div>
-      ))}
+      {/* Rappel des anniversaires du mois (petites bulles) */}
+      {anniversairesDuMois.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px' }}>
+          <div style={{ fontSize: '10px', fontWeight: '800', color: '#FFD700', textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0, marginRight: '4px' }}>Nos jubilaires du mois ✨</div>
+          {anniversairesDuMois.map(a => {
+            const parts = a.date_naissance?.split('-') || [];
+            const bDay = parseInt(parts[2], 10);
+            const bMonth = parseInt(parts[1], 10);
+            const t = new Date();
+            const isToday = bDay === t.getDate() && bMonth === (t.getMonth() + 1);
 
-      {/* Membres nés ce mois (confettis) */}
-      {anniversairesDuMois.length > 0 && anniversairesDuJour.length === 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
-          <style>{`@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}`}</style>
-          {anniversairesDuMois.slice(0, 5).map((a, i) => (
-            <div key={a.id} style={{ position: 'relative', flexShrink: 0, animation: `bounce ${1 + i * 0.15}s ease-in-out infinite` }}>
-              {a.avatar_url ? (
-                <img src={a.avatar_url} alt="" style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FC1713' }} />
-              ) : (
-                <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#FC1713', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700' }}>
-                  {a.prenom?.[0]}{a.nom?.[0]}
-                </div>
-              )}
-              <div style={{ position: 'absolute', top: '-4px', right: '-2px', fontSize: '10px' }}>🎂</div>
-            </div>
-          ))}
-          <span style={{ color: theme.muted, fontSize: '11px', flexShrink: 0 }}>
-            {anniversairesDuMois.length} anniversaire{anniversairesDuMois.length > 1 ? 's' : ''} ce mois
-          </span>
+            return (
+              <div key={a.id} title={`${a.prenom} - ${bDay}/${bMonth}`} style={{ flexShrink: 0, position: 'relative', animation: 'bounce-mini 2s ease-in-out infinite', animationDelay: `${Math.random() * 2}s` }}>
+                {isToday && <span style={{ position: 'absolute', top: '-6px', left: '-6px', fontSize: '14px', zIndex: 5 }}>🎉</span>}
+                {a.avatar_url ? (
+                  <img src={a.avatar_url} alt="" style={{ width: '34px', height: '34px', borderRadius: '50%', border: `2px solid #FFD700`, objectFit: 'cover', boxShadow: '0 2px 8px rgba(255,215,0,0.3)' }} />
+                ) : (
+                  <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,215,0,0.1)', border: `1px solid #FFD700`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: '700', color: '#FFD700' }}>
+                    {a.prenom?.[0]}{a.nom?.[0]}
+                  </div>
+                )}
+                {isToday && <span style={{ position: 'absolute', bottom: '-2px', right: '-2px', fontSize: '10px' }}>🎂</span>}
+              </div>
+            );
+          })}
         </div>
       )}
+
       {/* Verset */}
-      <div onClick={() => setTab('devotion')} style={{ background: 'linear-gradient(135deg,#FC1713,#8b0000)', borderRadius: '18px', padding: '28px 24px', color: 'white', marginBottom: '16px', position: 'relative', overflow: 'hidden', boxShadow: !dark ? '0 4px 12px rgba(200,16,46,0.2)' : 'none', cursor: 'pointer' }}>
-        <div style={{ position: 'absolute', top: '-20px', left: '10px', fontFamily: 'Georgia,serif', fontSize: '100px', color: 'rgba(255,255,255,0.06)', lineHeight: 1 }}>"</div>
+      <div onClick={() => setTab('devotion')} style={{ background: 'linear-gradient(135deg,#0965BA,#064a8a)', borderRadius: '18px', padding: '28px 24px', color: 'white', marginBottom: '16px', position: 'relative', overflow: 'hidden', boxShadow: !dark ? '0 4px 12px rgba(9,101,186,0.2)' : 'none', cursor: 'pointer' }}>
+        <div style={{ position: 'absolute', top: '-20px', left: '10px', fontFamily: 'Founders Grotesk', fontSize: '100px', color: 'rgba(255,255,255,0.06)', lineHeight: 1 }}>"</div>
         <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.7, marginBottom: '12px' }}>Dévotion du jour</div>
         {devotion ? (
           <>
             {devotion.titre && <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', opacity: 0.9 }}>{devotion.titre}</div>}
-            <div style={{ fontFamily: 'Georgia,serif', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
+            <div style={{ fontFamily: 'Founders Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
             <div style={{ fontSize: '12px', fontWeight: '700', opacity: 0.8 }}>• {devotion.reference}</div>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: 'Georgia,serif', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« Je puis tout par Christ qui me fortifie. »</div>
+            <div style={{ fontFamily: 'Founders Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« Je puis tout par Christ qui me fortifie. »</div>
             <div style={{ fontSize: '12px', fontWeight: '700', opacity: 0.8 }}>• Philippiens 4:13</div>
           </>
         )}
@@ -364,6 +426,49 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
               {expandPrayer ? '← Réduire' : 'Lire plus →'}
             </button>
           )}
+        </div>
+      )}
+
+      {/* Carte d'anniversaire du jour */}
+      {anniversairesDuJour.length > 0 && (
+        <div style={{
+          background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+          borderRadius: '20px', padding: '24px', marginBottom: '16px',
+          position: 'relative', overflow: 'hidden',
+          boxShadow: '0 8px 24px rgba(255, 165, 0, 0.3)',
+          border: '1px solid rgba(255,255,255,0.2)'
+        }}>
+          {/* Confettis animés */}
+          {[...Array(12)].map((_, i) => (
+            <div key={i} style={{
+              position: 'absolute', width: '8px', height: '8px', borderRadius: '2px',
+              left: `${Math.random() * 100}%`, top: '-20px',
+              background: ['#fff', '#FF69B4', '#00FFFF', '#FF4500', '#FFD700'][i % 5],
+              opacity: Math.random(), transform: `rotate(${Math.random() * 360}deg)`,
+              animation: `confetti-fall ${2 + Math.random() * 3}s linear infinite`,
+              animationDelay: `${Math.random() * 2}s`
+            }} />
+          ))}
+
+
+
+          <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ fontSize: '48px', animation: 'float 3s ease-in-out infinite' }}>🎂</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ color: 'rgba(0,0,0,0.5)', fontSize: '11px', fontWeight: '800', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '4px' }}>C'est la fête ! 🥳</div>
+              <h3 style={{ color: '#000', fontSize: '18px', fontWeight: '800', margin: 0, lineHeight: '1.2' }}>
+                Joyeux anniversaire à {anniversairesDuJour.map(b => b.prenom).join(' & ')} !
+              </h3>
+              <p style={{ color: 'rgba(0,0,0,0.6)', fontSize: '12px', marginTop: '6px', fontWeight: '600' }}>Envoyez-lui un petit message ✨</p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+                {anniversairesDuJour.map(b => (
+                  <a key={b.id} href={`https://wa.me/${b.whatsapp?.replace(/\s/g, '')}?text=${encodeURIComponent(`Joyeux anniversaire ${b.prenom} ! 🎉`)}`} style={{ background: '#000', color: '#fff', padding: '8px 14px', borderRadius: '12px', fontSize: '12px', fontWeight: '700', textDecoration: 'none' }}>
+                    Fêter {b.prenom}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -470,7 +575,7 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
           </div>
         </div>
       )}
-      <button onClick={() => window.open('https://wa.me/22890000000?text=Je souhaite soutenir l oeuvre', '_blank')} style={{ width: '100%', marginTop: '12px', background: 'linear-gradient(135deg, #0965BA, #064a8a)', color: 'white', border: 'none', borderRadius: '14px', padding: '14px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+      <button onClick={() => window.open('https://wa.me/22892894954?text=Je souhaite soutenir l oeuvre', '_blank')} style={{ width: '100%', marginTop: '12px', background: 'linear-gradient(135deg, #0965BA, #064a8a)', color: 'white', border: 'none', borderRadius: '14px', padding: '14px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
         <IconGift size={18} />
         Soutenir l'oeuvre
       </button>
@@ -506,25 +611,32 @@ function Devotion({ theme, supabase, dark, profile }) {
 
   return (
     <div style={{ padding: '16px', maxWidth: '600px', margin: '0 auto' }}>
-      <div style={{ background: 'linear-gradient(135deg,#FC1713,#8b0000)', borderRadius: '18px', padding: '28px 24px', color: 'white', marginBottom: '16px', textAlign: 'center', boxShadow: !dark ? '0 4px 12px rgba(200,16,46,0.2)' : 'none' }}>
+      <div style={{ background: 'linear-gradient(135deg,#FC1713,#8b0000)', borderRadius: '18px', padding: '28px 24px', color: 'white', marginBottom: '16px', textAlign: 'center', boxShadow: theme.isDark ? 'none' : '0 4px 12px rgba(200,16,46,0.2)' }}>
         <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center' }}><IconHeart size={36} /></div>
         <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.7, marginBottom: '12px' }}>{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
         {devotion ? (
           <>
             {devotion.titre && <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', opacity: 0.9 }}>{devotion.titre}</div>}
-            <div style={{ fontFamily: 'Georgia,serif', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
+            <div style={{ fontFamily: 'Founders Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
             <div style={{ fontSize: '13px', fontWeight: '700', opacity: 0.85 }}>• {devotion.reference}</div>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: 'Georgia,serif', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« Je puis tout par Christ qui me fortifie. »</div>
+            <div style={{ fontFamily: 'Founders Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« Je puis tout par Christ qui me fortifie. »</div>
             <div style={{ fontSize: '13px', fontWeight: '700', opacity: 0.85 }}>• Philippiens 4:13</div>
           </>
         )}
       </div>
 
+      {devotion?.contenu && (
+        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '16px', boxShadow: theme.isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.07)' }}>
+          <div style={{ color: '#0965BA', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>Dévotion</div>
+          <div style={{ color: theme.text, fontSize: '15px', lineHeight: '1.8', whiteSpace: 'pre-wrap' }}>{devotion.contenu}</div>
+        </div>
+      )}
+
       {devotion?.priere && (
-        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '16px', boxShadow: !dark ? '0 2px 8px rgba(0,0,0,0.07)' : 'none' }}>
+        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '16px', boxShadow: theme.isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.07)' }}>
           <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>Ma prière</div>
           <p style={{ color: theme.muted, fontSize: '14px', lineHeight: '1.9', fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: expandPrayer ? 'unset' : '3', WebkitBoxOrient: 'vertical', overflow: expandPrayer ? 'unset' : 'hidden', maxHeight: expandPrayer ? 'unset' : '120px', transition: 'all 0.3s ease-in-out' }}>{devotion.priere}</p>
           <button onClick={() => setExpandPrayer(!expandPrayer)} style={{ background: 'none', border: 'none', color: '#FC1713', fontSize: '12px', fontWeight: '600', cursor: 'pointer', marginTop: '10px', fontFamily: 'inherit', padding: 0 }}>
@@ -533,9 +645,11 @@ function Devotion({ theme, supabase, dark, profile }) {
         </div>
       )}
 
+      <BirthdayCard />
+
       {/* Commentaires / Édification */}
       {devotion && (
-        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', boxShadow: !dark ? '0 2px 8px rgba(0,0,0,0.07)' : 'none' }}>
+        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', boxShadow: theme.isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.07)' }}>
           <div style={{ color: theme.text, fontSize: '14px', fontWeight: 'bold', marginBottom: '16px' }}>Édification ({commentaires.length})</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
             {commentaires.map(cm => (
@@ -574,6 +688,7 @@ function Evenements({ theme, supabase, profile }) {
 
   useEffect(() => {
     async function load() {
+      if (!profile?.id) return
       const { data, error } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true })
       if (error) {
         console.log('❌ Erreur chargement événements:', error)
@@ -582,7 +697,9 @@ function Evenements({ theme, supabase, profile }) {
       if (data) setEvenements(data)
     }
     load()
-  }, [])
+  }, [supabase, profile?.id])
+
+
 
   async function envoyerFeedback() {
     if (!contenu) { setMsg('Rédigez votre feedback'); return }
@@ -600,27 +717,36 @@ function Evenements({ theme, supabase, profile }) {
   return (
     <div style={{ padding: '16px', maxWidth: '600px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-        <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', margin: 0 }}>Événements à venir</h2>
+        <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', margin: 0 }}>Événements à venir</h2>
       </div>
-      {evenements.length === 0 && (
-        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
-          Aucun événement à venir pour le moment
-        </div>
-      )}
       {evenements.map(ev => (
-        <div key={ev.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', overflow: 'hidden', marginBottom: '12px' }}>
-          <div style={{ background: ev.urgent ? '#FC1713' : '#16a34a', padding: '6px 14px' }}>
-            <span style={{ color: 'white', fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase' }}>{ev.urgent ? 'URGENT' : 'ÉVÉNEMENT'}</span>
-          </div>
-          <div style={{ padding: '14px' }}>
-            <div style={{ color: theme.text, fontSize: '15px', fontWeight: '700', marginBottom: '4px' }}>{ev.titre}</div>
-            <div style={{ color: theme.muted, fontSize: '12px', marginBottom: '8px' }}>{new Date(ev.date_evenement).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-            {ev.description && <p style={{ color: theme.muted, fontSize: '13px', lineHeight: '1.7', marginBottom: '12px' }}>{ev.description}</p>}
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button style={{ flex: 1, background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '9px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' }}>
+        <div key={ev.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '18px', overflow: 'hidden', marginBottom: '16px', boxShadow: theme.isDark ? 'none' : '0 4px 12px rgba(0,0,0,0.08)' }}>
+          {ev.poster_url ? (
+            <div style={{ aspectRatio: '1/1', overflow: 'hidden', background: '#000' }}>
+              <img src={ev.poster_url} alt={ev.titre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          ) : (
+            <div style={{ height: '8px', background: ev.urgent ? '#FC1713' : '#16a34a' }} />
+          )}
+
+          <div style={{ padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <div>
+                <div style={{ color: theme.text, fontSize: '18px', fontWeight: '700', fontFamily: 'Founders Grotesk' }}>{ev.titre}</div>
+                <div style={{ color: theme.muted, fontSize: '12px', marginTop: '4px' }}>{new Date(ev.date_evenement).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} {ev.lieu ? `· ${ev.lieu}` : ''}</div>
+              </div>
+              {ev.urgent && (
+                <span style={{ background: 'rgba(252,23,19,0.1)', color: '#FC1713', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: '700' }}>URGENT</span>
+              )}
+            </div>
+
+            {ev.description && <p style={{ color: theme.text, fontSize: '14px', lineHeight: '1.6', opacity: 0.8, marginBottom: '20px' }}>{ev.description}</p>}
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button style={{ flex: 2, background: '#FC1713', color: 'white', border: 'none', borderRadius: '12px', padding: '12px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' }}>
                 Je participe
               </button>
-              <button onClick={() => setFeedbackEv(ev)} style={{ flex: 1, background: theme.bg, color: theme.muted, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={() => setFeedbackEv(ev)} style={{ flex: 1, background: theme.bg, color: theme.muted, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '12px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' }}>
                 Feedback
               </button>
             </div>
@@ -656,6 +782,9 @@ function Communion({ theme, supabase }) {
   const [membres, setMembres] = useState([])
   const [selected, setSelected] = useState(null)
   const [search, setSearch] = useState('')
+  const [filtreStatut, setFiltreStatut] = useState('tous')
+  const [filtreDomaine, setFiltreDomaine] = useState('tous')
+  const [voirAnniversaires, setVoirAnniversaires] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -666,59 +795,42 @@ function Communion({ theme, supabase }) {
   }, [supabase])
 
   const filteredMembres = membres.filter(m => {
+    // Filtre anniversaire
+    if (voirAnniversaires) {
+      if (!m.date_naissance) return false
+      return new Date(m.date_naissance).getMonth() === new Date().getMonth()
+    }
+    // Filtre statut
+    if (filtreStatut !== 'tous' && m.statut_activite !== filtreStatut) return false
+    // Filtre domaine
+    if (filtreDomaine !== 'tous' && m.domaine !== filtreDomaine) return false
+    // Filtre texte
     if (!search) return true
     const s = search.toLowerCase()
-    return (m.prenom?.toLowerCase().includes(s) || m.nom?.toLowerCase().includes(s) || m.domaine?.toLowerCase().includes(s))
+    return (m.prenom?.toLowerCase().includes(s) || m.nom?.toLowerCase().includes(s) || m.domaine?.toLowerCase().includes(s) || m.quartier?.toLowerCase().includes(s))
   })
-  {/* Filtre domaine */ }
-  {
-    (() => {
-      const domaines = [...new Set(membres.map(m => {
-        if (!m.domaine) return null
-        const d = m.domaine.split(' - ')
-        return d[0]
-      }).filter(Boolean))]
-      return domaines.length > 0 ? (
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '4px', scrollbarWidth: 'none' }}>
-          <button
-            onClick={() => setSearch('')}
-            style={{
-              background: !search ? '#FC1713' : theme.card,
-              border: `1px solid ${!search ? '#FC1713' : theme.border}`,
-              borderRadius: '20px', padding: '6px 14px',
-              color: !search ? 'white' : theme.muted,
-              fontSize: '11px', fontWeight: !search ? '600' : '400',
-              cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', flexShrink: 0
-            }}
-          >
-            Tous
-          </button>
-          {domaines.map(d => (
-            <button
-              key={d}
-              onClick={() => setSearch(d)}
-              style={{
-                background: search === d ? '#FC1713' : theme.card,
-                border: `1px solid ${search === d ? '#FC1713' : theme.border}`,
-                borderRadius: '20px', padding: '6px 14px',
-                color: search === d ? 'white' : theme.muted,
-                fontSize: '11px', fontWeight: search === d ? '600' : '400',
-                cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', flexShrink: 0
-              }}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-      ) : null
-    })()
-  }
 
-  function formatBirthday(dateStr) {
+  const categories = [
+    { id: 'tous', label: 'Tous' },
+    { id: 'eleve', label: 'Élèves' },
+    { id: 'etudiant', label: 'Étudiants' },
+    { id: 'apprenti', label: 'Apprentis' },
+    { id: 'professionnel', label: 'Professionnels' }
+  ]
+
+  const domainesExistants = [...new Set(membres.map(m => m.domaine).filter(Boolean))].sort()
+
+  const FilterButton = ({ active, onClick, label, icon }) => (
+    <button onClick={onClick} style={{ background: active ? '#FC1713' : theme.card, border: `1px solid ${active ? '#FC1713' : theme.border}`, borderRadius: '20px', padding: '7px 16px', color: active ? 'white' : theme.muted, fontSize: '12px', fontWeight: active ? '600' : '400', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}>
+      {icon} {label}
+    </button>
+  )
+
+  function formatBirthday(dateStr, includeYear = false) {
     if (!dateStr) return null
     try {
       const d = new Date(dateStr)
-      return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+      return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: includeYear ? 'numeric' : undefined })
     } catch { return null }
   }
 
@@ -729,8 +841,45 @@ function Communion({ theme, supabase }) {
 
   return (
     <div style={{ padding: '16px', maxWidth: '960px', margin: '0 auto' }}>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '6px' }}>Communion</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '6px' }}>Communion</h2>
       <p style={{ color: theme.muted, fontSize: '12px', marginBottom: '16px' }}>Annuaire des membres de la jeunesse</p>
+
+      {/* Filtres */}
+      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '10px', paddingBottom: '8px', scrollbarWidth: 'none' }}>
+        <FilterButton
+          active={voirAnniversaires}
+          onClick={() => { setVoirAnniversaires(!voirAnniversaires); setFiltreStatut('tous'); setFiltreDomaine('tous') }}
+          label="Anniversaires du mois"
+          icon="🎂"
+        />
+        <div style={{ width: '1px', background: theme.border, margin: '4px 4px' }} />
+        {categories.map(cat => (
+          <FilterButton
+            key={cat.id}
+            active={!voirAnniversaires && filtreStatut === cat.id}
+            onClick={() => { setFiltreStatut(cat.id); setVoirAnniversaires(false); setFiltreDomaine('tous') }}
+            label={cat.label}
+          />
+        ))}
+      </div>
+
+      {domainesExistants.length > 0 && !voirAnniversaires && (
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '8px', scrollbarWidth: 'none' }}>
+          <FilterButton
+            active={filtreDomaine === 'tous'}
+            onClick={() => setFiltreDomaine('tous')}
+            label="Tous les métiers"
+          />
+          {domainesExistants.map(d => (
+            <FilterButton
+              key={d}
+              active={filtreDomaine === d}
+              onClick={() => setFiltreDomaine(d)}
+              label={d}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Barre de recherche */}
       <div style={{ position: 'relative', marginBottom: '16px' }}>
@@ -745,6 +894,13 @@ function Communion({ theme, supabase }) {
         />
       </div>
 
+      {voirAnniversaires && (
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <div style={{ fontSize: '40px', marginBottom: '8px' }}>🎂</div>
+          <div style={{ color: theme.text, fontSize: '15px', fontWeight: '700' }}>Célébrons les anniversaires de ce mois !</div>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: '14px' }}>
         {filteredMembres.map(m => (
           <button key={m.id} onClick={() => setSelected(m)} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '18px', textAlign: 'left', cursor: 'pointer', color: 'inherit', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', gap: '12px', overflow: 'hidden', transition: 'border-color 0.2s, transform 0.2s' }}>
@@ -757,16 +913,22 @@ function Communion({ theme, supabase }) {
                 </div>
               )}
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: theme.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.prenom} {m.nom}</div>
-                <div style={{ fontSize: '11px', color: theme.muted, marginTop: '3px' }}>{m.domaine || 'Membre'}</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: theme.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {m.prenom} {m.nom}
+                  {m.date_naissance && new Date(m.date_naissance).getMonth() === new Date().getMonth() && <span>🎉</span>}
+                </div>
+                <div style={{ fontSize: '11px', color: theme.muted, marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FC1713" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  {m.quartier || 'Quartier inconnu'}
+                </div>
               </div>
             </div>
             {m.date_naissance && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: theme.muted }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-3-3.87" /><path d="M4 21v-2a4 4 0 0 1 3-3.87" /><circle cx="12" cy="7" r="4" />
-                </svg>
-                Anniversaire : {formatBirthday(m.date_naissance)}
+                🎂 Date d'anniversaire : {formatBirthday(m.date_naissance)}
               </div>
             )}
             {m.bio && <div style={{ fontSize: '11px', color: theme.muted, lineHeight: '1.5' }}>{m.bio.length > 60 ? `${m.bio.slice(0, 60)}...` : m.bio}</div>}
@@ -792,7 +954,7 @@ function Communion({ theme, supabase }) {
             )}
 
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{ fontSize: '20px', fontWeight: '700', color: theme.text, fontFamily: 'Founders Grotesk,sans-serif' }}>{selected.prenom} {selected.nom}</div>
+              <div style={{ fontSize: '20px', fontWeight: '700', color: theme.text, fontFamily: 'Founders Grotesk' }}>{selected.prenom} {selected.nom}</div>
               {selected.domaine && <div style={{ fontSize: '12px', color: theme.muted, marginTop: '6px' }}>{selected.domaine}</div>}
             </div>
 
@@ -803,24 +965,32 @@ function Communion({ theme, supabase }) {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FC1713" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '4px' }}>
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
                   </svg>
-                  <div style={{ fontSize: '11px', color: theme.muted }}>Date de naissance</div>
+                  <div style={{ fontSize: '11px', color: theme.muted }}>Date d'anniversaire</div>
                   <div style={{ fontSize: '13px', color: theme.text, fontWeight: '600', marginTop: '2px' }}>{formatBirthday(selected.date_naissance)}</div>
                 </div>
               )}
-              {selected.statut_activite && (
-                <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FC1713" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '4px' }}>
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                  </svg>
-                  <div style={{ fontSize: '11px', color: theme.muted }}>Statut</div>
-                  <div style={{ fontSize: '13px', color: theme.text, fontWeight: '600', marginTop: '2px' }}>{getStatutLabel(selected.statut_activite)}</div>
-                </div>
-              )}
+              <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FC1713" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '4px' }}>
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <div style={{ fontSize: '11px', color: theme.muted }}>Quartier</div>
+                <div style={{ fontSize: '13px', color: theme.text, fontWeight: '600', marginTop: '2px' }}>{selected.quartier || 'Inconnu'}</div>
+              </div>
             </div>
 
             <div style={{ color: theme.muted, fontSize: '13px', lineHeight: '1.8', marginBottom: '20px' }}>{selected.bio || 'Aucune bio renseignée.'}</div>
             {selected.whatsapp && (
-              <a href={`https://wa.me/${selected.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}?text=${encodeURIComponent(`Bonjour ${selected.prenom}, je t'ai trouvé dans la communion de la Jeunesse Groupe des jeunes du Rocher !`)}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#25d366', color: 'white', borderRadius: '12px', padding: '12px', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}>
+              <a
+                href={`https://wa.me/${selected.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}?text=${encodeURIComponent(
+                  (selected.date_naissance && new Date(selected.date_naissance).getDate() === new Date().getDate() && new Date(selected.date_naissance).getMonth() === new Date().getMonth())
+                    ? `Joyeux anniversaire ${selected.prenom} ! 🥳`
+                    : `Bonjour ${selected.prenom}, je t'ai trouvé au sein de la communion du groupe des jeunes du Rocher !`
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#25d366', color: 'white', borderRadius: '12px', padding: '12px', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}
+              >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.632-1.467A11.932 11.932 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.207-.579-5.961-1.591l-.427-.254-2.748.871.879-2.682-.277-.44A9.774 9.774 0 0 1 2.182 12c0-5.423 4.395-9.818 9.818-9.818S21.818 6.577 21.818 12 17.423 21.818 12 21.818z" /></svg>
                 Contacter sur WhatsApp
               </a>
@@ -895,11 +1065,11 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, initialTab 
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-      <div style={{ background: 'linear-gradient(135deg,#FC1713,#8b0000)', padding: '32px 20px 24px', textAlign: 'center', color: 'white' }}>
+      <div style={{ background: 'linear-gradient(135deg,#0965BA,#064a8a)', padding: '80px 24px 48px', textAlign: 'center', color: 'white' }}>
         <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '3px solid rgba(255,255,255,0.4)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: '700' }}>
           {profile?.prenom?.[0]}{profile?.nom?.[0]}
         </div>
-        <div style={{ fontSize: '17px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif' }}>{profile?.prenom} {profile?.nom}</div>
+        <div style={{ fontSize: '17px', fontWeight: '700', fontFamily: 'Founders Grotesk' }}>{profile?.prenom} {profile?.nom}</div>
         <div style={{ fontSize: '12px', opacity: 0.75, marginTop: '4px' }}>{profile?.role} · {profile?.domaine}</div>
       </div>
 
@@ -918,6 +1088,16 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, initialTab 
             <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '16px', marginBottom: '12px' }}>
               <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>
                 Mes informations
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                <div style={{ background: theme.bg, borderRadius: '12px', padding: '12px', border: `1px solid ${theme.border}` }}>
+                  <div style={{ color: theme.muted, fontSize: '9px', textTransform: 'uppercase', marginBottom: '4px' }}>Quartier</div>
+                  <div style={{ color: theme.text, fontSize: '13px', fontWeight: '700' }}>{profile?.quartier || 'Non renseigné'}</div>
+                </div>
+                <div style={{ background: theme.bg, borderRadius: '12px', padding: '12px', border: `1px solid ${theme.border}` }}>
+                  <div style={{ color: theme.muted, fontSize: '9px', textTransform: 'uppercase', marginBottom: '4px' }}>Statut</div>
+                  <div style={{ color: theme.text, fontSize: '13px', fontWeight: '700' }}>{profile?.statut_activite || 'Membre'}</div>
+                </div>
               </div>
               <InfoEdit theme={theme} supabase={supabase} profile={profile} setMsg={setMsg} />
             </div>
@@ -1032,7 +1212,6 @@ function InfoEdit({ theme, supabase, profile, setMsg }) {
   const [bio, setBio] = useState(profile?.bio || '')
   const [whatsapp, setWhatsapp] = useState(profile?.whatsapp || '')
   const [quartier, setQuartier] = useState(profile?.quartier || '')
-  const [telephone, setTelephone] = useState(profile?.telephone || '')
   const [domaine, setDomaine] = useState(profile?.domaine || '')
   const [dateNaissance, setDateNaissance] = useState(profile?.date_naissance || '')
   const [saving, setSaving] = useState(false)
@@ -1047,7 +1226,7 @@ function InfoEdit({ theme, supabase, profile, setMsg }) {
   async function save() {
     setSaving(true)
     const { error } = await supabase.from('utilisateurs').update({
-      prenom, nom, bio, whatsapp, quartier, telephone, domaine,
+      prenom, nom, bio, whatsapp, quartier, domaine,
       date_naissance: dateNaissance || null
     }).eq('id', profile.id)
     setSaving(false)
@@ -1067,10 +1246,8 @@ function InfoEdit({ theme, supabase, profile, setMsg }) {
           <input value={nom} onChange={e => setNom(e.target.value)} style={input} placeholder="Nom" />
         </div>
       </div>
-      <label style={label}>WhatsApp</label>
+      <label style={label}>WhatsApp / Téléphone</label>
       <input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} style={input} placeholder="+228 90..." />
-      <label style={label}>Téléphone</label>
-      <input value={telephone} onChange={e => setTelephone(e.target.value)} style={input} placeholder="+228..." />
       <label style={label}>Quartier</label>
       <input value={quartier} onChange={e => setQuartier(e.target.value)} style={input} placeholder="Ex: Adidogomé" />
       <label style={label}>Domaine</label>
@@ -1112,12 +1289,12 @@ function MobileMoney({ theme, profile }) {
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-        <a href={`tel:${ussdMixx}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#0965BA', color: 'white', borderRadius: '12px', padding: '12px 8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }}>
-          <img src="/logo-mixx-by-yas.png" alt="" style={{ width: '24px', height: '24px', objectFit: 'contain', borderRadius: '4px' }} />
+        <a href={`tel:${ussdMixx}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#003B71', color: 'white', borderRadius: '12px', padding: '12px 8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }}>
+          <img src="/payments/logo-mixx-by-yas.png" alt="" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
           Mixx / T-Money
         </a>
-        <a href={`tel:${ussdMoov}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#f59e0b', color: 'white', borderRadius: '12px', padding: '12px 8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }}>
-          <img src="/logo-moov-money.png" alt="" style={{ width: '24px', height: '24px', objectFit: 'contain', borderRadius: '4px' }} />
+        <a href={`tel:${ussdMoov}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#F7941E', color: 'white', borderRadius: '12px', padding: '12px 8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: 'inherit' }}>
+          <img src="/payments/logo-moov-money.png" alt="" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
           Moov Money
         </a>
       </div>
@@ -1148,7 +1325,7 @@ function Contact({ theme, supabase }) {
 
   return (
     <div style={{ padding: '16px', maxWidth: '960px', margin: '0 auto' }}>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '6px' }}>Contact</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '6px' }}>Contact</h2>
       <p style={{ color: theme.muted, fontSize: '12px', marginBottom: '20px' }}>Le bureau de la jeunesse et nos réseaux sociaux</p>
 
       {/* R\u00e9seaux sociaux */}

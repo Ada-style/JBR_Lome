@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { createClient } from '@supabase/supabase-js'
@@ -176,36 +176,34 @@ export default function Admin() {
 }
 
 function Dashboard({ theme, supabase, supabaseAdmin, refreshCount }) {
-  const [stats, setStats] = useState({ membres: 0, cotisOk: 0, fichiers: 0, demandes: 0 })
+  const [stats, setStats] = useState({ membres: 0, cotisOk: 0, demandes: 0 })
 
   useEffect(() => {
     async function load() {
       const { count: membres } = await supabaseAdmin.from('utilisateurs').select('*', { count: 'exact', head: true })
       const { count: cotisOk } = await supabaseAdmin.from('cotisations').select('*', { count: 'exact', head: true }).eq('statut', 'paye')
-      const { count: fichiers } = await supabaseAdmin.from('fichiers').select('*', { count: 'exact', head: true }).eq('statut', 'en_attente')
       const { count: demandes } = await supabaseAdmin.from('demandes').select('*', { count: 'exact', head: true }).eq('statut', 'en_attente')
-      setStats({ membres: membres || 0, cotisOk: cotisOk || 0, fichiers: fichiers || 0, demandes: demandes || 0 })
+      setStats({ membres: membres || 0, cotisOk: cotisOk || 0, demandes: demandes || 0 })
     }
     load()
   }, [refreshCount])
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Tableau de bord</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Tableau de bord</h2>
       <style>{`
         @media (max-width: 768px) {
           .dashboard-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
-      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px' }}>
+      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px' }}>
         {[
           { label: 'Membres', val: stats.membres },
           { label: 'Cotisations payées', val: stats.cotisOk },
-          { label: 'Fichiers en attente', val: stats.fichiers },
           { label: 'Demandes en attente', val: stats.demandes },
         ].map(s => (
           <div key={s.label} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', textAlign: 'center' }}>
-            <div style={{ color: '#FC1713', fontSize: '32px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif' }}>{s.val}</div>
+            <div style={{ color: '#FC1713', fontSize: '32px', fontWeight: '700', fontFamily: 'Founders Grotesk' }}>{s.val}</div>
             <div style={{ color: theme.muted, fontSize: '11px', marginTop: '4px' }}>{s.label}</div>
           </div>
         ))}
@@ -300,6 +298,7 @@ function Demandes({ theme, supabase, onRefresh }) {
             domaine: demande.domaine || '',
             date_naissance: demande.date_naissance || null,
             statut_activite: demande.statut_activite || null,
+            quartier: demande.quartier || null
           }).eq('id', userId)
           if (updateErr) {
             showMsg('Erreur mise à jour profil : ' + updateErr.message)
@@ -317,6 +316,7 @@ function Demandes({ theme, supabase, onRefresh }) {
             domaine: demande.domaine || '',
             date_naissance: demande.date_naissance || null,
             statut_activite: demande.statut_activite || null,
+            quartier: demande.quartier || null,
             role: 'membre'
           })
 
@@ -352,7 +352,7 @@ function Demandes({ theme, supabase, onRefresh }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Demandes d'adhésion</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Demandes d'adhésion</h2>
 
       {msg && (
         <div style={{
@@ -383,7 +383,9 @@ function Demandes({ theme, supabase, onRefresh }) {
             )}
             <div style={{ flex: 1 }}>
               <div style={{ color: theme.text, fontSize: '14px', fontWeight: '700' }}>{d.prenom} {d.nom}</div>
-              <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{d.statut_activite || ''} {d.domaine ? `· ${d.domaine}` : ''}</div>
+              <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>
+                {d.statut_activite || ''} {d.niveau_etude ? `(${d.niveau_etude})` : ''} {d.domaine ? `· ${d.domaine}` : ''} {d.quartier ? `· ${d.quartier}` : ''}
+              </div>
               {d.date_naissance && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>🎂 {new Date(d.date_naissance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}</div>}
               <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{d.whatsapp}</div>
               {d.email && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{d.email}</div>}
@@ -412,19 +414,19 @@ function Demandes({ theme, supabase, onRefresh }) {
                     d.statut === 'accepte'
                       ? `Bonjour ${d.prenom} !
 
-Ta demande d'adhésion à la Jeunesse EB Le Rocher a été acceptée.
+Ta demande d'adhésion au groupe des jeunes du Rocher a été acceptée.
 
 Voici tes accès pour te connecter :
 Email : ${d.email}
 Mot de passe temporaire : rocher2026
 
-Lien : https://jbr-l.netlify.app
+Lien : https://jbr-h.vercel.app/
 
 N'oublie pas de changer ton mot de passe dès ta première connexion depuis Profil > Paramètres.
 
 A très bientôt !
 Le Bureau de la Jeunesse EB Le Rocher`
-                      : `Bonjour ${d.nom}, votre demande d'adhésion à la Jeunesse EB Le Rocher a été refusée. Merci de votre intérêt.`
+                      : `Bonjour ${d.nom}, votre demande d'adhésion au groupe des jeunes du Rocher a été refusée. Merci de votre intérêt.`
                   )}`}
                   target="_blank"
                   rel="noreferrer"
@@ -449,6 +451,8 @@ function Membres({ theme, supabase, refreshCount }) {
   const [email, setEmail] = useState('')
   const [domaine, setDomaine] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [quartier, setQuartier] = useState('')
+  const [dateNaissance, setDateNaissance] = useState('')
   const [msg, setMsg] = useState('')
   const [lastMembre, setLastMembre] = useState(null)
   const [editingMembre, setEditingMembre] = useState(null)
@@ -496,6 +500,8 @@ function Membres({ theme, supabase, refreshCount }) {
     setEmail(membre.email || '')
     setDomaine(membre.domaine || '')
     setWhatsapp(membre.whatsapp || '')
+    setQuartier(membre.quartier || '')
+    setDateNaissance(membre.date_naissance || '')
   }
 
   async function saveMembreModifie() {
@@ -504,14 +510,16 @@ function Membres({ theme, supabase, refreshCount }) {
       nom,
       prenom,
       domaine,
-      whatsapp
+      whatsapp,
+      quartier,
+      date_naissance: dateNaissance
     }).eq('id', editingMembre.id)
 
     if (error) { setMsg('Erreur : ' + error.message); return }
 
     setMsg('Membre modifié !')
     setEditingMembre(null)
-    setNom(''); setPrenom(''); setEmail(''); setDomaine(''); setWhatsapp('')
+    setNom(''); setPrenom(''); setEmail(''); setDomaine(''); setWhatsapp(''); setQuartier(''); setDateNaissance('')
     loadMembres()
   }
 
@@ -546,7 +554,7 @@ A bientôt.
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Membres</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Membres</h2>
       <div>
         {membres.length === 0 && (
           <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
@@ -566,7 +574,14 @@ A bientôt.
               <div style={{ color: theme.text, fontSize: '14px', fontWeight: '700' }}>{m.prenom && m.nom ? `${m.prenom} ${m.nom}` : m.email}</div>
               {m.prenom && m.nom && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{m.email}</div>}
               {m.whatsapp && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{m.whatsapp}</div>}
-              <div style={{ color: theme.muted, fontSize: '11px', marginTop: '4px' }}>{m.domaine} · {m.role}</div>
+              <div style={{ color: theme.muted, fontSize: '11px', marginTop: '4px' }}>
+                {m.domaine} · {m.role} {m.quartier ? `· ${m.quartier}` : ''}
+                {m.date_naissance && (
+                  <span style={{ marginLeft: '8px', color: '#FC1713', fontWeight: '600' }}>
+                    🎂 {new Date(m.date_naissance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </span>
+                )}
+              </div>
             </div>
             <div style={{ display: 'flex', gap: '6px', flexDirection: 'column', flexShrink: 0 }}>
               <button onClick={() => modifierMembre(m)} style={{ background: 'rgba(0,123,255,0.1)', border: '1px solid rgba(0,123,255,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#007bff', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
@@ -601,7 +616,11 @@ A bientôt.
             <input placeholder="Prénom" value={prenom} onChange={e => setPrenom(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }} />
             <input placeholder="Nom" value={nom} onChange={e => setNom(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }} />
             <input placeholder="Domaine" value={domaine} onChange={e => setDomaine(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }} />
-            <input placeholder="WhatsApp" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '16px', fontFamily: 'inherit' }} />
+            <input placeholder="WhatsApp / Téléphone" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }} />
+            <input placeholder="Quartier" value={quartier} onChange={e => setQuartier(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }} />
+
+            <label style={{ display: 'block', color: theme.muted, fontSize: '11px', fontWeight: '600', marginBottom: '5px' }}>Date de naissance</label>
+            <input type="date" value={dateNaissance} onChange={e => setDateNaissance(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '10px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '16px', fontFamily: 'inherit', cursor: 'pointer' }} />
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={saveMembreModifie} style={{ flex: 1, background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Sauvegarder
@@ -621,6 +640,8 @@ function Cotisations({ theme, supabase, supabaseAdmin }) {
   const [membres, setMembres] = useState([])
   const [selected, setSelected] = useState(null)
   const [montant, setMontant] = useState('200')
+  const [dernierMontant, setDernierMontant] = useState('200')
+  const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState('success')
   const MONTANT_BASE = 200
@@ -653,24 +674,36 @@ function Cotisations({ theme, supabase, supabaseAdmin }) {
       return
     }
 
-    // Déterminer les mois à couvrir
+    // Déterminer les mois à couvrir dynamiquement
     const moisPayes = (selected.cotisations || [])
       .filter(c => c.statut === 'paye')
       .map(c => c.mois)
 
-    const tousLesMois = [
-      'Janvier 2026', 'Février 2026', 'Mars 2026', 'Avril 2026',
-      'Mai 2026', 'Juin 2026', 'Juillet 2026', 'Août 2026',
-      'Septembre 2026', 'Octobre 2026', 'Novembre 2026', 'Décembre 2026'
-    ]
-    const moisNonPayes = tousLesMois.filter(m => !moisPayes.includes(m))
-    const moisACouvrir = moisNonPayes.slice(0, moisCouverts)
+    function getNextMonths(count, alreadyPaid) {
+      const res = []
+      let d = new Date()
+      d.setDate(1)
+      let iterations = 0
+      while (res.length < count && iterations < 48) {
+        const label = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+        const formatted = label.charAt(0).toUpperCase() + label.slice(1)
+        if (!alreadyPaid.includes(formatted)) {
+          res.push(formatted)
+        }
+        d.setMonth(d.getMonth() + 1)
+        iterations++
+      }
+      return res
+    }
+
+    const moisACouvrir = getNextMonths(moisCouverts, moisPayes)
 
     if (moisACouvrir.length === 0) {
       showMsg('Tous les mois sont déjà payés !', 'error')
       return
     }
 
+    setSaving(true)
     // Insérer les cotisations
     for (const mois of moisACouvrir) {
       const existing = (selected.cotisations || []).find(c => c.mois === mois)
@@ -688,6 +721,8 @@ function Cotisations({ theme, supabase, supabaseAdmin }) {
       reliquat_cotisation: nouveauReliquat
     }).eq('id', selected.id)
 
+    setSaving(false)
+
     // Historique
     await supabaseAdmin.from('cotisations_historique').insert({
       membre_id: selected.id,
@@ -702,6 +737,7 @@ function Cotisations({ theme, supabase, supabaseAdmin }) {
     const reliqMsg = nouveauReliquat > 0 ? ` Reliquat : ${nouveauReliquat} FCFA.` : ''
     showMsg(msg + reliqMsg, 'success')
 
+    setDernierMontant(montant)
     setMontant('200')
     await loadMembres()
     // Rafraîchir le membre sélectionné
@@ -727,7 +763,7 @@ function Cotisations({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>
         Cotisations
       </h2>
 
@@ -829,13 +865,13 @@ function Cotisations({ theme, supabase, supabaseAdmin }) {
                 </div>
               )}
 
-              <button onClick={nouveauPaiement}
-                style={{ width: '100%', background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', marginBottom: '8px' }}>
-                Enregistrer le paiement
+              <button onClick={nouveauPaiement} disabled={saving}
+                style={{ width: '100%', background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', marginBottom: '8px', opacity: saving ? 0.6 : 1 }}>
+                {saving ? 'Enregistrement...' : 'Enregistrer le paiement'}
               </button>
 
               {selected.whatsapp && (
-                <a href={`https://wa.me/${selected.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${selected.prenom} ! Paiement de ${montant} FCFA reçu. Merci !`)}`}
+                <a href={`https://wa.me/${selected.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${selected.prenom} ! Paiement de ${dernierMontant} FCFA reçu. Merci !`)}`}
                   target="_blank" rel="noreferrer"
                   style={{ display: 'block', textAlign: 'center', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', borderRadius: '8px', padding: '10px', color: '#25d366', fontSize: '12px', fontWeight: '600', textDecoration: 'none', marginBottom: '14px' }}>
                   Notifier sur WhatsApp
@@ -923,7 +959,7 @@ function Priere({ theme, supabase }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>
         Prière
       </h2>
 
@@ -1040,7 +1076,7 @@ function Galerie({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Galerie</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Galerie</h2>
       <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
         <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Publier un événement</div>
         {msg && <div style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', marginBottom: '12px' }}>{msg}</div>}
@@ -1114,7 +1150,7 @@ function Feedbacks({ theme, supabase }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Feedbacks</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Feedbacks</h2>
       {feedbacks.length === 0 && (
         <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
           Aucun feedback pour le moment
@@ -1147,6 +1183,9 @@ function Evenements({ theme, supabase, supabaseAdmin }) {
   const [lieu, setLieu] = useState('')
   const [description, setDescription] = useState('')
   const [evenements, setEvenements] = useState([])
+  const [poster, setPoster] = useState(null)
+  const [posterPreview, setPosterPreview] = useState(null)
+  const [uploading, setUploading] = useState(false)
   const [msg, setMsg] = useState('')
 
   useEffect(() => { loadEvenements() }, [])
@@ -1156,13 +1195,39 @@ function Evenements({ theme, supabase, supabaseAdmin }) {
     if (data) setEvenements(data)
   }
 
+  function handlePoster(e) {
+    const file = e.target.files[0]
+    if (file) {
+      setPoster(file)
+      setPosterPreview(URL.createObjectURL(file))
+    }
+  }
+
   async function publier() {
     if (!titre || !date) { setMsg('Renseignez le titre et la date'); return }
-    const { error } = await supabaseAdmin.from('evenements').insert({ titre, date_evenement: date, lieu, description })
-    if (error) { console.log('❌ Erreur création événement:', error); setMsg('Erreur : ' + error.message); return }
-    console.log('✅ Événement créé')
+    setUploading(true)
+
+    let poster_url = null
+    if (poster) {
+      const cleanName = poster.name.replace(/[^a-zA-Z0-9.]/g, '_')
+      const fileName = `poster-${Date.now()}-${cleanName}`
+      const { error: uploadError } = await supabase.storage.from('fichiers_membres').upload(`evenements/${fileName}`, poster)
+      if (uploadError) {
+        console.error('❌ Erreur upload affiche:', uploadError)
+        setMsg('Erreur upload affiche: ' + uploadError.message)
+        setUploading(false)
+        return
+      }
+      const { data: { publicUrl } } = supabase.storage.from('fichiers_membres').getPublicUrl(`evenements/${fileName}`)
+      poster_url = publicUrl
+    }
+
+    const { error } = await supabaseAdmin.from('evenements').insert({ titre, date_evenement: date, lieu, description, poster_url })
+    setUploading(false)
+    if (error) { setMsg('Erreur : ' + error.message); return }
+
     setMsg('Événement publié !')
-    setTitre(''); setDate(''); setLieu(''); setDescription('')
+    setTitre(''); setDate(''); setLieu(''); setDescription(''); setPoster(null); setPosterPreview(null)
     loadEvenements()
   }
 
@@ -1175,7 +1240,7 @@ function Evenements({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Événements</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Événements</h2>
       <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
         <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Nouvel événement</div>
         {msg && <div style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', marginBottom: '12px' }}>{msg}</div>}
@@ -1183,8 +1248,20 @@ function Evenements({ theme, supabase, supabaseAdmin }) {
         <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit', cursor: 'pointer' }} />
         <input placeholder="Lieu" value={lieu} onChange={e => setLieu(e.target.value)} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit' }} />
         <textarea placeholder="Description (optionnel)" value={description} onChange={e => setDescription(e.target.value)} rows={3} style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit', resize: 'none' }} />
-        <button onClick={publier} style={{ background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
-          Publier
+
+        <label style={{ display: 'block', background: theme.bg, border: `2px dashed ${theme.border}`, borderRadius: '10px', padding: '16px', textAlign: 'center', cursor: 'pointer', marginBottom: '10px' }}>
+          <div style={{ color: theme.muted, fontSize: '13px' }}>{poster ? "Changer l'affiche (Carré conseillé)" : "Ajouter une affiche (Affiche Instagram)"}</div>
+          <input type="file" accept="image/*" onChange={handlePoster} style={{ display: 'none' }} />
+        </label>
+
+        {posterPreview && (
+          <div style={{ marginBottom: '12px', textAlign: 'center' }}>
+            <img src={posterPreview} alt="Aperçu" style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '12px', border: `1px solid ${theme.border}` }} />
+          </div>
+        )}
+
+        <button onClick={publier} disabled={uploading} style={{ background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', opacity: uploading ? 0.6 : 1 }}>
+          {uploading ? 'Publication...' : 'Publier'}
         </button>
       </div>
       <div>
@@ -1195,6 +1272,9 @@ function Evenements({ theme, supabase, supabaseAdmin }) {
         )}
         {evenements.map(ev => (
           <div key={ev.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '14px', marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            {ev.poster_url && (
+              <img src={ev.poster_url} alt="" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '10px', flexShrink: 0 }} />
+            )}
             <div style={{ flex: 1 }}>
               <div style={{ color: theme.text, fontSize: '14px', fontWeight: '700' }}>{ev.titre}</div>
               <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{new Date(ev.date_evenement).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} {ev.lieu ? `· ${ev.lieu}` : ''}</div>
@@ -1250,7 +1330,7 @@ function Annonces({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>Annonces</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Annonces</h2>
       <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
         <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Nouvelle annonce</div>
         {msg && <div style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', marginBottom: '12px' }}>{msg}</div>}
@@ -1326,9 +1406,11 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
   const [verset, setVerset] = useState('')
   const [reference, setReference] = useState('')
   const [priere, setPriere] = useState('')
+  const [contenu, setContenu] = useState('')
   const [dateDevotion, setDateDevotion] = useState('')
   const [devotions, setDevotions] = useState([])
   const [commentairesOpen, setCommentairesOpen] = useState(null)
+  const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
 
   useEffect(() => { loadDevotions() }, [])
@@ -1346,16 +1428,25 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
       setMsg('Verset, référence et date sont obligatoires')
       return
     }
-    const { error } = await supabaseAdmin.from('devotions').insert({
+    setSaving(true)
+    const { error } = await supabaseAdmin.from('devotions').upsert({
       titre: titre || reference,
       verset,
       reference,
       priere,
+      contenu,
       date_devotion: dateDevotion
-    })
-    if (error) { setMsg('Erreur : ' + error.message); return }
-    setMsg('Dévotion publiée !')
-    setTitre(''); setVerset(''); setReference(''); setPriere(''); setDateDevotion('')
+    }, { onConflict: 'date_devotion' })
+
+    setSaving(false)
+    if (error) {
+      if (error.code === '23505') setMsg('Une dévotion existe déjà pour cette date')
+      else setMsg('Erreur : ' + error.message)
+      return
+    }
+
+    setMsg('Dévotion publiée/mise à jour !')
+    setTitre(''); setVerset(''); setReference(''); setPriere(''); setContenu(''); setDateDevotion('')
     loadDevotions()
     setTimeout(() => setMsg(''), 4000)
   }
@@ -1367,7 +1458,7 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif', marginBottom: '20px' }}>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>
         Dévotions
       </h2>
 
@@ -1425,6 +1516,17 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
           style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit', boxSizing: 'border-box' }}
         />
 
+        <label style={{ display: 'block', color: theme.muted, fontSize: '11px', fontWeight: '600', marginBottom: '5px' }}>
+          Texte de la dévotion *
+        </label>
+        <textarea
+          placeholder="Écrivez ici le message de la dévotion..."
+          value={contenu}
+          onChange={e => setContenu(e.target.value)}
+          rows={6}
+          style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box' }}
+        />
+
         <label style={{ display: 'block', color: '#0965BA', fontSize: '11px', fontWeight: '600', marginBottom: '5px' }}>
           Ma prière (optionnel)
         </label>
@@ -1438,9 +1540,10 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
 
         <button
           onClick={publier}
-          style={{ background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+          disabled={saving}
+          style={{ background: '#FC1713', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', opacity: saving ? 0.6 : 1 }}
         >
-          Publier
+          {saving ? 'Publication...' : 'Publier'}
         </button>
       </div>
 

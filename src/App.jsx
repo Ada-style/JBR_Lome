@@ -15,7 +15,7 @@ function AppContent() {
 
   useEffect(() => {
     // Vérifier si l'onboarding a été fait
-    const onboardingDone = localStorage.getItem('onboarding_done')
+    const onboardingDone = localStorage.getItem('onboarding_v2_done')
     if (!onboardingDone && window.location.pathname === '/') {
       navigate('/onboarding')
     }

@@ -74,24 +74,25 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Founders Grotesk, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       <div style={{ width: '100%', maxWidth: '360px' }}>
 
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '32px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={handleLogoClick}>
-          <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '12px', borderRadius: '16px', filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.4))' }} />
-          <h1 style={{ color: 'white', fontSize: '22px', fontFamily: 'Founders Grotesk,sans-serif', fontWeight: '700', margin: '0' }}>
-            GROUPE DES JEUNES DU ROCHER
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '4px', letterSpacing: '2px', textTransform: 'uppercase' }}>
-            Lomé, Togo · Hountigomé
-          </p>
-        </div>
-
         {/* Formulaire de connexion */}
-        <form onSubmit={handleLogin} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '20px' }}>
+        <form onSubmit={handleLogin} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '32px 24px' }}>
+          
+          {/* Logo intégré au formulaire */}
+          <div style={{ textAlign: 'center', marginBottom: '32px', cursor: 'pointer' }} onClick={handleLogoClick}>
+            <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '16px', borderRadius: '16px', filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.4))', display: 'block', margin: '0 auto' }} />
+            <h1 style={{ color: 'white', fontSize: '20px', fontFamily: 'Founders Grotesk', fontWeight: '700', margin: '0', lineHeight: '1.2' }}>
+              GROUPE DES JEUNES<br/>DU ROCHER
+            </h1>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '6px', letterSpacing: '2px', textTransform: 'uppercase' }}>
+              Lomé, Togo · Hountigomé
+            </p>
+          </div>
+
           {error && (
-            <div style={{ background: 'rgba(200,16,46,0.2)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '10px', padding: '10px 12px', marginBottom: '12px', color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>
+            <div style={{ background: 'rgba(200,16,46,0.2)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '10px', padding: '10px 12px', marginBottom: '12px', color: 'rgba(255,255,255,0.8)', fontSize: '13px', textAlign: 'center' }}>
               {error}
             </div>
           )}
@@ -103,18 +104,18 @@ export default function Login() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder="prenom.nom@email.com"
-            style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 12px', color: 'white', fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit' }}
+            style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 12px', color: 'white', fontSize: '13px', outline: 'none', marginBottom: '12px', fontFamily: 'inherit', boxSizing: 'border-box' }}
           />
           <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' }}>
             Mot de passe
           </label>
-          <div style={{ position: 'relative', marginBottom: '14px' }}>
+          <div style={{ position: 'relative', marginBottom: '20px' }}>
             <input
               type={showPwd ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 40px 10px 12px', color: 'white', fontSize: '13px', outline: 'none', fontFamily: 'inherit' }}
+              style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 40px 10px 12px', color: 'white', fontSize: '13px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
             />
             <button
               type="button"
@@ -127,14 +128,14 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            style={{ width: '100%', background: '#FC1713', color: 'white', border: 'none', borderRadius: '10px', padding: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', opacity: loading ? 0.6 : 1 }}
+            style={{ width: '100%', background: '#0965BA', color: 'white', border: 'none', borderRadius: '10px', padding: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', opacity: loading ? 0.6 : 1, transition: 'background 0.3s' }}
           >
             {loading ? 'Chargement...' : 'Se connecter'}
           </button>
           <button
             type="button"
-            onClick={resetMotDePasse}
-            style={{ width: '100%', background: 'transparent', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '10px', fontSize: '12px', fontWeight: '500', cursor: 'pointer', fontFamily: 'inherit', marginTop: '8px' }}
+            onClick={() => navigate('/reset-password')}
+            style={{ width: '100%', background: 'transparent', color: 'rgba(255,255,255,0.6)', border: 'none', borderRadius: '10px', padding: '10px', fontSize: '12px', fontWeight: '500', cursor: 'pointer', fontFamily: 'inherit', marginTop: '8px', textDecoration: 'underline' }}
           >
             Mot de passe oublié ?
           </button>

@@ -1,67 +1,60 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const slides = [
   {
-    bg: '#ffffff',
-    color: '#111111',
-    accent: '#FC1713',
-    shape: 'M60,10 L110,60 L60,110 L10,60 Z',
-    titre: 'Content de te voir ici !',
-    desc: 'Le Groupe des jeunes du Rocher, c\'est ta famille. On grandit ensemble, on s\'encourage, on vit notre foi.',
-  },
-  {
-    bg: '#FC1713',
+    bg: 'linear-gradient(135deg, #FC1713 0%, #a00d24 100%)',
     color: '#ffffff',
     accent: '#ffffff',
-    shape: 'M50,5 A45,45 0 1,1 49.9,5 Z',
-    titre: 'Rien ne te passe plus',
-    desc: 'Les annonces, les événements, tout ce qui se passe dans la jeunesse · tu es toujours dans la boucle.',
+    emoji: '🙌',
+    titre: 'Bienvenue dans la famille JBR',
+    desc: 'Le Groupe des jeunes du Rocher est plus qu\'un groupe, c\'est ta communauté pour grandir, s\'épanouir et vivre ta foi pleinement.',
   },
   {
-    bg: '#0965BA',
+    bg: 'linear-gradient(135deg, #0965BA 0%, #053a6b 100%)',
     color: '#ffffff',
     accent: '#ffffff',
-    shape: 'M10,90 L50,10 L90,90 Z',
-    titre: 'Commence bien ta journée',
-    desc: 'Un verset, une prière. Chaque matin on se retrouve dans la Parole.',
+    emoji: '🔔',
+    titre: 'Reste toujours connecté',
+    desc: 'Annonces, événements, défis... Reçois toutes les actus du bureau en temps réel. Tu ne manqueras plus rien d\'important.',
   },
   {
-    bg: '#ffffff',
+    bg: 'linear-gradient(135deg, #111111 0%, #333333 100%)',
+    color: '#ffffff',
+    accent: '#FC1713',
+    emoji: '📖',
+    titre: 'Nourris ton esprit',
+    desc: 'Accède chaque jour à des dévotions inspirantes et des plans de lecture biblique pour fortifier ta relation avec Dieu.',
+  },
+  {
+    bg: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
     color: '#111111',
     accent: '#FC1713',
-    shape: 'M20,20 L80,20 L80,80 L20,80 Z',
-    titre: 'C\'est ton espace',
-    desc: 'Ton profil, tes cotisations, tout ce qui te concerne · accessible en un clic.',
+    emoji: '🤝',
+    titre: 'Ton impact, ton réseau',
+    desc: 'Découvre l\'annuaire des membres, partage tes compétences et crée des liens forts avec tes frères et sœurs.',
   }
 ]
 
 export default function Onboarding() {
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
-  const [animating, setAnimating] = useState(false)
   const [touchStartX, setTouchStartX] = useState(0)
 
-  const slide = slides[current]
-
-  function goTo(index) {
-    if (animating || index === current) return
-    setAnimating(true)
-    setTimeout(() => {
-      setCurrent(index)
-      setAnimating(false)
-    }, 250)
-  }
-
   function next() {
-    if (current < slides.length - 1) goTo(current + 1)
-    else finish()
+    if (current < slides.length - 1) {
+      setCurrent(current + 1)
+    } else {
+      finish()
+    }
   }
 
   function finish() {
-    localStorage.setItem('onboarding_done', 'true')
+    localStorage.setItem('onboarding_v2_done', 'true')
     navigate('/')
   }
+
+  const slide = slides[current]
 
   return (
     <div
@@ -71,156 +64,153 @@ export default function Onboarding() {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: '48px 32px 48px',
-        transition: 'background 0.4s ease',
+        padding: '60px 40px 40px',
+        transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
         fontFamily: 'Founders Grotesk, sans-serif',
+        position: 'relative',
+        overflow: 'hidden',
+        color: slide.color
       }}
       onTouchStart={e => setTouchStartX(e.touches[0].clientX)}
       onTouchEnd={e => {
         const diff = touchStartX - e.changedTouches[0].clientX
-        if (diff > 60) next()
-        else if (diff < -60 && current > 0) goTo(current - 1)
+        if (diff > 50) next()
+        else if (diff < -50 && current > 0) setCurrent(current - 1)
       }}
     >
       <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
         }
-        .slide-content { animation: fadeUp 0.4s ease; }
+        @keyframes slideUp {
+          0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes bgRotate {
+          0% { transform: rotate(0deg) scale(1); }
+          50% { transform: rotate(180deg) scale(1.2); }
+          100% { transform: rotate(360deg) scale(1); }
+        }
+        .animate-up { animation: slideUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .float { animation: float 4s ease-in-out infinite; }
+        .bg-blob {
+          position: absolute;
+          width: 500px;
+          height: 500px;
+          background: ${slide.accent};
+          filter: blur(120px);
+          opacity: 0.15;
+          border-radius: 50%;
+          top: -100px;
+          right: -100px;
+          z-index: 0;
+          animation: bgRotate 20s linear infinite;
+          pointer-events: none;
+        }
       `}</style>
 
-      {/* Bouton Passer */}
-      <div style={{ textAlign: 'right' }}>
+      <div className="bg-blob" />
+
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 1 }}>
+        <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '1px' }}>JBR</div>
         <button
           onClick={finish}
           style={{
             background: 'none',
-            border: `1px solid ${slide.accent}`,
-            borderRadius: '20px',
-            padding: '8px 18px',
-            color: slide.accent,
-            fontSize: '13px',
+            border: 'none',
+            color: slide.color,
+            fontSize: '14px',
             fontWeight: '600',
             cursor: 'pointer',
-            fontFamily: 'inherit',
-            opacity: 0.7,
+            opacity: 0.6,
+            fontFamily: 'inherit'
           }}
         >
           Passer
         </button>
       </div>
 
-      {/* Illustration géométrique */}
-      <div key={`shape-${current}`} className="slide-content" style={{ display: 'flex', justifyContent: 'center', margin: '32px 0' }}>
-        <svg width="160" height="160" viewBox="0 0 100 100">
-          <path
-            d={slide.shape}
-            fill={slide.accent}
-            opacity="0.15"
-          />
-          <path
-            d={slide.shape}
-            fill="none"
-            stroke={slide.accent}
-            strokeWidth="2"
-            opacity="0.6"
-          />
-          {/* Logo JBR au centre */}
-          <text
-            x="50"
-            y="55"
-            textAnchor="middle"
-            fill={slide.accent}
-            fontSize="14"
-            fontWeight="700"
-            fontFamily="Founders Grotesk, sans-serif"
-          >
-            JDR
-          </text>
-        </svg>
+      {/* Illustration */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
+        <div key={current} className="float" style={{ fontSize: '120px', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.2))' }}>
+          {slide.emoji}
+        </div>
       </div>
 
-      {/* Texte */}
-      <div key={`text-${current}`} className="slide-content" style={{ flex: 1 }}>
-        {/* Numéro */}
+      {/* Content */}
+      <div key={`content-${current}`} className="animate-up" style={{ zIndex: 1 }}>
         <div style={{
-          display: 'inline-block',
+          height: '4px',
+          width: '40px',
           background: slide.accent,
-          color: slide.bg,
-          borderRadius: '20px',
-          padding: '4px 14px',
-          fontSize: '11px',
-          fontWeight: '700',
-          letterSpacing: '2px',
-          marginBottom: '20px',
-          opacity: 0.9,
-        }}>
-          {String(current + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
-        </div>
-
+          marginBottom: '24px',
+          borderRadius: '2px'
+        }} />
+        
         <h1 style={{
-          color: slide.color,
-          fontSize: '32px',
+          fontSize: '40px',
           fontWeight: '700',
-          lineHeight: '1.2',
-          marginBottom: '16px',
-          margin: '0 0 16px',
+          lineHeight: '1.1',
+          marginBottom: '20px',
+          maxWidth: '300px'
         }}>
           {slide.titre}
         </h1>
-
+        
         <p style={{
-          color: slide.color,
-          fontSize: '16px',
-          lineHeight: '1.8',
-          opacity: 0.75,
-          margin: 0,
+          fontSize: '18px',
+          lineHeight: '1.6',
+          opacity: 0.8,
+          marginBottom: '40px',
+          maxWidth: '320px'
         }}>
           {slide.desc}
         </p>
-      </div>
 
-      {/* Navigation */}
-      <div style={{ marginTop: '40px' }}>
-        {/* Points */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
-          {slides.map((_, i) => (
-            <div
-              key={i}
-              onClick={() => goTo(i)}
+        {/* Footer Navigation */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ flex: 1, height: '60px', position: 'relative' }}>
+             <button
+              onClick={next}
               style={{
-                height: '4px',
-                borderRadius: '2px',
-                background: slide.accent,
-                opacity: i === current ? 1 : 0.25,
-                flex: i === current ? 2 : 1,
-                transition: 'all 0.35s ease',
+                width: '100%',
+                height: '100%',
+                background: current === slides.length - 1 ? (slide.color === '#ffffff' ? '#ffffff' : slide.accent) : 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)',
+                color: current === slides.length - 1 ? (slide.color === '#ffffff' ? '#111' : '#fff') : slide.color,
+                border: current === slides.length - 1 ? 'none' : `1px solid ${slide.color}33`,
+                borderRadius: '18px',
+                fontSize: '16px',
+                fontWeight: '700',
                 cursor: 'pointer',
+                fontFamily: 'inherit',
+                transition: 'all 0.3s ease'
               }}
-            />
-          ))}
+            >
+              {current === slides.length - 1 ? 'Commencer' : 'Suivant'}
+            </button>
+          </div>
+          
+          {/* Progress dots */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {slides.map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: i === current ? '24px' : '8px',
+                  height: '8px',
+                  background: slide.color,
+                  opacity: i === current ? 1 : 0.2,
+                  borderRadius: '4px',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              />
+            ))}
+          </div>
         </div>
-
-        {/* Bouton Suivant */}
-        <button
-          onClick={next}
-          style={{
-            width: '100%',
-            background: slide.accent,
-            color: slide.bg,
-            border: 'none',
-            borderRadius: '14px',
-            padding: '16px',
-            fontSize: '15px',
-            fontWeight: '700',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            letterSpacing: '0.5px',
-          }}
-        >
-          {current < slides.length - 1 ? 'Suivant' : 'Commencer'}
-        </button>
       </div>
     </div>
   )

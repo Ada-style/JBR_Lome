@@ -101,7 +101,6 @@ export default function Nouveau() {
   const [nom, setNom] = useState('')
   const [prenom, setPrenom] = useState('')
   const [tel, setTel] = useState('')
-  const [telephone, setTelephone] = useState('')
   const [quartier, setQuartier] = useState('')
   const [niveauEtude, setNiveauEtude] = useState('')
   const [domaine, setDomaine] = useState('')
@@ -142,6 +141,18 @@ export default function Nouveau() {
   }
 
   useEffect(() => { loadEvenements() }, [])
+
+  // Gérer le retour arrière pour fermer le lightbox
+  useEffect(() => {
+    if (lightbox) {
+      window.history.pushState({ lightbox: true }, '')
+    }
+    const handlePopState = () => {
+      if (lightbox) setLightbox(null)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [lightbox])
 
   // Calculer le domaine final en fonction du statut d'activité
   function getDomaineFinal() {
@@ -204,7 +215,6 @@ export default function Nouveau() {
       nom: nom.trim(),
       prenom: prenom.trim(),
       whatsapp: tel.trim(),
-      telephone: telephone.trim() || null,
       quartier: quartier.trim() || null,
       niveau_etude: niveauEtude || null,
       email: email ? email.trim() : null,
@@ -227,11 +237,15 @@ export default function Nouveau() {
       .select();
 
     // If error mentions missing columns, retry without them
-    if (error && error.message && (error.message.includes('date_naissance') || error.message.includes('statut_activite'))) {
+    if (error && error.message && (error.message.includes('date_naissance') || error.message.includes('statut_activite') || error.message.includes('quartier'))) {
       console.log('⚠️ Colonnes manquantes, envoi sans les nouveaux champs...');
+      const minimalPayload = { ...basePayload };
+      delete minimalPayload.quartier;
+      delete minimalPayload.niveau_etude;
+      
       const { data: data2, error: error2 } = await supabase
         .from('demandes')
-        .insert(basePayload)
+        .insert(minimalPayload)
         .select();
       data = data2;
       error = error2;
@@ -251,7 +265,6 @@ export default function Nouveau() {
     setPrenom('');
     setNom('');
     setTel('');
-    setTelephone('');
     setQuartier('');
     setNiveauEtude('');
     setEmail('');
@@ -341,11 +354,11 @@ export default function Nouveau() {
       </button>
 
       {/* Hero */}
-      <div style={{ background: 'linear-gradient(135deg,#FC1713,#8b0000)', padding: '80px 24px 48px', textAlign: 'center', color: 'white' }}>
+      <div style={{ background: 'linear-gradient(135deg,#0965BA,#064a8a)', padding: '80px 24px 48px', textAlign: 'center', color: 'white' }}>
         <div style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 12px', display: 'inline-block', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '20px' }}>🚀 L'APPLICATION COMPLÈTE ARRIVE BIENTÔT</div>
         <br />
         <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '70px', height: '70px', objectFit: 'contain', borderRadius: '12px', marginBottom: '16px', filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.4))' }} />
-        <h1 style={{ fontFamily: 'Founders Grotesk,sans-serif', fontSize: '28px', fontWeight: '700', margin: '0 0 8px' }}>
+        <h1 style={{ fontFamily: 'Founders Grotesk', fontSize: '28px', fontWeight: '700', margin: '0 0 8px' }}>
           Bienvenue parmi nous
         </h1>
         <p style={{ fontSize: '14px', opacity: 0.8, maxWidth: '320px', margin: '0 auto', lineHeight: '1.7' }}>
@@ -358,7 +371,7 @@ export default function Nouveau() {
         {/* Mot du président */}
         <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
           <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>Mot du Président</div>
-          <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', fontStyle: 'italic', marginBottom: '12px', fontFamily: 'Georgia,serif' }}>
+          <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', fontStyle: 'italic', marginBottom: '12px', fontFamily: 'Founders Grotesk' }}>
             « Si tu cherches une famille où grandir dans la foi, l'amitié et la joie; tu es au bon endroit. On t'attendait ! »
           </p>
           <div style={{ color: theme.muted, fontSize: '12px', fontWeight: '600' }}>EZIAN-GNAMAVO Yao Benjamin : Président de la Groupe des jeunes du Rocher</div>
@@ -442,8 +455,11 @@ export default function Nouveau() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
             <div style={{ width: '4px', height: '28px', background: '#FC1713', borderRadius: '2px' }} />
             <div>
-              <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Founders Grotesk,sans-serif' }}>Rejoindre la jeunesse</div>
+              <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Founders Grotesk' }}>Rejoindre la jeunesse</div>
               <div style={{ color: theme.muted, fontSize: '11px', marginTop: '2px' }}>Remplis ce formulaire et le bureau te contactera</div>
+              <div style={{ background: 'rgba(9,101,186,0.08)', color: '#0965BA', padding: '10px 12px', borderRadius: '10px', fontSize: '11px', marginTop: '12px', lineHeight: '1.5', border: '1px solid rgba(9,101,186,0.15)' }}>
+                🔒 <b>Confidentialité :</b> Merci de renseigner vos vraies informations. Ces données sont strictement réservées à l'usage interne du bureau pour mieux vous accompagner.
+              </div>
             </div>
           </div>
 
@@ -481,11 +497,8 @@ export default function Nouveau() {
             <label style={labelStyle}>Adresse email *</label>
             <input placeholder="jean.kokou@email.com" type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} required />
 
-            <label style={labelStyle}>Numéro WhatsApp *</label>
+            <label style={labelStyle}>WhatsApp / Téléphone *</label>
             <input placeholder="+228 90 12 34 56" value={tel} onChange={e => setTel(e.target.value)} style={inputStyle} />
-
-            <label style={labelStyle}>Numéro de téléphone (optionnel)</label>
-            <input type="tel" placeholder="+228..." value={telephone} onChange={e => setTelephone(e.target.value)} style={inputStyle} />
 
             <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
