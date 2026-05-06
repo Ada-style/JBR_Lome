@@ -358,7 +358,7 @@ export default function Nouveau() {
         <div style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 12px', display: 'inline-block', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '20px' }}>🚀 L'APPLICATION COMPLÈTE ARRIVE BIENTÔT</div>
         <br />
         <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '70px', height: '70px', objectFit: 'contain', borderRadius: '12px', marginBottom: '16px', filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.4))' }} />
-        <h1 style={{ fontFamily: 'Founders Grotesk', fontSize: '28px', fontWeight: '700', margin: '0 0 8px' }}>
+        <h1 style={{ fontFamily: 'Space Grotesk', fontSize: '28px', fontWeight: '700', margin: '0 0 8px' }}>
           Bienvenue parmi nous
         </h1>
         <p style={{ fontSize: '14px', opacity: 0.8, maxWidth: '320px', margin: '0 auto', lineHeight: '1.7' }}>
@@ -371,7 +371,7 @@ export default function Nouveau() {
         {/* Mot du président */}
         <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
           <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>Mot du Président</div>
-          <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', fontStyle: 'italic', marginBottom: '12px', fontFamily: 'Founders Grotesk' }}>
+          <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', fontStyle: 'italic', marginBottom: '12px', fontFamily: 'Space Grotesk' }}>
             « Si tu cherches une famille où grandir dans la foi, l'amitié et la joie; tu es au bon endroit. On t'attendait ! »
           </p>
           <div style={{ color: theme.muted, fontSize: '12px', fontWeight: '600' }}>EZIAN-GNAMAVO Yao Benjamin : Président de la Groupe des jeunes du Rocher</div>
@@ -455,7 +455,7 @@ export default function Nouveau() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
             <div style={{ width: '4px', height: '28px', background: '#FC1713', borderRadius: '2px' }} />
             <div>
-              <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Founders Grotesk' }}>Rejoindre la jeunesse</div>
+              <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>Rejoindre la jeunesse</div>
               <div style={{ color: theme.muted, fontSize: '11px', marginTop: '2px' }}>Remplis ce formulaire et le bureau te contactera</div>
               <div style={{ background: 'rgba(9,101,186,0.08)', color: '#0965BA', padding: '10px 12px', borderRadius: '10px', fontSize: '11px', marginTop: '12px', lineHeight: '1.5', border: '1px solid rgba(9,101,186,0.15)' }}>
                 🔒 <b>Confidentialité :</b> Merci de renseigner vos vraies informations. Ces données sont strictement réservées à l'usage interne du bureau pour mieux vous accompagner.

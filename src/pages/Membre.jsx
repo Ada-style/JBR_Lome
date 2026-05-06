@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
+import { useBackModal } from '../hooks/useBackModal'
 import md5 from 'md5'
 
 // SVG Icon Components
@@ -39,20 +40,9 @@ export default function Membre() {
   const [showPaiement, setShowPaiement] = useState(false)
   const [luesAnnonces, setLuesAnnonces] = useState([])
 
-  // Gérer le retour arrière pour les modales
-  useEffect(() => {
-    const isAnyModalOpen = showNotifPanel || showProfil || showPaiement
-    if (isAnyModalOpen) {
-      window.history.pushState({ modal: true }, '')
-    }
-    const handlePopState = () => {
-      setShowNotifPanel(false)
-      setShowProfil(false)
-      setShowPaiement(false)
-    }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [showNotifPanel, showProfil, showPaiement])
+  // Gérer le retour arrière pour les modales via le hook
+  useBackModal(showNotifPanel, () => setShowNotifPanel(false))
+  useBackModal(showProfil, () => setShowProfil(false))
   const [touchStart, setTouchStart] = useState(null)
   const [profilTab, setProfilTab] = useState('info')
 
@@ -276,6 +266,8 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
   const [anniversairesDuMois, setAnniversairesDuMois] = useState([])
   const [anniversairesDuJour, setAnniversairesDuJour] = useState([])
 
+  useBackModal(!!showRequeteModal, () => setShowRequeteModal(null))
+
   const EVENEMENTS_LOCAUX = [
     {
       id: 'local-cine',
@@ -400,17 +392,17 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
 
       {/* Verset */}
       <div onClick={() => setTab('devotion')} style={{ background: 'linear-gradient(135deg,#0965BA,#064a8a)', borderRadius: '18px', padding: '28px 24px', color: 'white', marginBottom: '16px', position: 'relative', overflow: 'hidden', boxShadow: !dark ? '0 4px 12px rgba(9,101,186,0.2)' : 'none', cursor: 'pointer' }}>
-        <div style={{ position: 'absolute', top: '-20px', left: '10px', fontFamily: 'Founders Grotesk', fontSize: '100px', color: 'rgba(255,255,255,0.06)', lineHeight: 1 }}>"</div>
+        <div style={{ position: 'absolute', top: '-20px', left: '10px', fontFamily: 'Space Grotesk', fontSize: '100px', color: 'rgba(255,255,255,0.06)', lineHeight: 1 }}>"</div>
         <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.7, marginBottom: '12px' }}>Dévotion du jour</div>
         {devotion ? (
           <>
             {devotion.titre && <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', opacity: 0.9 }}>{devotion.titre}</div>}
-            <div style={{ fontFamily: 'Founders Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
             <div style={{ fontSize: '12px', fontWeight: '700', opacity: 0.8 }}>• {devotion.reference}</div>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: 'Founders Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« Je puis tout par Christ qui me fortifie. »</div>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« Je puis tout par Christ qui me fortifie. »</div>
             <div style={{ fontSize: '12px', fontWeight: '700', opacity: 0.8 }}>• Philippiens 4:13</div>
           </>
         )}
@@ -617,12 +609,12 @@ function Devotion({ theme, supabase, dark, profile }) {
         {devotion ? (
           <>
             {devotion.titre && <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', opacity: 0.9 }}>{devotion.titre}</div>}
-            <div style={{ fontFamily: 'Founders Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« {devotion.verset} »</div>
             <div style={{ fontSize: '13px', fontWeight: '700', opacity: 0.85 }}>• {devotion.reference}</div>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: 'Founders Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« Je puis tout par Christ qui me fortifie. »</div>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: '18px', fontStyle: 'italic', lineHeight: '1.7', marginBottom: '8px' }}>« Je puis tout par Christ qui me fortifie. »</div>
             <div style={{ fontSize: '13px', fontWeight: '700', opacity: 0.85 }}>• Philippiens 4:13</div>
           </>
         )}
@@ -686,6 +678,8 @@ function Evenements({ theme, supabase, profile }) {
   const [contenu, setContenu] = useState('')
   const [msg, setMsg] = useState('')
 
+  useBackModal(!!feedbackEv, () => setFeedbackEv(null))
+
   useEffect(() => {
     async function load() {
       if (!profile?.id) return
@@ -717,7 +711,7 @@ function Evenements({ theme, supabase, profile }) {
   return (
     <div style={{ padding: '16px', maxWidth: '600px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-        <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', margin: 0 }}>Événements à venir</h2>
+        <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', margin: 0 }}>Événements à venir</h2>
       </div>
       {evenements.map(ev => (
         <div key={ev.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '18px', overflow: 'hidden', marginBottom: '16px', boxShadow: theme.isDark ? 'none' : '0 4px 12px rgba(0,0,0,0.08)' }}>
@@ -732,7 +726,7 @@ function Evenements({ theme, supabase, profile }) {
           <div style={{ padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
               <div>
-                <div style={{ color: theme.text, fontSize: '18px', fontWeight: '700', fontFamily: 'Founders Grotesk' }}>{ev.titre}</div>
+                <div style={{ color: theme.text, fontSize: '18px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>{ev.titre}</div>
                 <div style={{ color: theme.muted, fontSize: '12px', marginTop: '4px' }}>{new Date(ev.date_evenement).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} {ev.lieu ? `· ${ev.lieu}` : ''}</div>
               </div>
               {ev.urgent && (
@@ -785,6 +779,8 @@ function Communion({ theme, supabase }) {
   const [filtreStatut, setFiltreStatut] = useState('tous')
   const [filtreDomaine, setFiltreDomaine] = useState('tous')
   const [voirAnniversaires, setVoirAnniversaires] = useState(false)
+
+  useBackModal(!!selected, () => setSelected(null))
 
   useEffect(() => {
     async function load() {
@@ -841,7 +837,7 @@ function Communion({ theme, supabase }) {
 
   return (
     <div style={{ padding: '16px', maxWidth: '960px', margin: '0 auto' }}>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '6px' }}>Communion</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '6px' }}>Communion</h2>
       <p style={{ color: theme.muted, fontSize: '12px', marginBottom: '16px' }}>Annuaire des membres de la jeunesse</p>
 
       {/* Filtres */}
@@ -954,7 +950,7 @@ function Communion({ theme, supabase }) {
             )}
 
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{ fontSize: '20px', fontWeight: '700', color: theme.text, fontFamily: 'Founders Grotesk' }}>{selected.prenom} {selected.nom}</div>
+              <div style={{ fontSize: '20px', fontWeight: '700', color: theme.text, fontFamily: 'Space Grotesk' }}>{selected.prenom} {selected.nom}</div>
               {selected.domaine && <div style={{ fontSize: '12px', color: theme.muted, marginTop: '6px' }}>{selected.domaine}</div>}
             </div>
 
@@ -1014,6 +1010,8 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, initialTab 
   const [preview, setPreview] = useState(null)
   const [uploading, setUploading] = useState(false)
 
+  useBackModal(!!preview, () => setPreview(null))
+
   useEffect(() => {
     if (profile?.id) {
       loadCotisations()
@@ -1069,7 +1067,7 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, initialTab 
         <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '3px solid rgba(255,255,255,0.4)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: '700' }}>
           {profile?.prenom?.[0]}{profile?.nom?.[0]}
         </div>
-        <div style={{ fontSize: '17px', fontWeight: '700', fontFamily: 'Founders Grotesk' }}>{profile?.prenom} {profile?.nom}</div>
+        <div style={{ fontSize: '17px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>{profile?.prenom} {profile?.nom}</div>
         <div style={{ fontSize: '12px', opacity: 0.75, marginTop: '4px' }}>{profile?.role} · {profile?.domaine}</div>
       </div>
 
@@ -1325,22 +1323,22 @@ function Contact({ theme, supabase }) {
 
   return (
     <div style={{ padding: '16px', maxWidth: '960px', margin: '0 auto' }}>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '6px' }}>Contact</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '6px' }}>Contact</h2>
       <p style={{ color: theme.muted, fontSize: '12px', marginBottom: '20px' }}>Le bureau de la jeunesse et nos réseaux sociaux</p>
 
       {/* R\u00e9seaux sociaux */}
       <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '16px', marginBottom: '24px' }}>
         <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>Nos Réseaux</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-          <a href="#" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', background: 'rgba(9,101,186,0.1)', color: '#0965BA', borderRadius: '12px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold' }}>
+          <a href="https://www.facebook.com/share/1HwJJNzhDx" target="_blank" rel="noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', background: 'rgba(9,101,186,0.1)', color: '#0965BA', borderRadius: '12px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
             Facebook
           </a>
-          <a href="#" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', background: 'rgba(252,23,19,0.08)', color: '#FC1713', borderRadius: '12px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold' }}>
+          <a href="https://www.instagram.com/jeunesdurocher?igsh=cGoyMnNkMWNidm5o" target="_blank" rel="noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', background: 'rgba(252,23,19,0.08)', color: '#FC1713', borderRadius: '12px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg>
             Instagram
           </a>
-          <a href="#" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', background: theme.card, color: theme.text, borderRadius: '12px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold', border: `1px solid ${theme.border}` }}>
+          <a href="https://www.tiktok.com/@jeunesdurocher?_r=1&_t=ZS-9688nppJDl7" target="_blank" rel="noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', background: theme.card, color: theme.text, borderRadius: '12px', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold', border: `1px solid ${theme.border}` }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
             TikTok
           </a>

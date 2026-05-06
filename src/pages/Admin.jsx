@@ -190,7 +190,7 @@ function Dashboard({ theme, supabase, supabaseAdmin, refreshCount }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Tableau de bord</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>Tableau de bord</h2>
       <style>{`
         @media (max-width: 768px) {
           .dashboard-grid { grid-template-columns: repeat(2, 1fr) !important; }
@@ -203,7 +203,7 @@ function Dashboard({ theme, supabase, supabaseAdmin, refreshCount }) {
           { label: 'Demandes en attente', val: stats.demandes },
         ].map(s => (
           <div key={s.label} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', textAlign: 'center' }}>
-            <div style={{ color: '#FC1713', fontSize: '32px', fontWeight: '700', fontFamily: 'Founders Grotesk' }}>{s.val}</div>
+            <div style={{ color: '#FC1713', fontSize: '32px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>{s.val}</div>
             <div style={{ color: theme.muted, fontSize: '11px', marginTop: '4px' }}>{s.label}</div>
           </div>
         ))}
@@ -352,7 +352,7 @@ function Demandes({ theme, supabase, onRefresh }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Demandes d'adhésion</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>Demandes d'adhésion</h2>
 
       {msg && (
         <div style={{
@@ -554,7 +554,7 @@ A bientôt.
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Membres</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>Membres</h2>
       <div>
         {membres.length === 0 && (
           <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
@@ -763,7 +763,7 @@ function Cotisations({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>
         Cotisations
       </h2>
 
@@ -959,7 +959,7 @@ function Priere({ theme, supabase }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>
         Prière
       </h2>
 
@@ -1076,7 +1076,7 @@ function Galerie({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Galerie</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>Galerie</h2>
       <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
         <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Publier un événement</div>
         {msg && <div style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', marginBottom: '12px' }}>{msg}</div>}
@@ -1150,7 +1150,7 @@ function Feedbacks({ theme, supabase }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Feedbacks</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>Feedbacks</h2>
       {feedbacks.length === 0 && (
         <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '24px', textAlign: 'center', color: theme.muted, fontSize: '13px' }}>
           Aucun feedback pour le moment
@@ -1240,7 +1240,7 @@ function Evenements({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Événements</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>Événements</h2>
       <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
         <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Nouvel événement</div>
         {msg && <div style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', marginBottom: '12px' }}>{msg}</div>}
@@ -1330,7 +1330,7 @@ function Annonces({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>Annonces</h2>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>Annonces</h2>
       <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
         <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Nouvelle annonce</div>
         {msg && <div style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '8px', padding: '8px 12px', color: '#FC1713', fontSize: '12px', marginBottom: '12px' }}>{msg}</div>}
@@ -1458,7 +1458,7 @@ function Devotions({ theme, supabase, supabaseAdmin }) {
 
   return (
     <div>
-      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Founders Grotesk', marginBottom: '20px' }}>
+      <h2 style={{ color: theme.text, fontSize: '22px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '20px' }}>
         Dévotions
       </h2>
 

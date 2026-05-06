@@ -66,7 +66,7 @@ export default function Onboarding() {
         justifyContent: 'space-between',
         padding: '60px 40px 40px',
         transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-        fontFamily: 'Founders Grotesk, sans-serif',
+        fontFamily: 'Space Grotesk, sans-serif',
         position: 'relative',
         overflow: 'hidden',
         color: slide.color

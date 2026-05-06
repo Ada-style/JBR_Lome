@@ -83,7 +83,7 @@ export default function Login() {
           {/* Logo intégré au formulaire */}
           <div style={{ textAlign: 'center', marginBottom: '32px', cursor: 'pointer' }} onClick={handleLogoClick}>
             <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '16px', borderRadius: '16px', filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.4))', display: 'block', margin: '0 auto' }} />
-            <h1 style={{ color: 'white', fontSize: '20px', fontFamily: 'Founders Grotesk', fontWeight: '700', margin: '0', lineHeight: '1.2' }}>
+            <h1 style={{ color: 'white', fontSize: '20px', fontFamily: 'Space Grotesk', fontWeight: '700', margin: '0', lineHeight: '1.2' }}>
               GROUPE DES JEUNES<br/>DU ROCHER
             </h1>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '6px', letterSpacing: '2px', textTransform: 'uppercase' }}>
