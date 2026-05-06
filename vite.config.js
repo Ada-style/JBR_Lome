@@ -11,7 +11,7 @@ export default defineConfig({
       manifest: {
         name: 'Groupe des jeunes du Rocher',
         short_name: 'JBR',
-        description: 'Plateforme de la Groupe des jeunes du Rocher',
+        description: 'Plateforme du groupe des jeunes du Rocher',
         theme_color: '#FC1713',
         background_color: '#111111',
         display: 'standalone',
