@@ -645,7 +645,7 @@ function Devotion({ theme, supabase, dark, profile }) {
         </div>
       )}
 
-      <BirthdayCard />
+
 
       {/* Commentaires / Édification */}
       {devotion && (
