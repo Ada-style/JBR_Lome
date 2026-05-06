@@ -67,11 +67,19 @@ export default function Membre() {
       setNotifs(data || [])
     }
     loadNotifs()
-
-    // Charger les annonces lues depuis localStorage
     const lues = JSON.parse(localStorage.getItem('lues_annonces') || '[]')
     setLuesAnnonces(lues)
   }, [])
+
+  // Génère les alertes de profil incomplet
+  const alertesProfil = profile ? [
+    !profile.avatar_url && { id: 'photo', titre: '📸 Photo de profil manquante', contenu: 'Ajoute une photo pour que tes frères et sœurs te reconnaissent !', lien: 'profil' },
+    !profile.whatsapp && { id: 'whatsapp', titre: '📱 Numéro WhatsApp manquant', contenu: 'Ajoute ton WhatsApp pour que le bureau puisse te contacter.', lien: 'profil' },
+    !profile.quartier && { id: 'quartier', titre: '📍 Quartier non renseigné', contenu: 'Indique ton quartier pour mieux vous connaître.', lien: 'profil' },
+    !profile.bio && { id: 'bio', titre: '✍️ Bio vide', contenu: 'Présente-toi en quelques mots à la communauté !', lien: 'profil' },
+    !profile.date_naissance && { id: 'naissance', titre: '🎂 Date de naissance manquante', contenu: 'Ajoute ta date de naissance pour ne pas rater les jubilaires !', lien: 'profil' },
+    !profile.domaine && { id: 'domaine', titre: '💼 Domaine d\'activité manquant', contenu: 'Partage ton domaine d\'étude ou de travail.', lien: 'profil' },
+  ].filter(Boolean) : []
 
   const tabs = [
     { id: 'accueil', label: 'Accueil', icon: <IconHome /> },
@@ -169,24 +177,40 @@ export default function Membre() {
         </div>
       </div>
 
-      {/* Panel notifications - avec backdrop pour click-outside */}
       {showNotifPanel && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 35 }} onClick={() => setShowNotifPanel(false)} />
       )}
       {showNotifPanel && (
-        <div style={{ position: 'absolute', top: '55px', left: 0, right: 0, background: dark ? '#1a1a1a' : '#ffffff', borderBottom: `1px solid ${theme.border}`, zIndex: 40, animation: 'slideDown 0.3s ease-in-out' }}>
+        <div style={{ position: 'absolute', top: '55px', left: 0, right: 0, background: dark ? '#1a1a1a' : '#ffffff', borderBottom: `1px solid ${theme.border}`, zIndex: 40, animation: 'slideDown 0.3s ease-in-out', maxHeight: '80vh', overflowY: 'auto' }}>
           <style>{`@keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`}</style>
           <div style={{ padding: '12px 16px', maxWidth: '600px', margin: '0 auto' }} onClick={e => e.stopPropagation()}>
+
+            {/* Alertes profil */}
+            {alertesProfil.length > 0 && (
+              <>
+                <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#FC1713', marginBottom: '8px', fontWeight: '700' }}>⚠️ Complète ton profil</div>
+                {alertesProfil.map(a => (
+                  <div key={a.id} onClick={() => { setShowNotifPanel(false); setShowProfil(true) }} style={{ background: 'rgba(252,23,19,0.06)', border: '1px solid rgba(252,23,19,0.2)', borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', cursor: 'pointer', borderLeft: '3px solid #FC1713' }}>
+                    <div style={{ color: theme.text, fontSize: '12px', fontWeight: '600', marginBottom: '3px' }}>{a.titre}</div>
+                    <div style={{ color: theme.muted, fontSize: '11px' }}>{a.contenu}</div>
+                  </div>
+                ))}
+                <div style={{ height: '1px', background: theme.border, margin: '12px 0' }} />
+              </>
+            )}
+            {alertesProfil.length === 0 && (
+              <div style={{ background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.2)', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px', color: '#25d366', fontSize: '12px', fontWeight: '600' }}>✅ Profil complet — Merci !</div>
+            )}
+
+            {/* Annonces */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: theme.muted }}>Notifications récentes</div>
+              <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: theme.muted }}>Annonces</div>
               {notifs.filter(n => !luesAnnonces.includes(n.id)).length > 0 && (
-                <button onClick={marquerToutLu} style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '6px', padding: '4px 8px', color: '#FC1713', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                  Tout marquer comme lu
-                </button>
+                <button onClick={marquerToutLu} style={{ background: 'rgba(200,16,46,0.1)', border: '1px solid rgba(200,16,46,0.3)', borderRadius: '6px', padding: '4px 8px', color: '#FC1713', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' }}>Tout marquer comme lu</button>
               )}
             </div>
             {notifs.length === 0 ? (
-              <div style={{ color: theme.muted, fontSize: '13px', padding: '10px 0' }}>Aucune notification</div>
+              <div style={{ color: theme.muted, fontSize: '13px', padding: '10px 0' }}>Aucune annonce</div>
             ) : (
               notifs.map(n => (
                 <div key={n.id} onClick={() => marquerLu(n.id)} style={{ background: theme.card, border: `1px solid ${n.urgent ? '#FC1713' : theme.border}`, borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', cursor: 'pointer', opacity: luesAnnonces.includes(n.id) ? 0.6 : 1, borderLeft: n.urgent ? '3px solid #FC1713' : '3px solid transparent' }}>
