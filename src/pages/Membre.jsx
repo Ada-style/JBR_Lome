@@ -645,7 +645,7 @@ function Devotion({ theme, supabase, dark, profile }) {
         </div>
       )}
 
-
+      <BirthdayCard />
 
       {/* Commentaires / Édification */}
       {devotion && (
@@ -984,7 +984,7 @@ function Communion({ theme, supabase }) {
               <a
                 href={`https://wa.me/${selected.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}?text=${encodeURIComponent(
                   (selected.date_naissance && new Date(selected.date_naissance).getDate() === new Date().getDate() && new Date(selected.date_naissance).getMonth() === new Date().getMonth())
-                    ? `Joyeux anniversaire ${selected.prenom} ! 🥳`
+                    ? `Joyeux anniversaire ${selected.prenom} !`
                     : `Bonjour ${selected.prenom}, je t'ai trouvé au sein de la communion du groupe des jeunes du Rocher !`
                 )}`}
                 target="_blank"
