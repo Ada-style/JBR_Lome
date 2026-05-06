@@ -299,7 +299,7 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
   useEffect(() => {
     async function load() {
       const today = new Date().toISOString().split('T')[0]
-      const { data: devData } = await supabase.from('devotions').select('*').order('date_devotion', { ascending: false }).limit(1)
+      const { data: devData } = await supabase.from('devotions').select('*').eq('date_devotion', today).limit(1)
       const dev = devData?.[0] || null
       setDevotion(dev)
       const { data: ann } = await supabase.from('annonces').select('*').order('created_at', { ascending: false }).limit(5)
@@ -590,7 +590,8 @@ function Devotion({ theme, supabase, dark, profile }) {
 
   useEffect(() => {
     async function load() {
-      const { data: devData } = await supabase.from('devotions').select('*').order('date_devotion', { ascending: false }).limit(1)
+      const today = new Date().toISOString().split('T')[0]
+      const { data: devData } = await supabase.from('devotions').select('*').eq('date_devotion', today).limit(1)
       const dev = devData?.[0] || null
       setDevotion(dev)
       if (dev) {
