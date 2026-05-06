@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192.png', 'icon-512.png', 'logo.png'],
+      includeAssets: ['icon-192.jpeg', 'icon-512.png', 'logo.png'],
       manifest: {
         name: 'Groupe des jeunes du Rocher',
         short_name: 'JBR',
@@ -18,9 +18,9 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/icon-192.png',
+            src: '/icon-192.jpeg',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/jpeg'
           },
           {
             src: '/icon-512.png',
