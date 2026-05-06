@@ -39,6 +39,9 @@ export default function Membre() {
   const [showProfil, setShowProfil] = useState(false)
   const [showPaiement, setShowPaiement] = useState(false)
   const [luesAnnonces, setLuesAnnonces] = useState([])
+  const [luesAlertesProfil, setLuesAlertesProfil] = useState(() =>
+    JSON.parse(localStorage.getItem('lues_alertes_profil') || '[]')
+  )
 
   // Gérer le retour arrière pour les modales via le hook
   useBackModal(showNotifPanel, () => setShowNotifPanel(false))
@@ -71,15 +74,24 @@ export default function Membre() {
     setLuesAnnonces(lues)
   }, [])
 
-  // Génère les alertes de profil incomplet
+  // Génère les alertes de profil incomplet (filtre celles déjà masquées)
   const alertesProfil = profile ? [
-    !profile.avatar_url && { id: 'photo', titre: '📸 Photo de profil manquante', contenu: 'Ajoute une photo pour que tes frères et sœurs te reconnaissent !', lien: 'profil' },
-    !profile.whatsapp && { id: 'whatsapp', titre: '📱 Numéro WhatsApp manquant', contenu: 'Ajoute ton WhatsApp pour que le bureau puisse te contacter.', lien: 'profil' },
-    !profile.quartier && { id: 'quartier', titre: '📍 Quartier non renseigné', contenu: 'Indique ton quartier pour mieux vous connaître.', lien: 'profil' },
-    !profile.bio && { id: 'bio', titre: '✍️ Bio vide', contenu: 'Présente-toi en quelques mots à la communauté !', lien: 'profil' },
-    !profile.date_naissance && { id: 'naissance', titre: '🎂 Date de naissance manquante', contenu: 'Ajoute ta date de naissance pour ne pas rater les jubilaires !', lien: 'profil' },
-    !profile.domaine && { id: 'domaine', titre: '💼 Domaine d\'activité manquant', contenu: 'Partage ton domaine d\'étude ou de travail.', lien: 'profil' },
-  ].filter(Boolean) : []
+    !profile.avatar_url && { id: 'photo', titre: '📸 Photo de profil manquante', contenu: 'Ajoute une photo pour que tes frères et sœurs te reconnaissent !' },
+    !profile.whatsapp && { id: 'whatsapp', titre: '📱 Numéro WhatsApp manquant', contenu: 'Ajoute ton WhatsApp pour que le bureau puisse te contacter.' },
+    !profile.quartier && { id: 'quartier', titre: '📍 Quartier non renseigné', contenu: 'Indique ton quartier pour mieux vous connaître.' },
+    !profile.bio && { id: 'bio', titre: '✍️ Bio vide', contenu: 'Présente-toi en quelques mots à la communauté !' },
+    !profile.date_naissance && { id: 'naissance', titre: '🎂 Date de naissance manquante', contenu: 'Ajoute ta date de naissance pour ne pas rater les jubilaires !' },
+    !profile.domaine && { id: 'domaine', titre: '💼 Domaine d\'activité manquant', contenu: 'Partage ton domaine d\'activité ou de travail.' },
+  ].filter(a => a && !luesAlertesProfil.includes(a.id)) : []
+
+  function masquerAlerteProfil(id, e) {
+    e.stopPropagation()
+    const nouvelles = [...luesAlertesProfil, id]
+    setLuesAlertesProfil(nouvelles)
+    localStorage.setItem('lues_alertes_profil', JSON.stringify(nouvelles))
+  }
+
+  const totalNonLus = notifs.filter(n => !luesAnnonces.includes(n.id)).length + alertesProfil.length
 
   const tabs = [
     { id: 'accueil', label: 'Accueil', icon: <IconHome /> },
@@ -162,9 +174,9 @@ export default function Membre() {
           <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', position: 'relative', color: theme.muted, display: 'flex' }}>
             <IconBell size={18} />
           </button>
-          {notifs.filter(n => !luesAnnonces.includes(n.id)).length > 0 && (
+          {totalNonLus > 0 && (
             <div style={{ position: 'absolute', top: '0px', right: '0px', background: '#FC1713', color: 'white', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: '700' }}>
-              {notifs.filter(n => !luesAnnonces.includes(n.id)).length}
+              {totalNonLus}
             </div>
           )}
         </div>
@@ -190,9 +202,12 @@ export default function Membre() {
               <>
                 <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#FC1713', marginBottom: '8px', fontWeight: '700' }}>⚠️ Complète ton profil</div>
                 {alertesProfil.map(a => (
-                  <div key={a.id} onClick={() => { setShowNotifPanel(false); setShowProfil(true) }} style={{ background: 'rgba(252,23,19,0.06)', border: '1px solid rgba(252,23,19,0.2)', borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', cursor: 'pointer', borderLeft: '3px solid #FC1713' }}>
-                    <div style={{ color: theme.text, fontSize: '12px', fontWeight: '600', marginBottom: '3px' }}>{a.titre}</div>
-                    <div style={{ color: theme.muted, fontSize: '11px' }}>{a.contenu}</div>
+                  <div key={a.id} onClick={() => { setShowNotifPanel(false); setShowProfil(true) }} style={{ background: 'rgba(252,23,19,0.06)', border: '1px solid rgba(252,23,19,0.2)', borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', cursor: 'pointer', borderLeft: '3px solid #FC1713', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: theme.text, fontSize: '12px', fontWeight: '600', marginBottom: '3px' }}>{a.titre}</div>
+                      <div style={{ color: theme.muted, fontSize: '11px' }}>{a.contenu}</div>
+                    </div>
+                    <button onClick={(e) => masquerAlerteProfil(a.id, e)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: theme.muted, fontSize: '14px', cursor: 'pointer', borderRadius: '4px', padding: '0 5px', lineHeight: '20px', flexShrink: 0 }}>✕</button>
                   </div>
                 ))}
                 <div style={{ height: '1px', background: theme.border, margin: '12px 0' }} />
