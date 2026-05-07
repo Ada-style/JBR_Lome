@@ -359,10 +359,11 @@ export default function Nouveau() {
         <br />
         <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '70px', height: '70px', objectFit: 'contain', borderRadius: '12px', marginBottom: '16px', filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.4))' }} />
         <h1 style={{ fontFamily: 'Space Grotesk', fontSize: '28px', fontWeight: '700', margin: '0 0 8px' }}>
-          Bienvenue parmi nous
+          Bienvenue parmi nous !
         </h1>
         <p style={{ fontSize: '14px', opacity: 0.8, maxWidth: '320px', margin: '0 auto', lineHeight: '1.7' }}>
-          Comme les premiers chrétiens, on se retrouve, on apprend, on prie et on partage la vie ensemble. Actes 2:42
+          Comme les premiers chrétiens, on se retrouve, on mange, on rit, on apprend, on prie et on partage la vraie vie ensemble. 
+          Actes 2:42
         </p>
       </div>
 
@@ -372,19 +373,20 @@ export default function Nouveau() {
         <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
           <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>Mot du Président</div>
           <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', fontStyle: 'italic', marginBottom: '12px', fontFamily: 'Space Grotesk' }}>
-            « Si tu cherches une famille où grandir dans la foi, l'amitié et la joie; tu es au bon endroit. On t'attendait ! »
+            « Si tu cherches une famille où grandir dans la foi, la communion et le partage; tu es au bon endroit. On t'attendait ! »
           </p>
-          <div style={{ color: theme.muted, fontSize: '12px', fontWeight: '600' }}>EZIAN-GNAMAVO Yao Benjamin : Président de la Groupe des jeunes du Rocher</div>
+          <div style={{ color: theme.muted, fontSize: '12px', fontWeight: '600' }}>EZIAN-GNAMAVO Yao Benjamin : Président du groupe des jeunes du Rocher</div>
         </div>
 
         {/* Ce que tu trouveras */}
         <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
           <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Ce que tu trouveras ici</div>
           {[
-            'Des dévotions hebdomadaires et des défis de lecture biblique',
-            'Des événements récréatifs et culturels tout au long de l\'année',
-            'Un réseau de jeunes talentueux avec qui collaborer',
-            'Un espace sûr pour grandir dans la foi et dans la vie',
+            'Un espace pour prier, partager tes requêtes et tes témoignages, et savoir que tu n\'es pas seul',
+            'Des dévotions hebdomadaires pour garder la flamme allumée',
+            'Une communauté de jeunes à découvrir, à connaître et à célébrer, parce que chaque talent compte',
+            'Des événements pour vivre ensemble, s\'amuser, s\'enrichir et créer des souvenirs',
+            'Un endroit où la foi se vit, pas seulement le dimanche',
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FC1713', marginTop: '7px', flexShrink: 0 }} />
@@ -533,7 +535,7 @@ export default function Nouveau() {
 
           {/* Statut d'activité */}
           <div style={{ marginBottom: '16px' }}>
-            <label style={labelStyle}>Tu es *</label>
+            <label style={labelStyle}>Je suis *</label>
             <div className="nouveau-statut-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <button type="button" onClick={() => { setStatutActivite('eleve'); setDomaine(''); }} style={statutBtnStyle(statutActivite === 'eleve')}>
                 <IconBackpack />
