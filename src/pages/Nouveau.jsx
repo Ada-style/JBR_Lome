@@ -273,7 +273,7 @@ export default function Nouveau() {
 
         <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px', textAlign: 'center' }}>
           <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.6', margin: 0, fontFamily: 'Space Grotesk' }}>
-            Tu fais partie de la famille ! Pour mieux te connaître et mieux t'organiser, prends 1 minute pour remplir ce formulaire. Nom, prénoms, profession... quelques infos simples qui nous aident à être un vrai groupe soudé.
+            Tu fais partie de la famille ! Pour mieux te connaître et mieux t'organiser, prends 1 minute pour remplir ce formulaire.
             <span style={{ color: '#FC1713', fontWeight: '700', display: 'block', marginTop: '8px' }}>Dieu te bénisse pour ta collaboration !</span>
           </p>
         </div>
