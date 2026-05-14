@@ -106,7 +106,6 @@ export default function Membre() {
   // Gérer le retour arrière pour les modales via le hook
   useBackModal(showNotifPanel, () => setShowNotifPanel(false))
   useBackModal(showProfil, () => setShowProfil(false))
-  const [touchStart, setTouchStart] = useState(null)
   const [profilTab, setProfilTab] = useState('info')
 
   const theme = {
@@ -161,13 +160,6 @@ export default function Membre() {
     { id: 'contact', label: 'Contact', icon: <IconPhone /> },
   ]
 
-  function handleSwipe(dir) {
-    const ids = tabs.map(t => t.id)
-    const idx = ids.indexOf(tab)
-    if (dir === 'left' && idx < ids.length - 1) setTab(ids[idx + 1])
-    if (dir === 'right' && idx > 0) setTab(ids[idx - 1])
-  }
-
   async function handleSignOut() {
     await signOut()
     navigate('/')
@@ -188,15 +180,6 @@ export default function Membre() {
   return (
     <div
       style={{ minHeight: '100vh', background: theme.bg, transition: 'background 0.3s' }}
-      onTouchStart={e => setTouchStart(e.touches[0].clientX)}
-      onTouchEnd={e => {
-        if (!touchStart) return
-        const touchEnd = e.changedTouches[0].clientX
-        const diff = touchStart - touchEnd
-        if (diff > 80) handleSwipe('left')
-        if (diff < -80) handleSwipe('right')
-        setTouchStart(null)
-      }}
     >
 
       <style>{`
