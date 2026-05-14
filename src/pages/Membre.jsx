@@ -606,7 +606,7 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
           </div>
         </div>
       )}
-      <button onClick={() => window.open('https://wa.me/22892894954?text=Je souhaite soutenir l oeuvre', '_blank')} style={{ width: '100%', marginTop: '12px', background: 'linear-gradient(135deg, #0965BA, #064a8a)', color: 'white', border: 'none', borderRadius: '14px', padding: '14px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+      <button onClick={() => window.open('https://wa.me/22892894954?text=Je souhaite soutenir l oeuvre au sein de la JBR', '_blank')} style={{ width: '100%', marginTop: '12px', background: 'linear-gradient(135deg, #0965BA, #064a8a)', color: 'white', border: 'none', borderRadius: '14px', padding: '14px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
         <IconGift size={18} />
         Soutenir l'oeuvre
       </button>
@@ -1306,12 +1306,12 @@ function MobileMoney({ theme, profile }) {
   const [montant, setMontant] = useState('200')
 
   // À remplacer par les vrais numéros du bureau
-  const NUMERO_MIXX = '22892894954'   // ← numéro T-Money du bureau
-  const NUMERO_MOOV = '22897440627'   // ← numéro Moov Money du bureau
+  const NUMERO_MIXX = '92894954'   // ← numéro T-Money du bureau
+  const NUMERO_MOOV = '97440627'   // ← numéro Moov Money du bureau
   const BUREAU_WA = '22892894954'   // ← WhatsApp du bureau
 
-  const ussdMixx = `*145*1*${NUMERO_MIXX}*${montant}#`
-  const ussdMoov = `*155*1*${NUMERO_MOOV}*${montant}#`
+  const ussdMixx = `*145*1*${montant}*${NUMERO_MIXX}*1#`
+  const ussdMoov = `*155*1*${montant}*${NUMERO_MOOV}*1#`
 
   const msgWA = encodeURIComponent(
     `Bonjour, j'ai effectué un paiement de ${montant} FCFA pour ma cotisation.\n\nNom : ${profile?.prenom} ${profile?.nom}\nMontant : ${montant} FCFA\n\nMerci de confirmer.`

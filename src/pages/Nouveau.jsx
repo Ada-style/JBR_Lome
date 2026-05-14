@@ -111,6 +111,8 @@ export default function Nouveau() {
   const [statutActivite, setStatutActivite] = useState('')
   const [classeEleve, setClasseEleve] = useState('')
   const [sending, setSending] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [niveauEtudeAutre, setNiveauEtudeAutre] = useState('')
 
   useEffect(() => {
     if (session) {
@@ -129,18 +131,7 @@ export default function Nouveau() {
     inputBg: dark ? 'rgba(255,255,255,0.04)' : '#fafaf9',
   }
 
-  const loadEvenements = async () => {
-    const { data } = await supabase
-      .from('evenements_galerie')
-      .select('*, photos_galerie(*)')
-      .order('date_evenement', { ascending: false })
-    if (data && data.length > 0) {
-      setEvenements([...data, ...EVENEMENTS_LOCAUX])
-      setActiveEv(data[0].id)
-    }
-  }
 
-  useEffect(() => { loadEvenements() }, [])
 
   // Gérer le retour arrière pour fermer le lightbox
   useEffect(() => {
@@ -242,7 +233,7 @@ export default function Nouveau() {
       const minimalPayload = { ...basePayload };
       delete minimalPayload.quartier;
       delete minimalPayload.niveau_etude;
-      
+
       const { data: data2, error: error2 } = await supabase
         .from('demandes')
         .insert(minimalPayload)
@@ -259,19 +250,7 @@ export default function Nouveau() {
       return;
     }
 
-    console.log('✅ Insertion réussie !', data);
-    showMsg('Demande envoyée avec succès ! Le bureau vous contactera bientôt.', 'success');
-
-    setPrenom('');
-    setNom('');
-    setTel('');
-    setQuartier('');
-    setNiveauEtude('');
-    setEmail('');
-    setDomaine('');
-    setDateAnniversaire('');
-    setStatutActivite('');
-    setClasseEleve('');
+    setSubmitted(true);
   }
 
   const evActif = evenements.find(e => e.id === activeEv)
@@ -353,291 +332,230 @@ export default function Nouveau() {
         {dark ? 'Mode clair' : 'Mode sombre'}
       </button>
 
-      {/* Hero */}
-      <div style={{ background: 'linear-gradient(135deg,#0965BA,#064a8a)', padding: '80px 24px 48px', textAlign: 'center', color: 'white' }}>
-        <div style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 12px', display: 'inline-block', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '20px' }}>🚀 L'APPLICATION COMPLÈTE ARRIVE BIENTÔT</div>
-        <br />
-        <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '70px', height: '70px', objectFit: 'contain', borderRadius: '12px', marginBottom: '16px', filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.4))' }} />
-        <h1 style={{ fontFamily: 'Space Grotesk', fontSize: '28px', fontWeight: '700', margin: '0 0 8px' }}>
-          Bienvenue parmi nous
-        </h1>
-        <p style={{ fontSize: '14px', opacity: 0.8, maxWidth: '320px', margin: '0 auto', lineHeight: '1.7' }}>
-          Comme les premiers chrétiens, on se retrouve, on apprend, on prie et on partage la vie ensemble. Actes 2:42
-        </p>
+      {/* Hero - split banner */}
+      <div style={{ marginTop: '56px', display: 'flex', alignItems: 'stretch', minHeight: '180px', overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.12)' }}>
+        <div style={{ background: '#ffffff', padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: '170px', width: '170px', flexShrink: 0, borderRight: '1px solid #e5e5e5' }}>
+          <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '60px', height: '60px', objectFit: 'contain', marginBottom: '12px' }} />
+          <div style={{ color: '#0965BA', fontSize: '13px', fontWeight: '800', letterSpacing: '0.5px', textTransform: 'uppercase', textAlign: 'center', lineHeight: '1.4' }}>
+            GROUPE<br/>DES JEUNES
+          </div>
+        </div>
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          <img src="/detente1.jpg" alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block', minHeight: '180px' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(175,10,10,0.55)' }} />
+        </div>
       </div>
 
       <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px' }}>
 
-        {/* Mot du président */}
+
+        {/* Intro chaleureuse */}
         <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
-          <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>Mot du Président</div>
-          <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', fontStyle: 'italic', marginBottom: '12px', fontFamily: 'Space Grotesk' }}>
-            « Si tu cherches une famille où grandir dans la foi, l'amitié et la joie; tu es au bon endroit. On t'attendait ! »
+          <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', margin: 0, fontFamily: 'Space Grotesk' }}>
+            Tu fais partie de la famille ! Pour mieux te connaître et mieux t'organiser, prends 1 minute pour remplir ce formulaire.
+            Nom, prénoms, profession... quelques infos simples qui nous aident à être un vrai groupe soudé.
+            <span style={{ color: '#FC1713', fontWeight: '700' }}> Dieu te bénisse pour ta collaboration !</span>
           </p>
-          <div style={{ color: theme.muted, fontSize: '12px', fontWeight: '600' }}>EZIAN-GNAMAVO Yao Benjamin : Président de la Groupe des jeunes du Rocher</div>
         </div>
 
-        {/* Ce que tu trouveras */}
-        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
-          <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Ce que tu trouveras ici</div>
-          {[
-            'Des dévotions hebdomadaires et des défis de lecture biblique',
-            'Des événements récréatifs et culturels tout au long de l\'année',
-            'Un réseau de jeunes talentueux avec qui collaborer',
-            'Un espace sûr pour grandir dans la foi et dans la vie',
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FC1713', marginTop: '7px', flexShrink: 0 }} />
-              <div style={{ color: theme.muted, fontSize: '13px', lineHeight: '1.7' }}>{item}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Galerie */}
-        {evenements.length > 0 && (
-          <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
-            <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '16px' }}>Nos moments</div>
-
-            {/* Tabs événements */}
-            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '4px', scrollbarWidth: 'none' }}>
-              {evenements.map(ev => (
-                <button
-                  key={ev.id}
-                  onClick={() => setActiveEv(ev.id)}
-                  style={{
-                    background: activeEv === ev.id ? '#FC1713' : theme.bg,
-                    border: `1px solid ${activeEv === ev.id ? '#FC1713' : theme.border}`,
-                    borderRadius: '20px',
-                    padding: '7px 16px',
-                    color: activeEv === ev.id ? 'white' : theme.muted,
-                    fontSize: '12px',
-                    fontWeight: activeEv === ev.id ? '600' : '400',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    fontFamily: 'inherit',
-                    transition: 'all 0.2s',
-                    flexShrink: 0,
-                  }}
-                >
-                  {ev.nom} · {new Date(ev.date_evenement).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}
-                </button>
-              ))}
-            </div>
-
-            {/* Photos de l'événement actif */}
-            {evActif && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                {evActif.photos_galerie?.map((p, i) => (
-                  <img
-                    key={p.id}
-                    src={p.url}
-                    alt=""
-                    loading="lazy"
-                    onClick={() => setLightbox(p.url)}
-                    style={{
-                      width: '100%',
-                      height: i === 0 ? '220px' : '150px',
-                      objectFit: 'cover',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      gridColumn: i === 0 ? 'span 2' : 'span 1',
-                      transition: 'transform 0.2s',
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Formulaire rejoindre */}
-        <div className="nouveau-form" style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '20px', padding: '28px', marginBottom: '32px', boxShadow: dark ? 'none' : '0 4px 24px rgba(0,0,0,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-            <div style={{ width: '4px', height: '28px', background: '#FC1713', borderRadius: '2px' }} />
-            <div>
-              <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>Rejoindre la jeunesse</div>
-              <div style={{ color: theme.muted, fontSize: '11px', marginTop: '2px' }}>Remplis ce formulaire et le bureau te contactera</div>
-              <div style={{ background: 'rgba(9,101,186,0.08)', color: '#0965BA', padding: '10px 12px', borderRadius: '10px', fontSize: '11px', marginTop: '12px', lineHeight: '1.5', border: '1px solid rgba(9,101,186,0.15)' }}>
-                🔒 <b>Confidentialité :</b> Merci de renseigner vos vraies informations. Ces données sont strictement réservées à l'usage interne du bureau pour mieux vous accompagner.
-              </div>
-            </div>
+        {submitted ? (
+          <div style={{ background: theme.card, border: '1px solid rgba(37,211,102,0.3)', borderRadius: '20px', padding: '40px 28px', marginBottom: '32px', textAlign: 'center' }}>
+            <div style={{ fontSize: '56px', marginBottom: '16px' }}>🎉</div>
+            <div style={{ color: '#25d366', fontSize: '20px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '12px' }}>Demande envoyée !</div>
+            <p style={{ color: theme.muted, fontSize: '14px', lineHeight: '1.8', marginBottom: '20px' }}>
+              Merci ! Le bureau a bien reçu ta demande et te contactera très bientôt sur WhatsApp. Dieu te bénisse !
+            </p>
+            <button onClick={() => navigate('/')} style={{ background: '#0965BA', color: 'white', border: 'none', borderRadius: '12px', padding: '12px 24px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
+              Retour à l'accueil
+            </button>
           </div>
-
-          {msg && (
-            <div style={{
-              background: msgType === 'success' ? 'rgba(37,211,102,0.08)' : 'rgba(200,16,46,0.08)',
-              border: `1px solid ${msgType === 'success' ? 'rgba(37,211,102,0.25)' : 'rgba(200,16,46,0.25)'}`,
-              borderRadius: '12px',
-              padding: '12px 16px',
-              color: msgType === 'success' ? '#25d366' : '#FC1713',
-              fontSize: '13px',
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              {msgType === 'success' && <IconCheck />}
-              {msg}
-            </div>
-          )}
-
-          {/* Informations personnelles */}
-          <div style={{ marginBottom: '4px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        ) : (
+          <div className="nouveau-form" style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '20px', padding: '28px', marginBottom: '32px', boxShadow: dark ? 'none' : '0 4px 24px rgba(0,0,0,0.06)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ width: '4px', height: '28px', background: '#FC1713', borderRadius: '2px' }} />
               <div>
-                <label style={labelStyle}>Prénoms *</label>
-                <input placeholder="Ex: Kodjo Jean" value={prenom} onChange={e => setPrenom(e.target.value)} style={inputStyle} />
-              </div>
-              <div>
-                <label style={labelStyle}>Nom *</label>
-                <input placeholder="Ex: KOKOU" value={nom} onChange={e => setNom(e.target.value)} style={inputStyle} />
+                <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>Rejoindre la jeunesse</div>
+                <div style={{ color: theme.muted, fontSize: '11px', marginTop: '2px' }}>Remplis ce formulaire et le bureau te contactera</div>
+                <div style={{ background: 'rgba(9,101,186,0.08)', color: '#0965BA', padding: '10px 12px', borderRadius: '10px', fontSize: '11px', marginTop: '12px', lineHeight: '1.5', border: '1px solid rgba(9,101,186,0.15)' }}>
+                  🔒 <b>Confidentialité :</b> Merci de renseigner vos vraies informations. Ces données sont strictement réservées à l'usage interne du bureau pour mieux vous accompagner.
+                </div>
               </div>
             </div>
 
-            <label style={labelStyle}>Adresse email *</label>
-            <input placeholder="jean.kokou@email.com" type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} required />
+            {msg && (
+              <div style={{
+                background: msgType === 'success' ? 'rgba(37,211,102,0.08)' : 'rgba(200,16,46,0.08)',
+                border: `1px solid ${msgType === 'success' ? 'rgba(37,211,102,0.25)' : 'rgba(200,16,46,0.25)'}`,
+                borderRadius: '12px',
+                padding: '12px 16px',
+                color: msgType === 'success' ? '#25d366' : '#FC1713',
+                fontSize: '13px',
+                marginBottom: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                {msgType === 'success' && <IconCheck />}
+                {msg}
+              </div>
+            )}
 
-            <label style={labelStyle}>WhatsApp / Téléphone *</label>
-            <input placeholder="+228 90 12 34 56" value={tel} onChange={e => setTel(e.target.value)} style={inputStyle} />
+            {/* Informations personnelles */}
+            <div style={{ marginBottom: '4px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={labelStyle}>Prénoms *</label>
+                  <input placeholder="Ex: Kodjo Jean" value={prenom} onChange={e => setPrenom(e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Nom *</label>
+                  <input placeholder="Ex: KOKOU" value={nom} onChange={e => setNom(e.target.value)} style={inputStyle} />
+                </div>
+              </div>
 
-            <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-              Quartier
-            </label>
-            <input
-              placeholder="Ex: Adidogomé, Bè, Tokoin..."
-              value={quartier}
-              onChange={e => setQuartier(e.target.value)}
-              style={inputStyle}
-            />
-          </div>
+              <label style={labelStyle}>Adresse email *</label>
+              <input placeholder="jean.kokou@email.com" type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} required />
 
-          {/* Séparateur */}
-          <div style={{ height: '1px', background: theme.border, margin: '8px 0 20px' }} />
+              <label style={labelStyle}>WhatsApp / Téléphone *</label>
+              <input placeholder="+228 90 12 34 56" value={tel} onChange={e => setTel(e.target.value)} style={inputStyle} />
 
-          {/* Date d'anniversaire */}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <IconCalendar /> Date d'anniversaire *
-            </label>
-            <input
-              type="date"
-              value={dateAnniversaire}
-              onChange={e => setDateAnniversaire(e.target.value)}
-              style={inputStyle}
-            />
-          </div>
-
-          {/* Statut d'activité */}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={labelStyle}>Tu es *</label>
-            <div className="nouveau-statut-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <button type="button" onClick={() => { setStatutActivite('eleve'); setDomaine(''); }} style={statutBtnStyle(statutActivite === 'eleve')}>
-                <IconBackpack />
-                <span>Élève</span>
-              </button>
-              <button type="button" onClick={() => { setStatutActivite('etudiant'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'etudiant')}>
-                <IconGradCap />
-                <span>Étudiant(e)</span>
-              </button>
-              <button type="button" onClick={() => { setStatutActivite('apprenti'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'apprenti')}>
-                <IconWrench />
-                <span>Apprenti(e)</span>
-              </button>
-              <button type="button" onClick={() => { setStatutActivite('professionnel'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'professionnel')}>
-                <IconBriefcase />
-                <span>Professionnel(le)</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Champs conditionnels */}
-          {statutActivite === 'eleve' && (
-            <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
-              <label style={labelStyle}>Classe *</label>
+              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                Quartier
+              </label>
               <input
-                placeholder="Ex: 3ème, Terminale C, CM2..."
-                value={classeEleve}
-                onChange={e => setClasseEleve(e.target.value)}
+                placeholder="Ex: Adidogomé, Bè, Tokoin..."
+                value={quartier}
+                onChange={e => setQuartier(e.target.value)}
                 style={inputStyle}
               />
             </div>
-          )}
 
-          {statutActivite === 'etudiant' && (
-            <div style={{ animation: 'fadeIn 0.3s ease' }}>
-              <div style={{ marginBottom: '12px' }}>
-                <label style={labelStyle}>Niveau d'étude *</label>
-                <select value={niveauEtude} onChange={e => setNiveauEtude(e.target.value)} style={selectStyle}>
-                  <option value="">Sélectionner</option>
-                  {['Licence 1', 'Licence 2', 'Licence 3', 'BTS 1', 'BTS 2', 'Master 1', 'Master 2', 'Doctorat 1', 'Doctorat 2 ', 'Autre'].map(n =>
-                    <option key={n} value={n} style={optionStyle}>{n}</option>
-                  )}
-                </select>
+            {/* Séparateur */}
+            <div style={{ height: '1px', background: theme.border, margin: '8px 0 20px' }} />
+
+            {/* Niveau d'étude global */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={labelStyle}>Niveau d'étude *</label>
+              <select value={niveauEtude} onChange={e => { setNiveauEtude(e.target.value); if (e.target.value !== 'Autre') setNiveauEtudeAutre(''); }} style={selectStyle}>
+                <option value=''>Sélectionner</option>
+                {['CEPD', 'BEPC', 'BAC', 'BT', 'CAP', 'BTS 1', 'BTS 2', 'Licence 1', 'Licence 2', 'Licence 3', 'Master 1', 'Master 2', 'Doctorat', 'Autre'].map(n =>
+                  <option key={n} value={n} style={optionStyle}>{n}</option>
+                )}
+              </select>
+              {niveauEtude === 'Autre' && (
+                <input placeholder="Précisez votre niveau..." value={niveauEtudeAutre} onChange={e => setNiveauEtudeAutre(e.target.value)} style={inputStyle} />
+              )}
+            </div>
+
+            {/* Date d'anniversaire */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <IconCalendar /> Date de naissance *
+              </label>
+              <input
+                type="date"
+                value={dateAnniversaire}
+                onChange={e => setDateAnniversaire(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+
+            {/* Statut d'activité */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={labelStyle}>Tu es *</label>
+              <div className="nouveau-statut-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button type="button" onClick={() => { setStatutActivite('eleve'); setDomaine(''); }} style={statutBtnStyle(statutActivite === 'eleve')}>
+                  <IconBackpack />
+                  <span>Élève</span>
+                </button>
+                <button type="button" onClick={() => { setStatutActivite('etudiant'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'etudiant')}>
+                  <IconGradCap />
+                  <span>Étudiant(e)</span>
+                </button>
+                <button type="button" onClick={() => { setStatutActivite('apprenti'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'apprenti')}>
+                  <IconWrench />
+                  <span>Apprenti(e)</span>
+                </button>
+                <button type="button" onClick={() => { setStatutActivite('professionnel'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'professionnel')}>
+                  <IconBriefcase />
+                  <span>Professionnel(le)</span>
+                </button>
               </div>
-              <label style={labelStyle}>Domaine d'études *</label>
-              <input placeholder="Ex: Informatique, Droit..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
             </div>
-          )}
 
-          {statutActivite === 'apprenti' && (
-            <div style={{ animation: 'fadeIn 0.3s ease' }}>
-              <div style={{ marginBottom: '12px' }}>
-                <label style={labelStyle}>Niveau d'étude *</label>
-                <select value={niveauEtude} onChange={e => setNiveauEtude(e.target.value)} style={selectStyle}>
-                  <option value="">Sélectionner</option>
-                  {['AUCUN', 'CEPD', 'BEPC', 'BAC1', 'BAC2', 'CAP', 'BT', 'BTS', 'LICENCE', 'MASTER', 'DOCTORAT', 'Autre'].map(n =>
-                    <option key={n} value={n} style={optionStyle}>{n}</option>
-                  )}
-                </select>
+            {/* Champs conditionnels */}
+            {statutActivite === 'eleve' && (
+              <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
+                <label style={labelStyle}>Classe *</label>
+                <input
+                  placeholder="Ex: 3ème, Terminale C, CM2..."
+                  value={classeEleve}
+                  onChange={e => setClasseEleve(e.target.value)}
+                  style={inputStyle}
+                />
               </div>
-              <label style={labelStyle}>Domaine d'apprentissage *</label>
-              <input placeholder="Ex: Couture, Menuiserie..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
-            </div>
-          )}
-
-          {statutActivite === 'professionnel' && (
-            <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
-              <label style={labelStyle}>Domaine d'activité *</label>
-              <input placeholder="Ex: Comptabilité, Enseignement, Commerce..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
-            </div>
-          )}
-
-          <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-
-          <button
-            onClick={envoyerDemande}
-            disabled={sending}
-            style={{
-              width: '100%',
-              background: sending ? '#999' : 'linear-gradient(135deg, #FC1713, #a00d24)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '14px',
-              fontSize: '14px',
-              fontWeight: '700',
-              cursor: sending ? 'not-allowed' : 'pointer',
-              fontFamily: 'inherit',
-              marginTop: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: sending ? 'none' : '0 4px 16px rgba(200,16,46,0.3)',
-              transition: 'all 0.3s ease',
-            }}
-          >
-            {sending ? (
-              <>Envoi en cours...</>
-            ) : (
-              <><IconSend /> Envoyer ma demande</>
             )}
-          </button>
-        </div>
+
+            {statutActivite === 'etudiant' && (
+              <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
+                <label style={labelStyle}>Domaine d'études *</label>
+                <input placeholder="Ex: Informatique, Droit..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
+              </div>
+            )}
+
+            {statutActivite === 'apprenti' && (
+              <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
+                <label style={labelStyle}>Domaine d'apprentissage *</label>
+                <input placeholder="Ex: Couture, Menuiserie..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
+              </div>
+            )}
+
+            {statutActivite === 'professionnel' && (
+              <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
+                <label style={labelStyle}>Domaine d'activité *</label>
+                <input placeholder="Ex: Comptabilité, Enseignement, Commerce..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
+              </div>
+            )}
+
+            <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+
+            <button
+              onClick={envoyerDemande}
+              disabled={sending}
+              style={{
+                width: '100%',
+                background: sending ? '#999' : 'linear-gradient(135deg, #FC1713, #a00d24)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '14px',
+                fontSize: '14px',
+                fontWeight: '700',
+                cursor: sending ? 'not-allowed' : 'pointer',
+                fontFamily: 'inherit',
+                marginTop: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: sending ? 'none' : '0 4px 16px rgba(200,16,46,0.3)',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {sending ? (
+                <>Envoi en cours...</>
+              ) : (
+                <><IconSend /> Envoyer ma demande</>
+              )}
+            </button>
+          </div>
+        )}
 
       </div>
 

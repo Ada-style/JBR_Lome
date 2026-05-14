@@ -15,7 +15,7 @@ export default function ResetPassword() {
     if (error) { setMsg('Erreur : ' + error.message); return }
     setMsg('Mot de passe créé avec succès !')
     setTimeout(() => navigate('/membre'), 2000)
-  }
+  } 
 
   return (
     <div style={{ minHeight: '100vh', background: '#0f0f0f', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>

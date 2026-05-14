@@ -11,4 +11,4 @@ export function useBackModal(isOpen, onClose) {
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [isOpen, onClose])
-} 
+}  
