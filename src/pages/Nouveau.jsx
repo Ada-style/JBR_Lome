@@ -446,6 +446,46 @@ export default function Nouveau() {
                 </svg>
                 Quartier
               </label>
+          {/* Date d'anniversaire */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <IconCalendar /> Date d'anniversaire *
+            </label>
+            <input
+              type="date"
+              value={dateAnniversaire}
+              onChange={e => setDateAnniversaire(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Statut d'activité */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={labelStyle}>Je suis *</label>
+            <div className="nouveau-statut-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <button type="button" onClick={() => { setStatutActivite('eleve'); setDomaine(''); }} style={statutBtnStyle(statutActivite === 'eleve')}>
+                <IconBackpack />
+                <span>Élève</span>
+              </button>
+              <button type="button" onClick={() => { setStatutActivite('etudiant'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'etudiant')}>
+                <IconGradCap />
+                <span>Étudiant(e)</span>
+              </button>
+              <button type="button" onClick={() => { setStatutActivite('apprenti'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'apprenti')}>
+                <IconWrench />
+                <span>Apprenti(e)</span>
+              </button>
+              <button type="button" onClick={() => { setStatutActivite('professionnel'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'professionnel')}>
+                <IconBriefcase />
+                <span>Professionnel(le)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Champs conditionnels */}
+          {statutActivite === 'eleve' && (
+            <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
+              <label style={labelStyle}>Classe *</label>
               <input
                 placeholder="Ex: Adidogomé, Bè, Tokoin..."
                 value={quartier}

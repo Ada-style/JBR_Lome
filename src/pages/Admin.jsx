@@ -425,7 +425,7 @@ Lien : https://jbr-h.vercel.app/
 N'oublie pas de changer ton mot de passe dès ta première connexion depuis Profil > Paramètres.
 
 A très bientôt !
-Le Bureau de la Jeunesse EB Le Rocher`
+Le Bureau du groupe des jeunes du Rocher`
                       : `Bonjour ${d.nom}, votre demande d'adhésion au groupe des jeunes du Rocher a été refusée. Merci de votre intérêt.`
                   )}`}
                   target="_blank"
@@ -532,7 +532,7 @@ function Membres({ theme, supabase, refreshCount }) {
     const message = encodeURIComponent(
       `Bonjour ${m.prenom},
 
-La Jeunesse EB Le Rocher dispose désormais d'une plateforme numérique dédiée à ses membres.
+Le groupe des jeunes du dispose désormais d'une plateforme numérique dédiée à ses membres.
 
 Sur cet espace tu trouveras les dévotions et défis de lecture biblique, les annonces et événements du bureau, l'annuaire des membres avec leurs talents et compétences, le suivi de tes cotisations, et un espace personnel pour partager ton profil et tes documents.
 
@@ -541,12 +541,13 @@ Nous t'encourageons à la consulter régulièrement pour rester connecté à la 
 Tes accès :
 Email : ${m.email}
 Mot de passe : rocher2026
-Lien : https://jbr-l.netlify.app/
+Lien : https://jbr-h.vercel.app/
+
 
 Pense à changer ton mot de passe dès ta première connexion dans Profil > Paramètres.
 
 A bientôt.
-- Le Bureau de la Jeunesse EB Le Rocher`
+- Le Bureau du groupe des jeunes du Rocher`
     )
     const lien = `https://wa.me/${m.whatsapp?.replace(/\+/g, '').replace(/\s/g, '')}?text=${message}`
     window.open(lien, '_blank')
