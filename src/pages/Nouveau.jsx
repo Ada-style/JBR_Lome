@@ -332,31 +332,49 @@ export default function Nouveau() {
         {dark ? 'Mode clair' : 'Mode sombre'}
       </button>
 
-      {/* Hero - split banner */}
-      <div style={{ marginTop: '56px', display: 'flex', alignItems: 'stretch', minHeight: '180px', overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.12)' }}>
-        <div style={{ background: '#ffffff', padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: '170px', width: '170px', flexShrink: 0, borderRight: '1px solid #e5e5e5' }}>
-          <img src="/logo.png" alt="Logo" loading="lazy" style={{ width: '60px', height: '60px', objectFit: 'contain', marginBottom: '12px' }} />
-          <div style={{ color: '#0965BA', fontSize: '13px', fontWeight: '800', letterSpacing: '0.5px', textTransform: 'uppercase', textAlign: 'center', lineHeight: '1.4' }}>
-            GROUPE<br/>DES JEUNES
+      {/* Hero Section */}
+      <div style={{ width: '100%', background: theme.card, borderBottom: `1px solid ${theme.border}`, overflow: 'hidden' }}>
+        <style>{`
+          .nouveau-hero-split { display: flex; align-items: stretch; height: 280px; position: relative; }
+          .nouveau-hero-left { background: ${theme.bg}; padding-top: 64px; padding-bottom: 20px; padding-left: 24px; padding-right: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60%; max-width: 450px; position: relative; z-index: 2; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); }
+          .nouveau-hero-right { position: absolute; top: 0; right: 0; bottom: 0; left: 15%; z-index: 1; }
+          .nouveau-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; }
+          @media (max-width: 768px) {
+            .nouveau-hero-split { height: 160px; }
+            .nouveau-hero-left { padding-top: 20px; width: 50%; padding-left: 10px; padding-right: 10px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); }
+            .nouveau-hero-right { left: 20%; }
+            .nouveau-hero-logo { width: 40px !important; height: 40px !important; margin-bottom: 6px !important; }
+            .nouveau-hero-title { font-size: 12px !important; }
+            .nouveau-hero-img { object-position: center 20% !important; }
+          }
+        `}</style>
+        {/* Split Banner Full Width */}
+        <div className="nouveau-hero-split">
+          {/* Gauche : fond (s'adapte au theme), logo + texte */}
+          <div className="nouveau-hero-left">
+            <img src="/logo.png" alt="Logo" loading="lazy" className="nouveau-hero-logo" style={{ width: '64px', height: '64px', objectFit: 'contain', marginBottom: '12px' }} />
+            <div className="nouveau-hero-title" style={{ color: '#0965BA', fontSize: '18px', fontWeight: '800', letterSpacing: '0.5px', textTransform: 'uppercase', textAlign: 'center', lineHeight: '1.2' }}>
+              GROUPE<br />DES JEUNES
+            </div>
+          </div>
+          {/* Droite : photo + overlay rouge */}
+          <div className="nouveau-hero-right">
+            <img src="/detente1.jpg" alt="" loading="lazy" className="nouveau-hero-img" />
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(252, 23, 19, 0.4)' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(252, 23, 19, 0.95) 0%, rgba(252, 23, 19, 0.1) 100%)' }} />
           </div>
         </div>
-        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-          <img src="/detente1.jpg" alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block', minHeight: '180px' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(175,10,10,0.55)' }} />
+
+        {/* Intro text directly below INSIDE the hero block */}
+        <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px', textAlign: 'center' }}>
+          <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.6', margin: 0, fontFamily: 'Space Grotesk' }}>
+            Tu fais partie de la famille ! Pour mieux te connaître et mieux t'organiser, prends 1 minute pour remplir ce formulaire.
+            <span style={{ color: '#FC1713', fontWeight: '700', display: 'block', marginTop: '8px' }}>Dieu te bénisse pour ta collaboration !</span>
+          </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px' }}>
-
-
-        {/* Intro chaleureuse */}
-        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
-          <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', margin: 0, fontFamily: 'Space Grotesk' }}>
-            Tu fais partie de la famille ! Pour mieux te connaître et mieux t'organiser, prends 1 minute pour remplir ce formulaire.
-            Nom, prénoms, profession... quelques infos simples qui nous aident à être un vrai groupe soudé.
-            <span style={{ color: '#FC1713', fontWeight: '700' }}> Dieu te bénisse pour ta collaboration !</span>
-          </p>
-        </div>
+      <div style={{ maxWidth: '680px', margin: '0 auto', padding: '16px 24px 24px' }}>
 
 
         {/* Formulaire rejoindre */}
@@ -468,7 +486,7 @@ export default function Nouveau() {
 
             {/* Statut d'activité */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={labelStyle}>Tu es *</label>
+              <label style={labelStyle}>Je suis *</label>
               <div className="nouveau-statut-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <button type="button" onClick={() => { setStatutActivite('eleve'); setDomaine(''); }} style={statutBtnStyle(statutActivite === 'eleve')}>
                   <IconBackpack />

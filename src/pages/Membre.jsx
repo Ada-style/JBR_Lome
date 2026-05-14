@@ -5,6 +5,65 @@ import { supabase } from '../lib/supabase'
 import { useBackModal } from '../hooks/useBackModal'
 import md5 from 'md5'
 
+const BUREAU_ROLES = {
+  'EZIAN': { role: 'Président', ordre: 1 },
+  'ATTIOGBE': { role: 'Vice-Président', ordre: 2 },
+  'ADOSSI': { role: 'Secrétaire', ordre: 3 },
+  'AGBETOWOKA': { role: 'Vice-Secrétaire & Communication', ordre: 4 },
+  'ADJINARE': {
+    'Assuaham': { role: 'Trésorière', ordre: 5 },
+    'Dorcas': { role: 'Trésorière', ordre: 5 },
+    'Louise': { role: 'Communion Fraternelle', ordre: 10 }
+  },
+  'KOUMAI': { role: 'Vice-Trésorier', ordre: 6 },
+  'KPEMOUA': { role: 'Communication', ordre: 7 },
+  'HOUNGLONOU': { role: 'Évangélisation', ordre: 8 },
+  'AFATSAWO': { role: 'Prière', ordre: 9 },
+  'DADZI': { role: 'Entretien', ordre: 11 }
+};
+
+function getBureauRoleInfo(nom, prenom) {
+  const n = (nom || '').toUpperCase();
+  const p = prenom || '';
+  for (const key of Object.keys(BUREAU_ROLES)) {
+    if (n.includes(key)) {
+      if (key === 'ADJINARE') {
+        if (p.includes('Louise')) return BUREAU_ROLES[key]['Louise'];
+        return BUREAU_ROLES[key]['Dorcas'];
+      }
+      return BUREAU_ROLES[key];
+    }
+  }
+  return { role: 'Membre du Bureau', ordre: 99 };
+}
+
+const CATEGORIES_METIER = {
+  'Santé': ['medecin', 'infirmier', 'sante', 'docteur', 'pharmacie', 'sage', 'hopital', 'clinique'],
+  'Finance & Gestion': ['finance', 'comptable', 'banque', 'gestion', 'economie', 'caisse', 'audit', 'econome', 'fiscalite'],
+  'Administration & Droit': ['juriste', 'avocat', 'droit', 'rh', 'ressources', 'administration', 'secretaire', 'assistant', 'sociologue'],
+  'Logistique & Transport': ['transitaire', 'logistique', 'transport', 'chauffeur', 'douane', 'declarant'],
+  'Mode & Beauté': ['mode', 'couture', 'coiffure', 'styliste', 'esthetique', 'tailleur'],
+  'Enseignement': ['enseignant', 'professeur', 'education', 'instituteur'],
+  'Informatique': ['informatique', 'developpeur', 'tech', 'ordinateur', 'reseau', 'logiciel'],
+  'Artisanat': ['menuisier', 'mecanicien', 'plombier', 'electricien', 'artisan', 'soudeur', 'menuiserie'],
+  'Commerce': ['commerce', 'vente', 'boutique', 'vendeur', 'commercial', 'marketing', 'commercant'],
+  'Art & Médias': ['art', 'media', 'journaliste', 'communication', 'design', 'photo', 'musique'],
+  'BTP & Architecture': ['btp', 'architecture', 'construction', 'macon', 'ingenieur'],
+  'Autres': []
+};
+
+function getCategorie(domaine) {
+  if (!domaine) return 'Autres';
+  const lower = domaine.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  for (const [cat, mots] of Object.entries(CATEGORIES_METIER)) {
+    if (mots.some(m => lower.includes(m))) return cat;
+  }
+  return 'Autres';
+}
+
+// Grouper les membres par catégorie métier
+
+
 // SVG Icon Components
 const Ic = (p) => <svg width={p.size || 16} height={p.size || 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={p.style}>{p.children}</svg>
 const IconBell = ({ size }) => <Ic size={size}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></Ic>
@@ -33,6 +92,7 @@ export default function Membre() {
   const navigate = useNavigate()
   const { profile, signOut } = useAuth()
   const [tab, setTab] = useState('accueil')
+  const [membreToView, setMembreToView] = useState(null)
   const [dark, setDark] = useState(true)
   const [notifs, setNotifs] = useState([])
   const [showNotifPanel, setShowNotifPanel] = useState(false)
@@ -258,15 +318,14 @@ export default function Membre() {
 
       {/* Contenu */}
       <div style={{ paddingBottom: '70px' }}
-        onTouchStart={e => setTouchStart(e.touches[0].clientX)}
-        onTouchEnd={e => { if (touchStart === null) return; const diff = touchStart - e.changedTouches[0].clientX; if (Math.abs(diff) > 60) handleSwipe(diff > 0 ? 'left' : 'right'); setTouchStart(null); }}
+
       >
 
         {tab === 'devotion' && <Devotion theme={theme} supabase={supabase} dark={dark} profile={profile} />}
         {tab === 'evenements' && <Evenements theme={theme} supabase={supabase} profile={profile} />}
-        {tab === 'communion' && <Communion theme={theme} supabase={supabase} />}
+        {tab === 'communion' && <Communion theme={theme} supabase={supabase} initialSelected={membreToView} onClear={() => setMembreToView(null)} />}
         {tab === 'contact' && <Contact theme={theme} supabase={supabase} />}
-        {tab === 'accueil' && <Accueil theme={theme} supabase={supabase} dark={dark} profile={profile} setTab={setTab} setShowProfil={setShowProfil} setProfilTab={setProfilTab} />}
+        {tab === 'accueil' && <Accueil theme={theme} supabase={supabase} dark={dark} profile={profile} setTab={setTab} setShowProfil={setShowProfil} setProfilTab={setProfilTab} setMembreToView={setMembreToView} />}
       </div>
 
       {/* Panel Profil - side modal */}
@@ -290,7 +349,7 @@ export default function Membre() {
 }
 
 
-function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setProfilTab }) {
+function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setProfilTab, setMembreToView }) {
   const [devotion, setDevotion] = useState(null)
   const [annonces, setAnnonces] = useState([])
   const [evenements, setEvenements] = useState([])
@@ -313,7 +372,6 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
       nom: 'Soirée Cinéma',
       date_evenement: '2023-05-01',
       photos_galerie: [
-        { id: 'c1', url: '/cine1.jpeg' },
         { id: 'c2', url: '/cine2.jpeg' },
         { id: 'c3', url: '/cine3.jpeg' },
         { id: 'c4', url: '/cine4.jpeg' },
@@ -351,13 +409,15 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
         setEvenements(EVENEMENTS_LOCAUX)
         setActiveEv('local-detente')
       }
-      const { data: cotisations } = await supabase
-        .from('cotisations')
-        .select('*')
-        .eq('utilisateur_id', profile?.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-      if (cotisations && cotisations.length > 0) setDerniereCotisation(cotisations[0])
+      if (profile?.id) {
+        const { data: cotisations } = await supabase
+          .from('cotisations')
+          .select('*')
+          .eq('utilisateur_id', profile.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+        if (cotisations && cotisations.length > 0) setDerniereCotisation(cotisations[0])
+      }
 
       // Anniversaires
       const t = new Date()
@@ -413,7 +473,7 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
             const isToday = bDay === t.getDate() && bMonth === (t.getMonth() + 1);
 
             return (
-              <div key={a.id} title={`${a.prenom} - ${bDay}/${bMonth}`} style={{ flexShrink: 0, position: 'relative', animation: 'bounce-mini 2s ease-in-out infinite', animationDelay: `${Math.random() * 2}s` }}>
+              <div key={a.id} title={`${a.prenom} - ${bDay}/${bMonth}`} onClick={() => { setMembreToView?.(a); setTab?.('communion'); }} style={{ flexShrink: 0, position: 'relative', animation: 'bounce-mini 2s ease-in-out infinite', animationDelay: `${Math.random() * 2}s`, cursor: 'pointer' }}>
                 {isToday && <span style={{ position: 'absolute', top: '-6px', left: '-6px', fontSize: '14px', zIndex: 5 }}>🎉</span>}
                 {a.avatar_url ? (
                   <img src={a.avatar_url} alt="" style={{ width: '34px', height: '34px', borderRadius: '50%', border: `2px solid #FFD700`, objectFit: 'cover', boxShadow: '0 2px 8px rgba(255,215,0,0.3)' }} />
@@ -508,13 +568,17 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
         <>
           <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: theme.muted, marginBottom: '10px' }}>Annonces</div>
           {annonces.map(a => (
-            <div key={a.id} style={{ background: theme.card, border: `1px solid ${theme.border}`, borderLeft: `3px solid ${a.urgent ? '#FC1713' : '#999'}`, borderRadius: '10px', padding: '12px 14px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: !dark ? '0 2px 8px rgba(0,0,0,0.07)' : 'none' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: a.urgent ? '#FC1713' : '#555', flexShrink: 0 }} />
+            <div key={a.id} style={{ background: a.urgent ? (dark ? 'rgba(252,23,19,0.1)' : 'rgba(252,23,19,0.05)') : theme.card, border: `1px solid ${a.urgent ? 'rgba(252,23,19,0.3)' : theme.border}`, borderRadius: '10px', padding: '12px 14px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: !dark && !a.urgent ? '0 2px 8px rgba(0,0,0,0.04)' : 'none' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: a.urgent ? '#FC1713' : theme.muted, flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <div style={{ color: theme.text, fontSize: '13px', fontWeight: '600' }}>{a.titre}</div>
-                {a.contenu && <div style={{ color: theme.muted, fontSize: '12px', marginTop: '2px' }}>{a.contenu}</div>}
+                <div style={{ color: theme.muted, fontSize: '11px', marginTop: '3px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {a.date_evenement && <span>📅 {new Date(a.date_evenement).toLocaleDateString('fr-FR')}</span>}
+                  {a.lieu && <span>📍 {a.lieu}</span>}
+                  {!a.date_evenement && !a.lieu && a.contenu && <span>{a.contenu.length > 50 ? a.contenu.substring(0, 50) + '...' : a.contenu}</span>}
+                </div>
               </div>
-              {a.urgent && <span style={{ background: 'rgba(200,16,46,0.15)', color: '#FC1713', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '8px', flexShrink: 0 }}>!</span>}
+              {a.urgent && <span style={{ background: 'rgba(252,23,19,0.1)', color: '#FC1713', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '8px', flexShrink: 0 }}>!</span>}
             </div>
           ))}
         </>
@@ -568,7 +632,7 @@ function Accueil({ theme, supabase, dark, profile, setTab, setShowProfil, setPro
           {evActif && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
               {evActif.photos_galerie?.map((p, i) => (
-                <img key={p.id} src={p.url} alt="" loading="lazy" onClick={() => setLightbox(p.url)} style={{ width: '100%', height: i === 0 ? '200px' : '130px', objectFit: 'cover', borderRadius: '10px', cursor: 'pointer', gridColumn: i === 0 ? 'span 2' : 'span 1', boxShadow: !dark ? '0 2px 8px rgba(0,0,0,0.1)' : 'none' }} />
+                <img key={p.id} src={p.url} alt="" loading="lazy" onClick={() => setLightbox(p.url)} style={{ width: '100%', height: (evActif.photos_galerie?.length === 1) ? '300px' : (i === 0 ? '200px' : '130px'), objectFit: 'cover', borderRadius: '10px', cursor: 'pointer', gridColumn: (evActif.photos_galerie?.length === 1 || i === 0) ? 'span 2' : 'span 1', boxShadow: !dark ? '0 2px 8px rgba(0,0,0,0.1)' : 'none' }} />
               ))}
             </div>
           )}
@@ -774,7 +838,7 @@ function Evenements({ theme, supabase, profile }) {
               )}
             </div>
 
-            {ev.description && <p style={{ color: theme.text, fontSize: '14px', lineHeight: '1.6', opacity: 0.8, marginBottom: '20px' }}>{ev.description}</p>}
+            {/* Description masquée selon demande */}
 
             <div style={{ display: 'flex', gap: '10px' }}>
               <button style={{ flex: 2, background: '#FC1713', color: 'white', border: 'none', borderRadius: '12px', padding: '12px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' }}>
@@ -812,15 +876,15 @@ function Evenements({ theme, supabase, profile }) {
   )
 }
 
-function Communion({ theme, supabase }) {
+function Communion({ theme, supabase, initialSelected, onClear }) {
   const [membres, setMembres] = useState([])
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState(initialSelected || null)
   const [search, setSearch] = useState('')
   const [filtreStatut, setFiltreStatut] = useState('tous')
   const [filtreDomaine, setFiltreDomaine] = useState('tous')
   const [voirAnniversaires, setVoirAnniversaires] = useState(false)
 
-  useBackModal(!!selected, () => setSelected(null))
+  useBackModal(!!selected, () => { setSelected(null); if (onClear) onClear(); })
 
   useEffect(() => {
     async function load() {
@@ -839,7 +903,7 @@ function Communion({ theme, supabase }) {
     // Filtre statut
     if (filtreStatut !== 'tous' && m.statut_activite !== filtreStatut) return false
     // Filtre domaine
-    if (filtreDomaine !== 'tous' && m.domaine !== filtreDomaine) return false
+    if (filtreDomaine !== 'tous' && getCategorie(m.domaine) !== filtreDomaine) return false
     // Filtre texte
     if (!search) return true
     const s = search.toLowerCase()
@@ -854,7 +918,8 @@ function Communion({ theme, supabase }) {
     { id: 'professionnel', label: 'Professionnels' }
   ]
 
-  const domainesExistants = [...new Set(membres.map(m => m.domaine).filter(Boolean))].sort()
+  const domainesExistants = [...new Set(membres.map(m => m.domaine ? getCategorie(m.domaine) : null).filter(Boolean))].sort()
+
 
   const FilterButton = ({ active, onClick, label, icon }) => (
     <button onClick={onClick} style={{ background: active ? '#FC1713' : theme.card, border: `1px solid ${active ? '#FC1713' : theme.border}`, borderRadius: '20px', padding: '7px 16px', color: active ? 'white' : theme.muted, fontSize: '12px', fontWeight: active ? '600' : '400', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}>
@@ -1350,7 +1415,9 @@ function Contact({ theme, supabase }) {
   useEffect(() => {
     async function load() {
       const { data } = await supabase.from('utilisateurs').select('*').eq('role', 'bureau')
-      if (data) setBureau(data)
+      if (data) {
+        setBureau(data.sort((a, b) => getBureauRoleInfo(a.nom, a.prenom).ordre - getBureauRoleInfo(b.nom, b.prenom).ordre));
+      }
     }
     load()
   }, [supabase])
@@ -1400,7 +1467,7 @@ function Contact({ theme, supabase }) {
               )}
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: '14px', fontWeight: '700', color: theme.text }}>{m.prenom} {m.nom}</div>
-                <div style={{ fontSize: '11px', color: theme.muted, marginTop: '3px' }}>{m.domaine || 'Membre du Bureau'}</div>
+                <div style={{ fontSize: '11px', color: theme.muted, marginTop: '3px' }}>{getBureauRoleInfo(m.nom, m.prenom).role}</div>
               </div>
             </div>
             {m.date_naissance && (
