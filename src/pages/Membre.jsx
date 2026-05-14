@@ -1109,6 +1109,7 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, initialTab 
   const [editing, setEditing] = useState(false)
   const [cotisations, setCotisations] = useState([])
   const [msg, setMsg] = useState('')
+  const [ancienMdp, setAncienMdp] = useState('')
   const [nouveauMdp, setNouveauMdp] = useState('')
   const [confirmerMdp, setConfirmerMdp] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -1135,11 +1136,25 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, initialTab 
   }
 
   async function changerMotDePasse() {
+    if (!ancienMdp) { setMsg('Veuillez saisir votre ancien mot de passe'); return }
     if (nouveauMdp !== confirmerMdp) { setMsg('Les mots de passe ne correspondent pas'); return }
     if (nouveauMdp.length < 6) { setMsg('Minimum 6 caractères'); return }
+
+    // Vérifier l'ancien mot de passe en tentant une reconnexion
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: profile.email,
+      password: ancienMdp
+    })
+
+    if (authError) {
+      setMsg('Ancien mot de passe incorrect');
+      return;
+    }
+
     const { error } = await supabase.auth.updateUser({ password: nouveauMdp })
     if (error) { setMsg('Erreur : ' + error.message); return }
     setMsg('Mot de passe mis à jour !')
+    setAncienMdp('')
     setNouveauMdp('')
     setConfirmerMdp('')
   }
@@ -1254,6 +1269,13 @@ function Profil({ theme, supabase, profile, handleSignOut, navigate, initialTab 
 
             <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '14px', padding: '16px' }}>
               <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Changer mot de passe</div>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Ancien mot de passe"
+                value={ancienMdp}
+                onChange={e => setAncienMdp(e.target.value)}
+                style={{ width: '100%', background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '9px 12px', color: theme.text, fontSize: '13px', outline: 'none', marginBottom: '10px', fontFamily: 'inherit' }}
+              />
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Nouveau mot de passe"
