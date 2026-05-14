@@ -178,6 +178,11 @@ export default function Nouveau() {
       return;
     }
 
+    if (!niveauEtude) {
+        showMsg('Veuillez renseigner votre niveau d\'étude');
+        return;
+    }
+
     if (!statutActivite) {
       showMsg('Veuillez sélectionner votre statut');
       return;
@@ -200,6 +205,7 @@ export default function Nouveau() {
 
     setSending(true)
     const domaineComplet = getDomaineFinal()
+    const niveauFinal = niveauEtude === 'Autre' ? niveauEtudeAutre : niveauEtude
 
     // Build payload - try with new columns first, fallback without them
     const basePayload = {
@@ -207,7 +213,7 @@ export default function Nouveau() {
       prenom: prenom.trim(),
       whatsapp: tel.trim(),
       quartier: quartier.trim() || null,
-      niveau_etude: niveauEtude || null,
+      niveau_etude: niveauFinal || null,
       email: email ? email.trim() : null,
       domaine: domaineComplet,
       statut: 'en_attente'
@@ -369,7 +375,7 @@ export default function Nouveau() {
         {/* Intro text directly below INSIDE the hero block */}
         <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px', textAlign: 'center' }}>
           <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.6', margin: 0, fontFamily: 'Space Grotesk' }}>
-            Tu fais partie de la famille ! Pour mieux te connaître et mieux t'organiser, prends 1 minute pour remplir ce formulaire.
+            Tu fais partie de la famille ! Pour mieux te connaître et mieux t'organiser, prends 1 minute pour remplir ce formulaire. Nom, prénoms, profession... quelques infos simples qui nous aident à être un vrai groupe soudé.
             <span style={{ color: '#FC1713', fontWeight: '700', display: 'block', marginTop: '8px' }}>Dieu te bénisse pour ta collaboration !</span>
           </p>
         </div>
@@ -377,251 +383,237 @@ export default function Nouveau() {
 
       <div style={{ maxWidth: '680px', margin: '0 auto', padding: '16px 24px 24px' }}>
 
-        {/* Mot du président */}
-        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
-          <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>Mot du Président</div>
-          <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', fontStyle: 'italic', marginBottom: '12px', fontFamily: 'Space Grotesk' }}>
-            « Si tu cherches une famille où grandir dans la foi, la communion et le partage; tu es au bon endroit. On t'attendait ! »
-          </p>
-          <div style={{ color: theme.muted, fontSize: '12px', fontWeight: '600' }}>EZIAN-GNAMAVO Yao Benjamin : Président du groupe des jeunes du Rocher</div>
-        </div>
-
-        {/* Ce que tu trouveras */}
-        <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
-          <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>Ce que tu trouveras ici</div>
-          {[
-            'Un espace pour prier, partager tes requêtes et tes témoignages, et savoir que tu n\'es pas seul',
-            'Des dévotions hebdomadaires pour garder la flamme allumée',
-            'Une communauté de jeunes à découvrir, à connaître et à célébrer, parce que chaque talent compte',
-            'Des événements pour vivre ensemble, s\'amuser, s\'enrichir et créer des souvenirs',
-            'Un endroit où la foi se vit, pas seulement le dimanche',
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FC1713', marginTop: '7px', flexShrink: 0 }} />
-              <div style={{ color: theme.muted, fontSize: '13px', lineHeight: '1.7' }}>{item}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Galerie */}
-        {evenements.length > 0 && (
-          <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
-            <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '16px' }}>Nos moments</div>
-            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '4px', scrollbarWidth: 'none' }}>
-              {evenements.map(ev => (
-                <button
-                  key={ev.id}
-                  onClick={() => setActiveEv(ev.id)}
-                  style={{
-                    background: activeEv === ev.id ? '#FC1713' : theme.bg,
-                    border: `1px solid ${activeEv === ev.id ? '#FC1713' : theme.border}`,
-                    borderRadius: '20px',
-                    padding: '7px 16px',
-                    color: activeEv === ev.id ? 'white' : theme.muted,
-                    fontSize: '12px',
-                    fontWeight: activeEv === ev.id ? '600' : '400',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    fontFamily: 'inherit',
-                    transition: 'all 0.2s',
-                    flexShrink: 0,
-                  }}
-                >
-                  {ev.nom} · {new Date(ev.date_evenement).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}
-                </button>
-              ))}
-            </div>
-            {evActif && (
-              <div className="nouveau-photo-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                {evActif.photos_galerie?.map((p, i) => (
-                  <img
-                    key={p.id}
-                    src={p.url}
-                    alt=""
-                    loading="lazy"
-                    onClick={() => setLightbox(p.url)}
-                    style={{
-                      width: '100%',
-                      height: '140px',
-                      objectFit: 'cover',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s',
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-
-        {/* Formulaire rejoindre */}
         {submitted ? (
-          <div style={{ background: theme.card, border: '1px solid rgba(37,211,102,0.3)', borderRadius: '20px', padding: '40px 28px', marginBottom: '32px', textAlign: 'center' }}>
-            <div style={{ fontSize: '56px', marginBottom: '16px' }}>🎉</div>
-            <div style={{ color: '#25d366', fontSize: '20px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '12px' }}>Demande envoyée !</div>
-            <p style={{ color: theme.muted, fontSize: '14px', lineHeight: '1.8', marginBottom: '20px' }}>
+          /* Confirmation centrée à la place de tout le reste */
+          <div style={{ background: theme.card, border: '1px solid rgba(37,211,102,0.3)', borderRadius: '20px', padding: '60px 28px', marginTop: '40px', textAlign: 'center', animation: 'fadeIn 0.5s ease' }}>
+            <div style={{ fontSize: '72px', marginBottom: '24px' }}>🎉</div>
+            <div style={{ color: '#25d366', fontSize: '24px', fontWeight: '700', fontFamily: 'Space Grotesk', marginBottom: '16px' }}>Demande envoyée !</div>
+            <p style={{ color: theme.muted, fontSize: '16px', lineHeight: '1.8', marginBottom: '32px', maxWidth: '400px', margin: '0 auto 32px' }}>
               Merci ! Le bureau a bien reçu ta demande et te contactera très bientôt sur WhatsApp. Dieu te bénisse !
             </p>
-            <button onClick={() => navigate('/')} style={{ background: '#0965BA', color: 'white', border: 'none', borderRadius: '12px', padding: '12px 24px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={() => navigate('/')} style={{ background: '#0965BA', color: 'white', border: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(9,101,186,0.3)' }}>
               Retour à l'accueil
             </button>
           </div>
         ) : (
-          <div className="nouveau-form" style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '20px', padding: '28px', marginBottom: '32px', boxShadow: dark ? 'none' : '0 4px 24px rgba(0,0,0,0.06)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <div style={{ width: '4px', height: '28px', background: '#FC1713', borderRadius: '2px' }} />
-              <div>
-                <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>Rejoindre la jeunesse</div>
-                <div style={{ color: theme.muted, fontSize: '11px', marginTop: '2px' }}>Remplis ce formulaire et le bureau te contactera</div>
-                <div style={{ background: 'rgba(9,101,186,0.08)', color: '#0965BA', padding: '10px 12px', borderRadius: '10px', fontSize: '11px', marginTop: '12px', lineHeight: '1.5', border: '1px solid rgba(9,101,186,0.15)' }}>
-                  🔒 <b>Confidentialité :</b> Merci de renseigner vos vraies informations. Ces données sont strictement réservées à l'usage interne du bureau pour mieux vous accompagner.
-                </div>
-              </div>
+          <>
+            {/* Mot du président */}
+            <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
+              <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>Mot du Président</div>
+              <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', fontStyle: 'italic', marginBottom: '12px', fontFamily: 'Space Grotesk' }}>
+                « Si tu cherches une famille où grandir dans la foi, la communion et le partage; tu es au bon endroit. On t'attendait ! »
+              </p>
+              <div style={{ color: theme.muted, fontSize: '12px', fontWeight: '600' }}>EZIAN-GNAMAVO Yao Benjamin : Président du groupe des jeunes du Rocher</div>
             </div>
 
-            {msg && (
-              <div style={{
-                background: msgType === 'success' ? 'rgba(37,211,102,0.08)' : 'rgba(200,16,46,0.08)',
-                border: `1px solid ${msgType === 'success' ? 'rgba(37,211,102,0.25)' : 'rgba(200,16,46,0.25)'}`,
-                borderRadius: '12px',
-                padding: '12px 16px',
-                color: msgType === 'success' ? '#25d366' : '#FC1713',
-                fontSize: '13px',
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                {msgType === 'success' && <IconCheck />}
-                {msg}
+            {/* Galerie */}
+            {evenements.length > 0 && (
+              <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
+                <div style={{ color: '#FC1713', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '16px' }}>Nos moments</div>
+                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '4px', scrollbarWidth: 'none' }}>
+                  {evenements.map(ev => (
+                    <button
+                      key={ev.id}
+                      onClick={() => setActiveEv(ev.id)}
+                      style={{
+                        background: activeEv === ev.id ? '#FC1713' : theme.bg,
+                        border: `1px solid ${activeEv === ev.id ? '#FC1713' : theme.border}`,
+                        borderRadius: '20px',
+                        padding: '7px 16px',
+                        color: activeEv === ev.id ? 'white' : theme.muted,
+                        fontSize: '12px',
+                        fontWeight: activeEv === ev.id ? '600' : '400',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        fontFamily: 'inherit',
+                        transition: 'all 0.2s',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {ev.nom} · {new Date(ev.date_evenement).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}
+                    </button>
+                  ))}
+                </div>
+                {evActif && (
+                  <div className="nouveau-photo-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    {evActif.photos_galerie?.map((p, i) => (
+                      <img
+                        key={p.id}
+                        src={p.url}
+                        alt=""
+                        loading="lazy"
+                        onClick={() => setLightbox(p.url)}
+                        style={{
+                          width: '100%',
+                          height: '140px',
+                          objectFit: 'cover',
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s',
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Informations personnelles */}
-            <div style={{ marginBottom: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+
+            {/* Formulaire rejoindre */}
+            <div className="nouveau-form" style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '20px', padding: '28px', marginBottom: '32px', boxShadow: dark ? 'none' : '0 4px 24px rgba(0,0,0,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                <div style={{ width: '4px', height: '28px', background: '#FC1713', borderRadius: '2px' }} />
                 <div>
-                  <label style={labelStyle}>Prénoms *</label>
-                  <input placeholder="Ex: Kodjo Jean" value={prenom} onChange={e => setPrenom(e.target.value)} style={inputStyle} />
-                </div>
-                <div>
-                  <label style={labelStyle}>Nom *</label>
-                  <input placeholder="Ex: KOKOU" value={nom} onChange={e => setNom(e.target.value)} style={inputStyle} />
+                  <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>Rejoindre la jeunesse</div>
+                  <div style={{ color: theme.muted, fontSize: '11px', marginTop: '2px' }}>Remplis ce formulaire et le bureau te contactera</div>
+                  <div style={{ background: 'rgba(9,101,186,0.08)', color: '#0965BA', padding: '10px 12px', borderRadius: '10px', fontSize: '11px', marginTop: '12px', lineHeight: '1.5', border: '1px solid rgba(9,101,186,0.15)' }}>
+                    🔒 <b>Confidentialité :</b> Merci de renseigner vos vraies informations. Ces données sont strictement réservées à l'usage interne du bureau pour mieux vous accompagner.
+                  </div>
                 </div>
               </div>
 
-              <label style={labelStyle}>Adresse email *</label>
-              <input placeholder="jean.kokou@email.com" type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} required />
+              {msg && (
+                <div style={{
+                  background: msgType === 'success' ? 'rgba(37,211,102,0.08)' : 'rgba(200,16,46,0.08)',
+                  border: `1px solid ${msgType === 'success' ? 'rgba(37,211,102,0.25)' : 'rgba(200,16,46,0.25)'}`,
+                  borderRadius: '12px',
+                  padding: '12px 16px',
+                  color: msgType === 'success' ? '#25d366' : '#FC1713',
+                  fontSize: '13px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  {msgType === 'success' && <IconCheck />}
+                  {msg}
+                </div>
+              )}
 
-              <label style={labelStyle}>WhatsApp / Téléphone *</label>
-              <input placeholder="+228 90 12 34 56" value={tel} onChange={e => setTel(e.target.value)} style={inputStyle} />
+              {/* Informations personnelles */}
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={labelStyle}>Prénoms *</label>
+                    <input placeholder="Ex: Kodjo Jean" value={prenom} onChange={e => setPrenom(e.target.value)} style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Nom *</label>
+                    <input placeholder="Ex: KOKOU" value={nom} onChange={e => setNom(e.target.value)} style={inputStyle} />
+                  </div>
+                </div>
 
-              <label style={labelStyle}>Quartier *</label>
-              <input placeholder="Ex: Adidogomé, Bè, Tokoin..." value={quartier} onChange={e => setQuartier(e.target.value)} style={inputStyle} />
-            </div>
+                <label style={labelStyle}>Adresse email *</label>
+                <input placeholder="jean.kokou@email.com" type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} required />
 
-            {/* Date d'anniversaire */}
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <IconCalendar /> Date de naissance *
-              </label>
-              <input
-                type="date"
-                value={dateAnniversaire}
-                onChange={e => setDateAnniversaire(e.target.value)}
-                style={inputStyle}
-              />
-            </div>
+                <label style={labelStyle}>WhatsApp / Téléphone *</label>
+                <input placeholder="+228 90 12 34 56" value={tel} onChange={e => setTel(e.target.value)} style={inputStyle} />
 
-            {/* Statut d'activité */}
-            <div style={{ marginBottom: '16px' }}>
-              <label style={labelStyle}>Je suis *</label>
-              <div className="nouveau-statut-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <button type="button" onClick={() => { setStatutActivite('eleve'); setDomaine(''); }} style={statutBtnStyle(statutActivite === 'eleve')}>
-                  <IconBackpack />
-                  <span>Élève</span>
-                </button>
-                <button type="button" onClick={() => { setStatutActivite('etudiant'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'etudiant')}>
-                  <IconGradCap />
-                  <span>Étudiant(e)</span>
-                </button>
-                <button type="button" onClick={() => { setStatutActivite('apprenti'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'apprenti')}>
-                  <IconWrench />
-                  <span>Apprenti(e)</span>
-                </button>
-                <button type="button" onClick={() => { setStatutActivite('professionnel'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'professionnel')}>
-                  <IconBriefcase />
-                  <span>Professionnel(le)</span>
-                </button>
+                <label style={labelStyle}>Quartier *</label>
+                <input placeholder="Ex: Adidogomé, Bè, Tokoin..." value={quartier} onChange={e => setQuartier(e.target.value)} style={inputStyle} />
               </div>
-            </div>
 
-            {/* Champs conditionnels */}
-            {statutActivite === 'eleve' && (
-              <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
-                <label style={labelStyle}>Classe *</label>
+              {/* Niveau d'étude global (OBLIGATOIRE POUR TOUS) */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Niveau d'étude *</label>
+                <select value={niveauEtude} onChange={e => { setNiveauEtude(e.target.value); if (e.target.value !== 'Autre') setNiveauEtudeAutre(''); }} style={selectStyle}>
+                  <option value=''>Sélectionner</option>
+                  {['CEPD', 'BEPC', 'BAC', 'BT', 'CAP', 'BTS 1', 'BTS 2', 'Licence 1', 'Licence 2', 'Licence 3', 'Master 1', 'Master 2', 'Doctorat', 'Autre'].map(n =>
+                    <option key={n} value={n} style={optionStyle}>{n}</option>
+                  )}
+                </select>
+                {niveauEtude === 'Autre' && (
+                  <input placeholder="Précisez votre niveau..." value={niveauEtudeAutre} onChange={e => setNiveauEtudeAutre(e.target.value)} style={{ ...inputStyle, marginTop: '8px', animation: 'fadeIn 0.3s ease' }} />
+                )}
+              </div>
+
+              {/* Date d'anniversaire */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <IconCalendar /> Date de naissance *
+                </label>
                 <input
-                  placeholder="Ex: 3ème, Terminale C, CM2..."
-                  value={classeEleve}
-                  onChange={e => setClasseEleve(e.target.value)}
+                  type="date"
+                  value={dateAnniversaire}
+                  onChange={e => setDateAnniversaire(e.target.value)}
                   style={inputStyle}
                 />
               </div>
-            )}
 
-            {statutActivite === 'etudiant' && (
-              <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
-                <label style={labelStyle}>Domaine d'études *</label>
-                <input placeholder="Ex: Informatique, Droit..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
+              {/* Statut d'activité */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Je suis *</label>
+                <div className="nouveau-statut-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <button type="button" onClick={() => { setStatutActivite('eleve'); setDomaine(''); }} style={statutBtnStyle(statutActivite === 'eleve')}>
+                    <IconBackpack />
+                    <span>Élève</span>
+                  </button>
+                  <button type="button" onClick={() => { setStatutActivite('etudiant'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'etudiant')}>
+                    <IconGradCap />
+                    <span>Étudiant(e)</span>
+                  </button>
+                  <button type="button" onClick={() => { setStatutActivite('apprenti'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'apprenti')}>
+                    <IconWrench />
+                    <span>Apprenti(e)</span>
+                  </button>
+                  <button type="button" onClick={() => { setStatutActivite('professionnel'); setClasseEleve(''); }} style={statutBtnStyle(statutActivite === 'professionnel')}>
+                    <IconBriefcase />
+                    <span>Professionnel(le)</span>
+                  </button>
+                </div>
               </div>
-            )}
 
-            {statutActivite === 'apprenti' && (
-              <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
-                <label style={labelStyle}>Domaine d'apprentissage *</label>
-                <input placeholder="Ex: Couture, Menuiserie..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
-              </div>
-            )}
-
-            {statutActivite === 'professionnel' && (
-              <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
-                <label style={labelStyle}>Domaine d'activité *</label>
-                <input placeholder="Ex: Comptabilité, Enseignement, Commerce..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
-              </div>
-            )}
-
-            <button
-              onClick={envoyerDemande}
-              disabled={sending}
-              style={{
-                width: '100%',
-                background: sending ? '#999' : 'linear-gradient(135deg, #FC1713, #a00d24)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '14px',
-                fontSize: '14px',
-                fontWeight: '700',
-                cursor: sending ? 'not-allowed' : 'pointer',
-                fontFamily: 'inherit',
-                marginTop: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: sending ? 'none' : '0 4px 16px rgba(200,16,46,0.3)',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              {sending ? (
-                <>Envoi en cours...</>
-              ) : (
-                <><IconSend /> Envoyer ma demande</>
+              {/* Champs conditionnels */}
+              {statutActivite === 'eleve' && (
+                <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
+                  <label style={labelStyle}>Classe *</label>
+                  <input
+                    placeholder="Ex: 3ème, Terminale C, CM2..."
+                    value={classeEleve}
+                    onChange={e => setClasseEleve(e.target.value)}
+                    style={inputStyle}
+                  />
+                </div>
               )}
-            </button>
-          </div>
+
+              {(statutActivite === 'etudiant' || statutActivite === 'apprenti' || statutActivite === 'professionnel') && (
+                <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
+                  <label style={labelStyle}>{statutActivite === 'etudiant' ? "Domaine d'études *" : statutActivite === 'apprenti' ? "Domaine d'apprentissage *" : "Domaine d'activité *"}</label>
+                  <input placeholder="Ex: Informatique, Couture, Comptabilité..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
+                </div>
+              )}
+
+              <button
+                onClick={envoyerDemande}
+                disabled={sending}
+                style={{
+                  width: '100%',
+                  background: sending ? '#999' : 'linear-gradient(135deg, #FC1713, #a00d24)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  cursor: sending ? 'not-allowed' : 'pointer',
+                  fontFamily: 'inherit',
+                  marginTop: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: sending ? 'none' : '0 4px 16px rgba(200,16,46,0.3)',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                {sending ? (
+                  <>Envoi en cours...</>
+                ) : (
+                  <><IconSend /> Envoyer ma demande</>
+                )}
+              </button>
+            </div>
+          </>
         )}
 
       </div>
