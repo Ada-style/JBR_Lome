@@ -16,7 +16,7 @@ const BUREAU_ROLES = {
     'Louise': { role: 'Communion Fraternelle', ordre: 10 }
   },
   'KOUMAI': { role: 'Vice-Trésorier', ordre: 6 },
-  'KPEMOUA': { role: 'Communication', ordre: 7 },
+  'KPEMOUA': { role: 'Présidente JCF', ordre: 7 },
   'HOUNGLONOU': { role: 'Évangélisation', ordre: 8 },
   'AFATSAWO': { role: 'Prière', ordre: 9 },
   'DADZI': { role: 'Entretien', ordre: 11 }
