@@ -299,14 +299,14 @@ export default function Nouveau() {
               <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.9', fontStyle: 'italic', marginBottom: '12px', fontFamily: 'Space Grotesk' }}>
                 « Si tu cherches une famille où grandir dans la foi, la communion et le partage; tu es au bon endroit. On t'attendait ! »
               </p>
-              <div style={{ color: theme.muted, fontSize: '12px', fontWeight: '600' }}>EZIAN-GNAMAVO Yao Benjamin : Président du groupe des jeunes du Rocher</div>
+              <div style={{ color: theme.muted, fontSize: '12px', fontWeight: '600' }}>EZIAN-GNAMAVO Yao Benjamin : Président du Groupe des Jeunes du Rocher</div>
             </div>
 
             <div className="nouveau-form" style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: '20px', padding: '28px', marginBottom: '32px', boxShadow: dark ? 'none' : '0 4px 24px rgba(0,0,0,0.06)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
                 <div style={{ width: '4px', height: '28px', background: '#FC1713', borderRadius: '2px' }} />
                 <div>
-                  <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>Rejoindre la jeunesse</div>
+                  <div style={{ color: theme.text, fontSize: '17px', fontWeight: '700', fontFamily: 'Space Grotesk' }}>Rejoindre le Groupe des Jeunes</div>
                   <div style={{ color: theme.muted, fontSize: '11px', marginTop: '2px' }}>Remplis ce formulaire et le bureau te contactera</div>
                 </div>
               </div>
