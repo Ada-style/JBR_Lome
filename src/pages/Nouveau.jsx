@@ -370,7 +370,7 @@ export default function Nouveau() {
               )}
               {(statutActivite === 'etudiant' || statutActivite === 'apprenti' || statutActivite === 'professionnel') && (
                 <div style={{ marginBottom: '12px', animation: 'fadeIn 0.3s ease' }}>
-                  <label style={labelStyle}>{statutActivite === 'etudiant' ? "Domaine d'études *" : statutActivite === 'apprenti' ? "Domaine d'apprentissage *" : "Domaine d'activité *"}</label>
+                  <label style={labelStyle}>{statutActivite === 'etudiant' ? "Domaine d'études *" : statutActivite === 'apprenti' ? "Domaine d'apprentissage *" : "Profession *"}</label>
                   <input placeholder="Ex: Informatique, Couture, Comptabilité..." value={domaine} onChange={e => setDomaine(e.target.value)} style={inputStyle} />
                 </div>
               )}
