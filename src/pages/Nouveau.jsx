@@ -252,7 +252,7 @@ export default function Nouveau() {
             .nouveau-hero-split { height: 160px; }
             .nouveau-hero-left { padding-top: 20px; width: 50%; padding-left: 10px; padding-right: 10px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); }
             .nouveau-hero-right { left: 20%; }
-            .nouveau-hero-logo { width: 60px !important; height: 60px !important; margin-bottom: 6px !important; }
+            .nouveau-hero-logo { width: 80px !important; height: 80px !important; margin-bottom: 6px !important; }
             .nouveau-hero-title { font-size: 12px !important; }
             .nouveau-hero-img { object-position: center 20% !important; }
           }
