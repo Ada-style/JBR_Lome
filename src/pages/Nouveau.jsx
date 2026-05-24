@@ -259,7 +259,7 @@ export default function Nouveau() {
         `}</style>
         <div className="nouveau-hero-split">
           <div className="nouveau-hero-left">
-            <img src="/icon-192.png" alt="Logo" loading="lazy" className="nouveau-hero-logo" style={{ width: '64px', height: '64px', objectFit: 'contain', marginBottom: '12px' }} />
+            <img src="/icon-192.png" alt="Logo" loading="lazy" className="nouveau-hero-logo" style={{ width: '90px', height: '90px', objectFit: 'contain', marginBottom: '12px' }} />
           </div>
           <div className="nouveau-hero-right">
             <img src="/detente1.jpg" alt="" loading="lazy" className="nouveau-hero-img" />
@@ -270,8 +270,8 @@ export default function Nouveau() {
 
         <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px', textAlign: 'center' }}>
           <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.6', margin: 0, fontFamily: 'Space Grotesk' }}>
-            Tu es de la famille ! Merci de renseigner ce formulaire. Il permet l'enregistrement des informations des jeunes du Rocher pour une bonne  communion.
-            Cela ne te prendra qu'une (1) minute.
+            Ce formulaire permet l'enregistrement des informations des jeunes du Rocher pour une bonne communion.
+              Cela ne te prendra qu'une (1) minute.
             <span style={{ color: '#FC1713', fontWeight: '700', display: 'block', marginTop: '8px' }}>Dieu te bénisse pour ta collaboration !</span>
           </p>
         </div>
