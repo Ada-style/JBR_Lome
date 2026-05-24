@@ -259,7 +259,7 @@ export default function Nouveau() {
         `}</style>
         <div className="nouveau-hero-split">
           <div className="nouveau-hero-left">
-            <img src="/icon-192.png" alt="Logo" loading="lazy" className="nouveau-hero-logo" style={{ width: '90px', height: '90px', objectFit: 'contain', marginBottom: '12px' }} />
+            <img src="/icon-192.png" alt="Logo" loading="lazy" className="nouveau-hero-logo" style={{ width: '180px', height: '180px', objectFit: 'contain', marginBottom: '12px' }} />
           </div>
           <div className="nouveau-hero-right">
             <img src="/detente1.jpg" alt="" loading="lazy" className="nouveau-hero-img" />
