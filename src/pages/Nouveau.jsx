@@ -270,7 +270,7 @@ export default function Nouveau() {
 
         <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px', textAlign: 'center' }}>
           <p style={{ color: theme.text, fontSize: '15px', lineHeight: '1.6', margin: 0, fontFamily: 'Space Grotesk' }}>
-            Ce formulaire permet l'enregistrement des informations des jeunes du Rocher pour une bonne communion.
+           Bienvenue! Ce formulaire permet l'enregistrement des informations des jeunes du Rocher pour une bonne communion.
               Cela ne te prendra qu'une (1) minute.
             <span style={{ color: '#FC1713', fontWeight: '700', display: 'block', marginTop: '8px' }}>Dieu te bénisse pour ta collaboration !</span>
           </p>
