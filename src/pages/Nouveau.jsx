@@ -252,14 +252,14 @@ export default function Nouveau() {
             .nouveau-hero-split { height: 160px; }
             .nouveau-hero-left { padding-top: 20px; width: 50%; padding-left: 10px; padding-right: 10px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); }
             .nouveau-hero-right { left: 20%; }
-            .nouveau-hero-logo { width: 40px !important; height: 40px !important; margin-bottom: 6px !important; }
+            .nouveau-hero-logo { width: 60px !important; height: 60px !important; margin-bottom: 6px !important; }
             .nouveau-hero-title { font-size: 12px !important; }
             .nouveau-hero-img { object-position: center 20% !important; }
           }
         `}</style>
         <div className="nouveau-hero-split">
           <div className="nouveau-hero-left">
-            <img src="/icon-192.png" alt="Logo" loading="lazy" className="nouveau-hero-logo" style={{ width: '180px', height: '180px', objectFit: 'contain', marginBottom: '12px' }} />
+            <img src="/icon-192.png" alt="Logo" loading="lazy" className="nouveau-hero-logo" style={{ width: '120px', height: '120px', objectFit: 'contain', marginBottom: '12px' }} />
           </div>
           <div className="nouveau-hero-right">
             <img src="/detente1.jpg" alt="" loading="lazy" className="nouveau-hero-img" />
